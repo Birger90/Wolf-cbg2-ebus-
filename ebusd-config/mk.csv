@@ -1,0 +1,26 @@
+type,circuit,level,name,comment,qq,zz,pbsb,id,*name,part,type,divisor/values,unit,comment
+# Mischerkreis-Einstellungen (MK_BM-2), Slave 86. Lesen verifiziert, Schreiben ungetestet.
+r3,mk,,Flowtemp,Vorlauftemperatur Mischerkreis,,86,5022,1f8727,value,,SIN,10,°C,TN 10119
+r2,mk,,MkStatus,Mischerkreis Status,,86,5022,9fac27,value,,UIN,0=Aus;1=Heizbetrieb;2=Absenkbetrieb;3=Eco;4=Absenkstop;5=AT_Abschaltung;6=RT_Abschaltung;7=AT_Frostschutz;8=RT_Frostschutz;9=SmartHome;10=Warmwasservorrang;11=Kuehlbetrieb;12=TPW_ausgeloest;13=Heizvorrang_vor_Kuehlen,,TN 10156
+r5,mk,,MkDemand,Anforderung Mischerkreis,,86,5022,57ab27,value,,UIN,0=Initialisierung;1=Deaktiviert;2=Estrichtrocknung;3=Schornsteinfeger;4=Telefonfernschalter;5=Partymodus;6=Urlaubsmodus;7=Automatik_ein;8=Automatik_aus;9=Permanentbetrieb;10=Sparbetrieb;11=Standby;12=Externe_Deaktivierung;13=SmartHome;14=Automatik_Kuehlen_Ein;15=Automatik_Kuehlen_Aus;16=Permanent_Kuehlen,,TN 10155
+r3,mk,,MkProgram,Programmwahl Mischerkreis - NUR LESEN (Mieter),,86,5022,ff7427,value,,UIN,0=Standby;1=Auto;2=Permanent;3=Sparen,,TN 10100
+r9,mk,,MkDaytemp,Tagtemperatur Mischerkreis (5-30 C),,86,5022,fb7d27,value,,SIN,10,°C,TN 10109
+w,mk,,MkDaytemp,Tagtemperatur Mischerkreis (5-30 C),,86,5023,007d27,value,,SIN,10,°C,TN 10109
+r9,mk,,MkSparfaktor,Sparfaktor Mischerkreis (0-10),,86,5022,8b8127,value,,SIN,10,,TN 10113
+r9,mk,,MkCurveBasetemp,Sockeltemperatur Heizkurve MK (10-60 C),,86,5022,6f7b27,value,,SIN,10,°C,TN 10107
+w,mk,,MkCurveBasetemp,Sockeltemperatur Heizkurve MK (10-60 C),,86,5023,007b27,value,,SIN,10,°C,TN 10107
+r9,mk,,MkCurveStart,Startpunkt Heizkurve MK (0-40 C),,86,5022,1f7e27,value,,SIN,10,°C,TN 10110
+w,mk,,MkCurveStart,Startpunkt Heizkurve MK (0-40 C),,86,5023,007e27,value,,SIN,10,°C,TN 10110
+r9,mk,,MkCurveNormoutside,Normaussentemperatur Heizkurve MK (-25-0 C),,86,5022,437f27,value,,SIN,10,°C,TN 10111
+w,mk,,MkCurveNormoutside,Normaussentemperatur Heizkurve MK (-25-0 C),,86,5023,007f27,value,,SIN,10,°C,TN 10111
+r9,mk,,MkCurveFlowtemp,Vorlauftemperatur Heizkurve MK (25-90 C),,86,5022,a77c27,value,,SIN,10,°C,TN 10108
+w,mk,,MkCurveFlowtemp,Vorlauftemperatur Heizkurve MK (25-90 C),,86,5023,007c27,value,,SIN,10,°C,TN 10108
+r9,mk,,MkSetpointcorr,Sollwertkorrektur Mischerkreis (-4-4 K),,86,5022,2bb527,value,,SIN,10,K,TN 10165
+w,mk,,MkSetpointcorr,Sollwertkorrektur Mischerkreis (-4-4 K),,86,5023,00b527,value,,SIN,10,K,TN 10165
+r9,mk,,Roomtemp,Raumtemperatur Mischerkreis,,86,5022,77b427,value,,SIN,10,°C,TN 10164
+r9,mk,,OutsidetempAvg,Gemittelte Aussentemperatur MK,,86,5022,4bc327,value,,SIN,10,°C,TN 10179
+r9,mk,,MkWintersummer,Winter/Sommer Umschaltung MK (0-40 C),,86,5022,251601,value,,SIN,10,°C,TN 278
+w,mk,,MkWintersummer,Winter/Sommer Umschaltung MK (0-40 C),,86,5023,001601,value,,SIN,10,°C,TN 278
+r9,mk,,MkEcoabs,ECO/ABS MK (-10-40 C),,86,5022,791701,value,,SIN,10,°C,TN 279
+w,mk,,MkEcoabs,ECO/ABS MK (-10-40 C),,86,5023,001701,value,,SIN,10,°C,TN 279
+r,mk,,MkControllertype,Reglertyp MK,,86,5022,ec9214,value,,UIN,0=Notbetrieb;1=Witterungsgefuehrt;2=Reiner_Raumregler;3=Witterungsgefuehrt_mit_Raumeinfluss;4=Erweiterter_Raumeinfuss,,TN 5266

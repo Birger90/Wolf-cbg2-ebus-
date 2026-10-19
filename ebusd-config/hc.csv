@@ -1,0 +1,67 @@
+type,circuit,level,name,comment,qq,zz,pbsb,id,*name,part,type,divisor/values,unit,comment
+# Wolf CGB-2-24 Therme (Kromschroeder-Feuerungsautomat), Slave 08 / Master 03.
+# Lesen mit Praefix cc (wie das BM-2), dadurch werden die zyklischen Abfragen des BM-2 passiv mitgelesen.
+# Schreiben an 03 mit Anhang 9d010000 = offizielles ebusd-Format (kromschroeder/08..hc.csv), auf CGB-2 ungetestet.
+# Passive Telegramme des Reglers (Operation, RcTarget) aus der offiziellen ebusd-Konfiguration:
+w,hc,,Operation,Betriebsdaten des Reglers an den Feuerungsautomaten,,03,0507,,status,,UCH,0=off;1=none;85=hwc;170=heat;204=emissioncheck;221=techcheck;238=stop;102=hwc_stop;187=hwc_heat;68=hwc_stepped,,status heat request,action,,UCH,0=none;1=pumpoff;2=pumpon;3=consumeoff;4=consumeon,,variable consumers,desiredtemp,,D2C,,°C,boiler target temperature,desiredpress,,D2B,,bar,boiler target pressure,settingdegree,,D1C,,%,setting degree,hwcdesiredtemp,,D1C,,°C,hot water target temperature,fuel,,UCH,0=dontcare;1=gas;2=oil;3=dontcare1,,fuel choice
+w,hc,,RcTarget,Sollwertuebertragung des Reglers an andere Regler,,03,0800,,desiredtemp,,D2B,,°C,boiler target temperature,outsidetemp,,D2B,,°C,Aussentemperatur,forced,,SCH,,%,forced performance,hwc,,BI0,,,hot water active,hc,,BI1,,,heat active,hwcdesiredtemp,,D2B,,°C,hot water target temperature
+r1,hc,,Flowtemp,Kesseltemperatur Vorlauf Istwert,,08,5022,cc0d00,value,,SIN,10,°C,TN 13
+r2,hc,,Returntemp,Ruecklauftemperatur,,08,5022,cc1600,value,,SIN,10,°C,TN 22
+r2,hc,,Flowtempdesired,Kesselsolltemperatur,,08,5022,cc0200,value,,SIN,10,°C,TN 2
+r3,hc,,Hwctemp,Warmwassertemperatur,,08,5022,cc0e00,value,,SIN,10,°C,TN 14
+r5,hc,,Hwctempdesired,Warmwassersolltemperatur an der Therme,,08,5022,cc0300,value,,SIN,10,°C,TN 3
+r9,hc,,Outsidetemp,Aussentemperatur an der Therme,,08,5022,cc0c00,value,,SIN,10,°C,TN 12
+r3,hc,,Exhausttemp,Abgastemperatur,,08,5022,cc1d27,value,,SIN,10,°C,TN 10013
+r3,hc,,Pressure,Anlagendruck,,08,5022,cc1a27,value,,UIN,100,bar,TN 10010
+r1,hc,,Modulation,Modulationsgrad,,08,5022,cc6f01,value,,UIN,,%,TN 367
+r1,hc,,Brennerstatus,Brennerstatus,,08,5022,cc5427,value,,UIN,0=Aus;1=Ruhekontakt;2=Vorspuelen;3=Zuenden;4=Stabilisierung;5=Ein;6=Ventilpruefung;7=Nachspuelen;8=Softstart;9=Taktsperre;10=Betrieb_ohne_Brenner;11=Abgasklappe;12=Stoerung;13=Gradienten_Ueberwachung;14=Gasdruck;15=Spreizung_hoch;16=Spreizung_KF,,TN 10068
+r2,hc,,Betriebsart,Betriebsart der Therme,,08,5022,cc5327,value,,UIN,0=Test;1=Start;2=Frost_Heizkreis;3=Frost_Warmwasser;4=Schornsteinfeger;5=Kombibetrieb;6=Parallelbetrieb;7=Warmwasser;8=Warmwassernachlauf;9=Mindest_Kombizeit;10=Heizbetrieb;11=Nachlauf_Heizkreispumpe;12=Frostschutz;13=Standby;14=Kaskadenbetrieb;15=GLT_Betrieb;16=Kalibration;17=Kalibration_Heizbetrieb;18=Kalibration_Warmwasserbetrieb;19=Kalibration_Kombibetrieb;20=Warmwasser_Schnellstart;21=Externe_Deaktivierung;22=Durchfluss_gering,,TN 10067
+r3,hc,,Pumpspeed,Drehzahl Heizkreispumpe,,08,5022,cc5727,value,,UIN,,%,TN 10071
+r5,hc,,Hwcflow,Durchfluss Warmwasser,,08,5022,cc6c01,value,,SIN,10,l/min,TN 364
+r3,hc,,BurnerStartsLow,Anzahl Brennerstarts Low-Wort (gesamt = High*65536+Low),,08,5022,cc2602,value,,UIN,,,TN 550
+r5,hc,,BurnerStartsHigh,Anzahl Brennerstarts High-Wort,,08,5022,cc2702,value,,UIN,,,TN 551
+r5,hc,,BurnerHours,Brennerbetriebsstunden,,08,5022,cc2a02,value,,UIN,,h,TN 554
+r9,hc,,NetHoursLow,Netzbetriebsstunden Low-Wort,,08,5022,cc2802,value,,UIN,,h,TN 552
+r9,hc,,NetHoursHigh,Netzbetriebsstunden High-Wort,,08,5022,cc2902,value,,UIN,,,TN 553
+r9,hc,,NetStarts,Anzahl Netz-Starts,,08,5022,cc5e27,value,,UIN,,,TN 10078
+r5,hc,,Stb,Sicherheitstemperaturbegrenzer,,08,5022,cc7902,value,,UIN,0=i_O;1=Ausgeloest,,TN 633
+r9,hc,,EnergyToday,Verbrauch aktueller Tag,,08,5022,cc812a,value,,UIN,,kWh,TN 10881
+r9,hc,,HeatToday,Erzeugte Waermemenge aktueller Tag,,08,5022,cc822a,value,,UIN,,kWh,TN 10882
+r9,hc,,EnergyYesterday,Verbrauch Vortag,,08,5022,ccf832,value,,UIN,,kWh,TN 13048
+r9,hc,,HeatYesterday,Erzeugte Waermemenge Vortag,,08,5022,ccf932,value,,UIN,,kWh,TN 13049
+r9,hc,,Hg01,HG01 Schaltdifferenz Brenner (7-30 K),,08,5022,cc2200,value,,SIN,10,K,TN 34
+w,hc,,Hg01,HG01 Schaltdifferenz Brenner (7-30 K),,03,5023,002200,value,,SIN,10,K,TN 34,suffix,,HEX:4,=9d010000,,
+r9,hc,,Hg02,HG02 Untere Brennerleistung (%) - nicht schreiben,,08,5022,cc5a01,value,,UIN,,%,TN 346
+r9,hc,,Hg03,HG03 Obere Brennerleistung Warmwasser (%),,08,5022,cc5901,value,,UIN,,%,TN 345
+r9,hc,,Hg04,HG04 Obere Brennerleistung Heizung (1-100 %),,08,5022,cc3f01,value,,UIN,,%,TN 319
+w,hc,,Hg04,HG04 Obere Brennerleistung Heizung (1-100 %),,03,5023,003f01,value,,UIN,,%,TN 319,suffix,,HEX:4,=9d010000,,
+r9,hc,,Hg07,HG07 Nachlaufzeit Kesselkreispumpe (0-30 min),,08,5022,cc4201,value,,UIN,,min,TN 322
+w,hc,,Hg07,HG07 Nachlaufzeit Kesselkreispumpe (0-30 min),,03,5023,004201,value,,UIN,,min,TN 322,suffix,,HEX:4,=9d010000,,
+r9,hc,,Hg08,HG08 Kesselmaximaltemperatur Heizung TV-max (40-90 C),,08,5022,cc8402,value,,SIN,10,°C,TN 644
+w,hc,,Hg08,HG08 Kesselmaximaltemperatur Heizung TV-max (40-90 C),,03,5023,008402,value,,SIN,10,°C,TN 644,suffix,,HEX:4,=9d010000,,
+r9,hc,,Hg09,HG09 Brennertaktsperre Heizbetrieb (1-30 min),,08,5022,cc4301,value,,UIN,,min,TN 323
+w,hc,,Hg09,HG09 Brennertaktsperre Heizbetrieb (1-30 min),,03,5023,004301,value,,UIN,,min,TN 323,suffix,,HEX:4,=9d010000,,
+r9,hc,,Hg15,HG15 Speicherhysterese (1-30 K),,08,5022,cc4001,value,,SIN,10,K,TN 320
+w,hc,,Hg15,HG15 Speicherhysterese (1-30 K),,03,5023,004001,value,,SIN,10,K,TN 320,suffix,,HEX:4,=9d010000,,
+r9,hc,,Hg16,HG16 Pumpenleistung HK minimal (15-100 %),,08,5022,cc5501,value,,UIN,,%,TN 341
+w,hc,,Hg16,HG16 Pumpenleistung HK minimal (15-100 %),,03,5023,005501,value,,UIN,,%,TN 341,suffix,,HEX:4,=9d010000,,
+r9,hc,,Hg17,HG17 Pumpenleistung HK maximal (15-100 %),,08,5022,cc5601,value,,UIN,,%,TN 342
+w,hc,,Hg17,HG17 Pumpenleistung HK maximal (15-100 %),,03,5023,005601,value,,UIN,,%,TN 342,suffix,,HEX:4,=9d010000,,
+r9,hc,,Hg21,HG21 Kesselminimaltemperatur TK-min (20-90 C),,08,5022,cc1f00,value,,SIN,10,°C,TN 31
+w,hc,,Hg21,HG21 Kesselminimaltemperatur TK-min (20-90 C),,03,5023,001f00,value,,SIN,10,°C,TN 31,suffix,,HEX:4,=9d010000,,
+r9,hc,,Hg22,HG22 Kesselmaximaltemperatur TK-max (50-90 C),,08,5022,cc2700,value,,SIN,10,°C,TN 39
+w,hc,,Hg22,HG22 Kesselmaximaltemperatur TK-max (50-90 C),,03,5023,002700,value,,SIN,10,°C,TN 39,suffix,,HEX:4,=9d010000,,
+r9,hc,,Hg25,HG25 Kesseluebertemperatur bei Speicherladung (1-30 K),,08,5022,cc2d00,value,,SIN,10,K,TN 45
+w,hc,,Hg25,HG25 Kesseluebertemperatur bei Speicherladung (1-30 K),,03,5023,002d00,value,,SIN,10,K,TN 45,suffix,,HEX:4,=9d010000,,
+r9,hc,,Hg33,HG33 Laufzeit Brennerhysterese (1-30 min),,08,5022,cc2100,value,,UIN,,min,TN 33
+w,hc,,Hg33,HG33 Laufzeit Brennerhysterese (1-30 min),,03,5023,002100,value,,UIN,,min,TN 33,suffix,,HEX:4,=9d010000,,
+r9,hc,,Hg38,HG38 Soll-Spreizung dT Pumpenregelung (0-40 K),,08,5022,ccce05,value,,SIN,10,K,TN 1486
+w,hc,,Hg38,HG38 Soll-Spreizung dT Pumpenregelung (0-40 K),,03,5023,00ce05,value,,SIN,10,K,TN 1486,suffix,,HEX:4,=9d010000,,
+r9,hc,,Hg39,HG39 Zeit Softstart (0-10 min),,08,5022,cc5301,value,,UIN,,min,TN 339
+w,hc,,Hg39,HG39 Zeit Softstart (0-10 min),,03,5023,005301,value,,UIN,,min,TN 339,suffix,,HEX:4,=9d010000,,
+r9,hc,,Hg60,HG60 Minimale Schalthysterese Brenner (2-30 K),,08,5022,cc382a,value,,SIN,10,K,TN 10808
+w,hc,,Hg60,HG60 Minimale Schalthysterese Brenner (2-30 K),,03,5023,00382a,value,,SIN,10,K,TN 10808,suffix,,HEX:4,=9d010000,,
+r9,hc,,Hg62,HG62 Anlagenkorrekturfaktor (0.1-2),,08,5022,cc872a,value,,SIN,100,,TN 10887
+r,hc,,Hg12,HG12 Gasart - nur lesen,,08,5022,cc6b01,value,,UIN,0=Nat_gas;1=LPG,,TN 363
+r,hc,,Hg10,HG10 eBus-Adresse,,08,5022,cc7801,value,,UIN,,,TN 376
+r,hc,,Firmware,Firmware Feuerungsautomat,,08,5022,cc9a01,value,,SIN,100,,TN 410

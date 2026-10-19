@@ -1,0 +1,42 @@
+type,circuit,level,name,comment,qq,zz,pbsb,id,*name,part,type,divisor/values,unit,comment
+# Wolf BM-2 Bedienmodul, Slave 35: System, direkter Heizkreis, Warmwasser.
+# Lesen mit CRC-Praefix (wie das ISM7). Schreiben: 5 Byte an 35 mit Praefix 00 (verifiziert 19.10.2026, TN 19).
+# Programmwahl bewusst nur lesbar (Mieterwohnung haengt an beiden Kreisen).
+r5,bm2,,WwSoll,Warmwassersolltemperatur eingestellt (25-65 C),,35,5022,541300,value,,SIN,10,°C,TN 19
+w,bm2,,WwSoll,Warmwassersolltemperatur eingestellt (25-65 C),,35,5023,001300,value,,SIN,10,°C,TN 19
+r9,bm2,,WwMin,Warmwasserminimaltemperatur (25-65 C),,35,5022,199801,value,,SIN,10,°C,TN 408
+w,bm2,,WwMin,Warmwasserminimaltemperatur (25-65 C),,35,5023,009801,value,,SIN,10,°C,TN 408
+r3,bm2,,Outsidetemp,Aussentemperatur BM-2,,35,5022,fbd327,value,,SIN,10,°C,TN 10195
+r5,bm2,,OutsidetempAvg,Gemittelte Aussentemperatur,,35,5022,4bc327,value,,SIN,10,°C,TN 10179
+r5,bm2,,Roomtemp,Raumtemperatur am BM-2,,35,5022,77b427,value,,SIN,10,°C,TN 10164
+r3,bm2,,Flowtemp,Vorlauftemperatur direkter Heizkreis,,35,5022,1f8727,value,,SIN,10,°C,TN 10119
+r2,bm2,,HkStatus,Heizkreis Status,,35,5022,9fac27,value,,UIN,0=Aus;1=Heizbetrieb;2=Absenkbetrieb;3=Eco;4=Absenkstop;5=AT_Abschaltung;6=RT_Abschaltung;7=AT_Frostschutz;8=RT_Frostschutz;9=SmartHome;10=Warmwasservorrang;11=Kuehlbetrieb;12=TPW_ausgeloest;13=Heizvorrang_vor_Kuehlen,,TN 10156
+r5,bm2,,HkDemand,Anforderung Heizkreis,,35,5022,57ab27,value,,UIN,0=Initialisierung;1=Deaktiviert;2=Estrichtrocknung;3=Schornsteinfeger;4=Telefonfernschalter;5=Partymodus;6=Urlaubsmodus;7=Automatik_ein;8=Automatik_aus;9=Permanentbetrieb;10=Sparbetrieb;11=Standby;12=Externe_Deaktivierung;13=SmartHome;14=Automatik_Kuehlen_Ein;15=Automatik_Kuehlen_Aus;16=Permanent_Kuehlen,,TN 10155
+r3,bm2,,HkProgram,Programmwahl direkter Heizkreis - NUR LESEN (Mieter),,35,5022,ff7427,value,,UIN,0=Standby;1=Auto;2=Permanent;3=Sparen,,TN 10100
+r5,bm2,,WwProgram,Programmwahl Warmwasser - NUR LESEN,,35,5022,a37527,value,,UIN,0=Standby;1=Auto;2=Permanent,,TN 10101
+r5,bm2,,WwStatus,Warmwasser Status,,35,5022,f39627,value,,UIN,0=Deaktiviert;1=Initialisierung;2=Antilegionellenfunktion;3=Fernschalter_ein;4=1x_Warmwasser;5=Ein;6=Bereit_keine_Ladung;7=Solarbetrieb;8=Reduzierter_Betrieb;9=Aus;10=Ein_2;11=Bereit_keine_Ladung_2;12=Standby;13=SmartHome;14=SmartGrid,,TN 10134
+r9,bm2,,HkDaytemp,Tagtemperatur direkter Heizkreis (5-30 C),,35,5022,fb7d27,value,,SIN,10,°C,TN 10109
+w,bm2,,HkDaytemp,Tagtemperatur direkter Heizkreis (5-30 C),,35,5023,007d27,value,,SIN,10,°C,TN 10109
+r9,bm2,,HkSparfaktor,Sparfaktor direkter Heizkreis (0-10),,35,5022,8b8127,value,,SIN,10,,TN 10113
+r9,bm2,,HkCurveBasetemp,Sockeltemperatur Heizkurve (10-60 C),,35,5022,6f7b27,value,,SIN,10,°C,TN 10107
+w,bm2,,HkCurveBasetemp,Sockeltemperatur Heizkurve (10-60 C),,35,5023,007b27,value,,SIN,10,°C,TN 10107
+r9,bm2,,HkCurveStart,Startpunkt Heizkurve (0-40 C),,35,5022,1f7e27,value,,SIN,10,°C,TN 10110
+w,bm2,,HkCurveStart,Startpunkt Heizkurve (0-40 C),,35,5023,007e27,value,,SIN,10,°C,TN 10110
+r9,bm2,,HkCurveNormoutside,Normaussentemperatur Heizkurve (-25-0 C),,35,5022,437f27,value,,SIN,10,°C,TN 10111
+w,bm2,,HkCurveNormoutside,Normaussentemperatur Heizkurve (-25-0 C),,35,5023,007f27,value,,SIN,10,°C,TN 10111
+r9,bm2,,HkCurveFlowtemp,Vorlauftemperatur Heizkurve (25-90 C),,35,5022,a77c27,value,,SIN,10,°C,TN 10108
+w,bm2,,HkCurveFlowtemp,Vorlauftemperatur Heizkurve (25-90 C),,35,5023,007c27,value,,SIN,10,°C,TN 10108
+r9,bm2,,HkSetpointcorr,Sollwertkorrektur direkter Heizkreis (-4-4 K),,35,5022,2bb527,value,,SIN,10,K,TN 10165
+w,bm2,,HkSetpointcorr,Sollwertkorrektur direkter Heizkreis (-4-4 K),,35,5023,00b527,value,,SIN,10,K,TN 10165
+r9,bm2,,HkWintersummer,Winter/Sommer Umschaltung (0-40 C),,35,5022,251601,value,,SIN,10,°C,TN 278
+w,bm2,,HkWintersummer,Winter/Sommer Umschaltung (0-40 C),,35,5023,001601,value,,SIN,10,°C,TN 278
+r9,bm2,,HkEcoabs,ECO/ABS (-10-40 C),,35,5022,791701,value,,SIN,10,°C,TN 279
+w,bm2,,HkEcoabs,ECO/ABS (-10-40 C),,35,5023,001701,value,,SIN,10,°C,TN 279
+r,bm2,,HkControllertype,Reglertyp,,35,5022,ec9214,value,,UIN,0=Notbetrieb;1=Witterungsgefuehrt;2=Reiner_Raumregler;3=Witterungsgefuehrt_mit_Raumeinfluss;4=Erweiterter_Raumeinfuss,,TN 5266
+r9,bm2,,Maintenance,Wartung betriebsabhaengig,,35,5022,b88114,value,,UIN,,%,TN 5249
+r,bm2,,MaintenanceMode,Wartungsmeldung,,35,5022,a66a02,value,,UIN,0=Aus;1=Betriebsabhaengig;2=Datumsabhaengig,,TN 618
+r9,bm2,,ParallelMode,Freigabe Parallelbetrieb,,35,5022,d82300,value,,UIN,0=Aus;1=Ein,,TN 35
+r9,bm2,,OneTimeHotwater,1x Warmwasser,,35,5022,a78527,value,,UIN,0=Aus;1=Ein,,TN 10117
+w,bm2,,OneTimeHotwater,1x Warmwasser,,35,5023,008527,value,,UIN,0=Aus;1=Ein,,TN 10117
+r,bm2,,SmarthomeEnable,Freigabe SmartHome,,35,5022,e6a02a,value,,UIN,0=Aus;1=Ein,,TN 10912
+r,bm2,,AvgPeriod,Aussenfuehler gemittelt Berechnungszeitraum (0-24 h),,35,5022,dd8401,value,,UIN,,,TN 388
