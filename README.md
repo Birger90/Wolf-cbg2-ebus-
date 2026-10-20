@@ -20,6 +20,8 @@ ISM7 (noch)     ──┘
 | `tools/wolf_crc.py` | Prüfbyte-Berechnung des Wolf-Protokolls, Selbsttest gegen 30 mitgeschnittene Telegramme |
 | `tools/gen_ebusd_config.py` | Generator, der die CSV-Dateien aus Tabellen erzeugt (Telegrammnummern aus der Wolf-Parameterdatenbank) |
 | `docs/protokoll.md` | Protokolldetails, Busadressen, was funktioniert und was nicht, mit Belegen |
+| `homeassistant/gen_scripts.py` | Erzeugt die HA-Skripte `heizung_therme_schreiben` (Prüfbyte in Jinja) und `heizung_parametertest` als JSON |
+| `homeassistant/script_*.json` | Die erzeugten Skripte, per API/UI in Home Assistant anlegbar |
 
 ## Hardware
 
@@ -68,8 +70,16 @@ Schreibtelegramme auch mit falschem Prüfbyte an. Deshalb reichen statische IDs 
 - ebusd meldet dabei immer `ERR: read timeout`, weil das BM-2 keine Antwortdaten liefert
   ([ebusd Issue #1696](https://github.com/john30/ebusd/issues/1696)). Erfolg nur durch Zurücklesen prüfen.
   Von fünf Schreibvorgängen kam einer nicht an und musste wiederholt werden.
-- Schreiben an die Therme (HG-Parameter): offizielles ebusd-Format an Master `03` mit Anhang `9d010000`
-  (kromschroeder/08..hc.csv). **Auf der CGB-2 noch nicht getestet.**
+- **Therme (HG-Parameter):** Das offizielle ebusd-Format (9 Byte an `03` mit Anhang `9d010000`) nimmt die CGB-2 nicht an.
+  Es funktioniert die 5-Byte-Form an Master `03` (`31 03 5023 05 ac 4201 0200` = HG07 auf 2 min), die Therme quittiert
+  sie (ebusd `done`). **Die Therme prüft das Prüfbyte**: mit `00` statt CRC kommt `read timeout` und der Wert bleibt
+  (Test 20.10.2026). Darum gibt es in `hc.csv` nur eine Roh-Schreibnachricht `HgRaw` (HEX:5); das Prüfbyte berechnet
+  Home Assistant im Skript `heizung_therme_schreiben` (Jinja-Makro in `homeassistant/gen_scripts.py`).
+- **Mischerkreis (`86`):** statische 5-Byte-Zeilen mit Präfix `00` wie beim BM-2.
+- **Parametertest 20.10.2026:** alle 32 schreibbaren Parameter (Therme 14, BM-2 10, Mischerkreis 8) je um +1 geändert,
+  zurückgelesen und auf den Originalwert zurückgeschrieben, Ergebnis siehe `docs/protokoll.md`.
+- Programmwahl des direkten Heizkreises wurde einmalig per Rohtelegramm geschrieben (`d4 7427 0200` = Heizbetrieb,
+  `30 7427 0100` = Auto), Wertetabelle `0=Standby 1=Auto 2=Permanent 3=Sparen` damit bestätigt.
 
 ## Installation in Home Assistant
 
@@ -84,13 +94,27 @@ Schreibtelegramme auch mit falschem Prüfbyte an. Deshalb reichen statische IDs 
    --enabledefine
    ```
    (kein `--scanconfig`, die Dateien im Ordner werden alle geladen; `seed_mqtt_cfg` bleibt an, die vorhandene cfg wird genutzt)
-4. App neu starten. Im Log muss stehen `found messages: 146 (… 88 poll, 10 update)`.
+4. App neu starten. Im Log muss stehen `found messages: 135 (… 88 poll, 10 update)`.
 5. Home Assistant legt per MQTT-Discovery die Entitäten an: `sensor.heating_ebusd_<circuit>_<name>`,
-   schreibbare Werte als `number.…` bzw. `select.…`.
+   schreibbare BM-2/MK-Werte als `number.…` bzw. `select.…`. HG-Parameter der Therme sind nur Sensoren; geschrieben
+   wird über `script.heizung_therme_schreiben` (Felder: name, tn, wert, teiler, minimum, maximum).
+6. Skripte aus `homeassistant/` anlegen (`python3 homeassistant/gen_scripts.py`, JSON per HA-API oder von Hand im Editor).
 
 Die Therme wird vom BM-2 ohnehin alle ~65 s abgefragt; da die IDs in `hc.csv` dem Format des BM-2 entsprechen
 (Präfix `cc`), liest ebusd diese Antworten passiv mit. BM-2/MK/MM nutzen das CRC-Präfix wie das ISM7, solange
 das ISM7 am Bus hängt, kommen auch diese Werte passiv.
+
+## Home-Assistant-Bausteine (Stand 20.10.2026)
+
+- `sensor.brennerstarts_gesamt_ebus` (Template): `BurnerStartsHigh * 65536 + BurnerStartsLow`, Quelle der Tageszähler
+  (utility_meter „Brennerstarts pro Tag“, „Brennerstunden pro Tag“ aus `hc/BurnerHours`).
+- `binary_sensor.heizung_ebus_daten_aktuell` (Template): ebusd-Signal an und `hc/Flowtemp` jünger als 10 min; Basis der
+  Automation „Heizung: Datenausfall“.
+- Automationen: „Anlagendruck niedrig“ (`hc/Pressure` unter einstellbarer Schwelle, 5 min), „Datenausfall“,
+  „Störung“ (`hc/Brennerstatus` = Stoerung oder `hc/Stb` = Ausgeloest, 2 min, mit Entwarnung), „Wartung fällig“.
+- Skripte: `heizung_therme_schreiben` (Therme, Prüfbyte), `heizung_ebus_schreiben` (BM-2/MK über die statischen
+  Nachrichten), `heizung_parametertest` (Testlauf aller schreibbaren Werte), `heizung_mqtt_raw` (Rohtelegramm, nur Test).
+- Dashboard „Heizung“ (`heizung-wolf`) liest ausschließlich eBus-Entitäten.
 
 ## Sicherheitsregeln (für die HA-Automatisierung)
 

@@ -14,7 +14,12 @@ Busadressen dieser Anlage (verifiziert 19.10.2026 über Vergleich mit der Wolf-C
 Lese-ID = Prüfbyte + TN (little endian). Prüfbyte:
   Therme: 'cc' (so liest das BM-2 selbst -> ebusd sieht diese Telegramme passiv mit)
   BM-2/MK/MM: CRC nach tools/wolf_crc.py (so liest das ISM7 -> ebenfalls passiv mitgelesen)
-Schreib-ID = '00' + TN (Prüfbyte wird vom BM-2 ignoriert, Test 19.10.2026).
+Schreiben (verifiziert 19./20.10.2026):
+  BM-2 (35): 5 Byte an Slave 35, Schreib-ID '00' + TN, Prüfbyte wird vom BM-2 nicht geprüft -> statische Zeilen.
+  Therme:    5 Byte an Master 03, Prüfbyte WIRD geprüft (mit '00' kein ACK, mit CRC 'done' und Wert geändert).
+             Deshalb nur eine Roh-Schreibnachricht HgRaw (HEX:5); Prüfbyte berechnet Home Assistant
+             (script.heizung_therme_schreiben, Jinja-Makro, gegen tools/wolf_crc.py verifiziert).
+  MK (86):   statische Zeilen wie BM-2 plus MkRaw; ob 86 das Prüfbyte prüft, zeigt der Test.
 
 Aufruf: python3 tools/gen_ebusd_config.py  -> schreibt ebusd-config/*.csv
 """
@@ -78,7 +83,7 @@ V_EBUS_EINSP = vals("0;Aus;1;Ein;2;Auto")
 # --- Tabellen: (TN, Name, Kommentar, Typ, Teiler|Werte, Einheit, Poll-Prio oder None, schreibbar) --------------
 # Typen: SIN/UIN = 16 Bit signed/unsigned little endian (Wolf-DB SS/US), Teiler 10 = SS10/US10, 100 = SS100/US100
 
-HC = [  # Therme, ZZ 08 (Lesen mit Präfix cc), Schreiben an 03 mit Anhang 9d010000 (offizielles ebusd-Format, auf CGB-2 noch ungetestet)
+HC = [  # Therme, ZZ 08 (Lesen mit Präfix cc). "schreibbar" = Freigabe fuer HgRaw-Schreiben per HA-Skript (keine statischen w-Zeilen)
     (13,    "Flowtemp",          "Kesseltemperatur Vorlauf Istwert",          "SIN", "10",  "°C", 1, False),
     (22,    "Returntemp",        "Ruecklauftemperatur",                        "SIN", "10",  "°C", 2, False),
     (2,     "Flowtempdesired",   "Kesselsolltemperatur",                       "SIN", "10",  "°C", 2, False),
@@ -151,6 +156,7 @@ BM2 = [  # BM-2, ZZ 35 (System, direkter Heizkreis, Warmwasser). Schreiben: 5 By
     (5266,  "HkControllertype",  "Reglertyp",                                  "UIN", V_REGLERTYP, "", None, False),
     (5249,  "Maintenance",       "Wartung betriebsabhaengig",                  "UIN", "",   "%",  9, False),
     (618,   "MaintenanceMode",   "Wartungsmeldung",                            "UIN", V_WARTUNG, "", None, False),
+    (5250,  "MaintenanceDate",   "Wartung Faelligkeitsdatum roh (BM2Date: Tag=(v&31)+1 Monat=((v>>5)&15)+1 Jahr=2000+(v>>9))", "UIN", "", "", 9, False),
     (35,    "ParallelMode",      "Freigabe Parallelbetrieb",                   "UIN", V_AUS_EIN, "", 9, False),
     (10117, "OneTimeHotwater",   "1x Warmwasser",                              "UIN", V_AUS_EIN, "", 9, True),
     (10912, "SmarthomeEnable",   "Freigabe SmartHome",                         "UIN", V_AUS_EIN, "", None, False),
@@ -191,20 +197,21 @@ MM = [  # Mischermodul MM, ZZ 52 (nur lesen)
 ]
 
 
-def rows(circuit, zz, table, prefix_mode, write_zz=None, write_suffix=""):
+def rows(circuit, zz, table, prefix_mode, static_writes=True):
     out = []
     for tn, name, comment, typ, div, unit, prio, writable in table:
         prefix = "cc" if prefix_mode == "cc" else None
         rid = (prefix + tn_hex(tn)) if prefix else read_id(tn)
         rtype = f"r{prio}" if prio else "r"
         out.append(f"{rtype},{circuit},,{name},{comment},,{zz},5022,{rid},value,,{typ},{div},{unit},TN {tn}")
-        if writable:
-            wzz = write_zz or zz
-            w = f"w,{circuit},,{name},{comment},,{wzz},5023,00{tn_hex(tn)},value,,{typ},{div},{unit},TN {tn}"
-            if write_suffix:
-                w += f",suffix,,HEX:4,={write_suffix},,"
-            out.append(w)
+        if writable and static_writes:
+            out.append(f"w,{circuit},,{name},{comment},,{zz},5023,00{tn_hex(tn)},value,,{typ},{div},{unit},TN {tn}")
     return out
+
+
+def raw_write(circuit, name, zz, comment):
+    """Roh-Schreibnachricht: Nutzdaten komplett als 5 Hex-Bytes (Pruefbyte TNlo TNhi Wertlo Werthi), z.B. '48 42 01 01 00'."""
+    return f"w,{circuit},,{name},{comment},,{zz},5023,,data,,HEX:5,,,Pruefbyte+TN+Wert"
 
 
 def main():
@@ -213,17 +220,24 @@ def main():
     hc = [HEADER,
           "# Wolf CGB-2-24 Therme (Kromschroeder-Feuerungsautomat), Slave 08 / Master 03.",
           "# Lesen mit Praefix cc (wie das BM-2), dadurch werden die zyklischen Abfragen des BM-2 passiv mitgelesen.",
-          "# Schreiben an 03 mit Anhang 9d010000 = offizielles ebusd-Format (kromschroeder/08..hc.csv), auf CGB-2 ungetestet.",
+          "# Schreiben: 5 Byte an Master 03, die Therme prueft das Pruefbyte (Test 20.10.2026: Praefix 00 -> kein ACK, CRC -> done).",
+          "# Das offizielle ebusd-Format (9 Byte mit Anhang 9d010000) nimmt die CGB-2 nicht an (Test 19.10.2026).",
+          "# Deshalb eine Roh-Schreibnachricht HgRaw; das Pruefbyte berechnet script.heizung_therme_schreiben in Home Assistant.",
           "# Passive Telegramme des Reglers (Operation, RcTarget) aus der offiziellen ebusd-Konfiguration:",
           "w,hc,,Operation,Betriebsdaten des Reglers an den Feuerungsautomaten,,03,0507,,status,,UCH,0=off;1=none;85=hwc;170=heat;204=emissioncheck;221=techcheck;238=stop;102=hwc_stop;187=hwc_heat;68=hwc_stepped,,status heat request,action,,UCH,0=none;1=pumpoff;2=pumpon;3=consumeoff;4=consumeon,,variable consumers,desiredtemp,,D2C,,°C,boiler target temperature,desiredpress,,D2B,,bar,boiler target pressure,settingdegree,,D1C,,%,setting degree,hwcdesiredtemp,,D1C,,°C,hot water target temperature,fuel,,UCH,0=dontcare;1=gas;2=oil;3=dontcare1,,fuel choice",
           "w,hc,,RcTarget,Sollwertuebertragung des Reglers an andere Regler,,03,0800,,desiredtemp,,D2B,,°C,boiler target temperature,outsidetemp,,D2B,,°C,Aussentemperatur,forced,,SCH,,%,forced performance,hwc,,BI0,,,hot water active,hc,,BI1,,,heat active,hwcdesiredtemp,,D2B,,°C,hot water target temperature",
-          ] + rows("hc", "08", HC, "cc", write_zz="03", write_suffix="9d010000")
+          raw_write("hc", "HgRaw", "03", "Roh-Schreibtelegramm an die Therme (HG-Parameter) nur ueber script.heizung_therme_schreiben"),
+          ] + rows("hc", "08", HC, "cc", static_writes=False)
 
     bm2 = [HEADER, "# Wolf BM-2 Bedienmodul, Slave 35: System, direkter Heizkreis, Warmwasser.",
-           "# Lesen mit CRC-Praefix (wie das ISM7). Schreiben: 5 Byte an 35 mit Praefix 00 (verifiziert 19.10.2026, TN 19).",
-           "# Programmwahl bewusst nur lesbar (Mieterwohnung haengt an beiden Kreisen)."] + rows("bm2", "35", BM2, "crc")
+           "# Lesen mit CRC-Praefix (wie das ISM7). Schreiben: 5 Byte an 35 mit Praefix 00 (verifiziert 19.10.2026, TN 19 und 279).",
+           "# Programmwahl bewusst nur lesbar (Mieterwohnung haengt an beiden Kreisen).",
+           raw_write("bm2", "BmRaw", "35", "Roh-Schreibtelegramm an das BM-2 - nur fuer Tests und Skripte"),
+           ] + rows("bm2", "35", BM2, "crc")
 
-    mk = [HEADER, "# Mischerkreis-Einstellungen (MK_BM-2), Slave 86. Lesen verifiziert, Schreiben ungetestet."] + rows("mk", "86", MK, "crc")
+    mk = [HEADER, "# Mischerkreis-Einstellungen (MK_BM-2), Slave 86. Lesen verifiziert, statische Schreibzeilen wie BM-2.",
+          raw_write("mk", "MkRaw", "86", "Roh-Schreibtelegramm an den Mischerkreis - nur fuer Tests und Skripte"),
+          ] + rows("mk", "86", MK, "crc")
 
     mm = [HEADER, "# Wolf Mischermodul MM, Slave 52 (Kromschroeder). Nur lesen."] + rows("mm", "52", MM, "crc")
 

@@ -1,0 +1,488 @@
+{
+ "alias": "Heizung: Parametertest (alle schreibbaren Werte +1 und zurueck)",
+ "description": "Testlauf: liest jeden schreibbaren Parameter, schreibt Wert+1, liest zurueck, schreibt den Originalwert, liest erneut. Ergebnis je Parameter im Logbuch (Name 'Heizung Parametertest').",
+ "mode": "single",
+ "sequence": [
+  {
+   "action": "logbook.log",
+   "data": {
+    "name": "Heizung Parametertest",
+    "message": "Start"
+   }
+  },
+  {
+   "repeat": {
+    "for_each": [
+     {
+      "circuit": "hc",
+      "name": "Hg01",
+      "tn": 34,
+      "teiler": 10,
+      "entity": "sensor.heating_ebusd_hc_hg01"
+     },
+     {
+      "circuit": "hc",
+      "name": "Hg04",
+      "tn": 319,
+      "teiler": 1,
+      "entity": "sensor.heating_ebusd_hc_hg04"
+     },
+     {
+      "circuit": "hc",
+      "name": "Hg07",
+      "tn": 322,
+      "teiler": 1,
+      "entity": "sensor.heating_ebusd_hc_hg07"
+     },
+     {
+      "circuit": "hc",
+      "name": "Hg08",
+      "tn": 644,
+      "teiler": 10,
+      "entity": "sensor.heating_ebusd_hc_hg08"
+     },
+     {
+      "circuit": "hc",
+      "name": "Hg09",
+      "tn": 323,
+      "teiler": 1,
+      "entity": "sensor.heating_ebusd_hc_hg09"
+     },
+     {
+      "circuit": "hc",
+      "name": "Hg15",
+      "tn": 320,
+      "teiler": 10,
+      "entity": "sensor.heating_ebusd_hc_hg15"
+     },
+     {
+      "circuit": "hc",
+      "name": "Hg16",
+      "tn": 341,
+      "teiler": 1,
+      "entity": "sensor.heating_ebusd_hc_hg16"
+     },
+     {
+      "circuit": "hc",
+      "name": "Hg17",
+      "tn": 342,
+      "teiler": 1,
+      "entity": "sensor.heating_ebusd_hc_hg17"
+     },
+     {
+      "circuit": "hc",
+      "name": "Hg22",
+      "tn": 39,
+      "teiler": 10,
+      "entity": "sensor.heating_ebusd_hc_hg22"
+     },
+     {
+      "circuit": "hc",
+      "name": "Hg25",
+      "tn": 45,
+      "teiler": 10,
+      "entity": "sensor.heating_ebusd_hc_hg25"
+     },
+     {
+      "circuit": "hc",
+      "name": "Hg33",
+      "tn": 33,
+      "teiler": 1,
+      "entity": "sensor.heating_ebusd_hc_hg33"
+     },
+     {
+      "circuit": "hc",
+      "name": "Hg38",
+      "tn": 1486,
+      "teiler": 10,
+      "entity": "sensor.heating_ebusd_hc_hg38"
+     },
+     {
+      "circuit": "hc",
+      "name": "Hg39",
+      "tn": 339,
+      "teiler": 1,
+      "entity": "sensor.heating_ebusd_hc_hg39"
+     },
+     {
+      "circuit": "hc",
+      "name": "Hg60",
+      "tn": 10808,
+      "teiler": 10,
+      "entity": "sensor.heating_ebusd_hc_hg60"
+     },
+     {
+      "circuit": "bm2",
+      "name": "WwSoll",
+      "tn": 19,
+      "teiler": 10,
+      "entity": "number.heating_ebusd_bm2_wwsoll"
+     },
+     {
+      "circuit": "bm2",
+      "name": "WwMin",
+      "tn": 408,
+      "teiler": 10,
+      "entity": "number.heating_ebusd_bm2_wwmin"
+     },
+     {
+      "circuit": "bm2",
+      "name": "HkDaytemp",
+      "tn": 10109,
+      "teiler": 10,
+      "entity": "number.heating_ebusd_bm2_hkdaytemp"
+     },
+     {
+      "circuit": "bm2",
+      "name": "HkCurveBasetemp",
+      "tn": 10107,
+      "teiler": 10,
+      "entity": "number.heating_ebusd_bm2_hkcurvebasetemp"
+     },
+     {
+      "circuit": "bm2",
+      "name": "HkCurveStart",
+      "tn": 10110,
+      "teiler": 10,
+      "entity": "number.heating_ebusd_bm2_hkcurvestart"
+     },
+     {
+      "circuit": "bm2",
+      "name": "HkCurveNormoutside",
+      "tn": 10111,
+      "teiler": 10,
+      "entity": "number.heating_ebusd_bm2_hkcurvenormoutside"
+     },
+     {
+      "circuit": "bm2",
+      "name": "HkCurveFlowtemp",
+      "tn": 10108,
+      "teiler": 10,
+      "entity": "number.heating_ebusd_bm2_hkcurveflowtemp"
+     },
+     {
+      "circuit": "bm2",
+      "name": "HkSetpointcorr",
+      "tn": 10165,
+      "teiler": 10,
+      "entity": "number.heating_ebusd_bm2_hksetpointcorr"
+     },
+     {
+      "circuit": "bm2",
+      "name": "HkWintersummer",
+      "tn": 278,
+      "teiler": 10,
+      "entity": "number.heating_ebusd_bm2_hkwintersummer"
+     },
+     {
+      "circuit": "bm2",
+      "name": "HkEcoabs",
+      "tn": 279,
+      "teiler": 10,
+      "entity": "number.heating_ebusd_bm2_hkecoabs"
+     },
+     {
+      "circuit": "mk",
+      "name": "MkDaytemp",
+      "tn": 10109,
+      "teiler": 10,
+      "entity": "number.heating_ebusd_mk_mkdaytemp"
+     },
+     {
+      "circuit": "mk",
+      "name": "MkCurveBasetemp",
+      "tn": 10107,
+      "teiler": 10,
+      "entity": "number.heating_ebusd_mk_mkcurvebasetemp"
+     },
+     {
+      "circuit": "mk",
+      "name": "MkCurveStart",
+      "tn": 10110,
+      "teiler": 10,
+      "entity": "number.heating_ebusd_mk_mkcurvestart"
+     },
+     {
+      "circuit": "mk",
+      "name": "MkCurveNormoutside",
+      "tn": 10111,
+      "teiler": 10,
+      "entity": "number.heating_ebusd_mk_mkcurvenormoutside"
+     },
+     {
+      "circuit": "mk",
+      "name": "MkCurveFlowtemp",
+      "tn": 10108,
+      "teiler": 10,
+      "entity": "number.heating_ebusd_mk_mkcurveflowtemp"
+     },
+     {
+      "circuit": "mk",
+      "name": "MkSetpointcorr",
+      "tn": 10165,
+      "teiler": 10,
+      "entity": "number.heating_ebusd_mk_mksetpointcorr"
+     },
+     {
+      "circuit": "mk",
+      "name": "MkWintersummer",
+      "tn": 278,
+      "teiler": 10,
+      "entity": "number.heating_ebusd_mk_mkwintersummer"
+     },
+     {
+      "circuit": "mk",
+      "name": "MkEcoabs",
+      "tn": 279,
+      "teiler": 10,
+      "entity": "number.heating_ebusd_mk_mkecoabs"
+     }
+    ],
+    "sequence": [
+     {
+      "action": "mqtt.publish",
+      "data": {
+       "topic": "ebusd/{{ repeat.item.circuit }}/{{ repeat.item.name }}/get",
+       "payload": ""
+      }
+     },
+     {
+      "delay": {
+       "seconds": 4
+      }
+     },
+     {
+      "variables": {
+       "orig": "{{ states(repeat.item.entity) | float(none) }}"
+      }
+     },
+     {
+      "if": [
+       {
+        "condition": "template",
+        "value_template": "{{ orig is none }}"
+       }
+      ],
+      "then": [
+       {
+        "action": "logbook.log",
+        "data": {
+         "name": "Heizung Parametertest",
+         "message": "{{ repeat.item.circuit }}/{{ repeat.item.name }}: UEBERSPRUNGEN, kein Lesewert"
+        }
+       }
+      ],
+      "else": [
+       {
+        "variables": {
+         "ziel": "{{ orig + 1 }}"
+        }
+       },
+       {
+        "if": [
+         {
+          "condition": "template",
+          "value_template": "{{ repeat.item.circuit == 'hc' }}"
+         }
+        ],
+        "then": [
+         {
+          "action": "script.heizung_therme_schreiben",
+          "continue_on_error": true,
+          "data": {
+           "name": "{{ repeat.item.name }}",
+           "tn": "{{ repeat.item.tn }}",
+           "wert": "{{ ziel }}",
+           "teiler": "{{ repeat.item.teiler }}"
+          }
+         }
+        ],
+        "else": [
+         {
+          "action": "mqtt.publish",
+          "data": {
+           "topic": "ebusd/{{ repeat.item.circuit }}/{{ repeat.item.name }}/set",
+           "payload": "{{ ziel }}"
+          }
+         },
+         {
+          "delay": {
+           "seconds": 3
+          }
+         },
+         {
+          "action": "mqtt.publish",
+          "data": {
+           "topic": "ebusd/{{ repeat.item.circuit }}/{{ repeat.item.name }}/get",
+           "payload": ""
+          }
+         },
+         {
+          "delay": {
+           "seconds": 4
+          }
+         }
+        ]
+       },
+       {
+        "variables": {
+         "nach_test": "{{ states(repeat.item.entity) | float(none) }}"
+        }
+       },
+       {
+        "variables": {
+         "ziel": "{{ orig }}"
+        }
+       },
+       {
+        "if": [
+         {
+          "condition": "template",
+          "value_template": "{{ repeat.item.circuit == 'hc' }}"
+         }
+        ],
+        "then": [
+         {
+          "action": "script.heizung_therme_schreiben",
+          "continue_on_error": true,
+          "data": {
+           "name": "{{ repeat.item.name }}",
+           "tn": "{{ repeat.item.tn }}",
+           "wert": "{{ ziel }}",
+           "teiler": "{{ repeat.item.teiler }}"
+          }
+         }
+        ],
+        "else": [
+         {
+          "action": "mqtt.publish",
+          "data": {
+           "topic": "ebusd/{{ repeat.item.circuit }}/{{ repeat.item.name }}/set",
+           "payload": "{{ ziel }}"
+          }
+         },
+         {
+          "delay": {
+           "seconds": 3
+          }
+         },
+         {
+          "action": "mqtt.publish",
+          "data": {
+           "topic": "ebusd/{{ repeat.item.circuit }}/{{ repeat.item.name }}/get",
+           "payload": ""
+          }
+         },
+         {
+          "delay": {
+           "seconds": 4
+          }
+         }
+        ]
+       },
+       {
+        "if": [
+         {
+          "condition": "template",
+          "value_template": "{{ (states(repeat.item.entity) | float(-9999) - orig) | abs > 0.05 }}"
+         }
+        ],
+        "then": [
+         {
+          "variables": {
+           "ziel": "{{ orig }}"
+          }
+         },
+         {
+          "if": [
+           {
+            "condition": "template",
+            "value_template": "{{ repeat.item.circuit == 'hc' }}"
+           }
+          ],
+          "then": [
+           {
+            "action": "script.heizung_therme_schreiben",
+            "continue_on_error": true,
+            "data": {
+             "name": "{{ repeat.item.name }}",
+             "tn": "{{ repeat.item.tn }}",
+             "wert": "{{ ziel }}",
+             "teiler": "{{ repeat.item.teiler }}"
+            }
+           }
+          ],
+          "else": [
+           {
+            "action": "mqtt.publish",
+            "data": {
+             "topic": "ebusd/{{ repeat.item.circuit }}/{{ repeat.item.name }}/set",
+             "payload": "{{ ziel }}"
+            }
+           },
+           {
+            "delay": {
+             "seconds": 3
+            }
+           },
+           {
+            "action": "mqtt.publish",
+            "data": {
+             "topic": "ebusd/{{ repeat.item.circuit }}/{{ repeat.item.name }}/get",
+             "payload": ""
+            }
+           },
+           {
+            "delay": {
+             "seconds": 4
+            }
+           }
+          ]
+         }
+        ]
+       },
+       {
+        "action": "logbook.log",
+        "data": {
+         "name": "Heizung Parametertest",
+         "message": "{{ repeat.item.circuit }}/{{ repeat.item.name }}: orig {{ orig }} -> +1 gelesen {{ nach_test }} -> zurueck gelesen {{ states(repeat.item.entity) }} | {{ 'SCHREIBEN OK' if nach_test is not none and (nach_test - orig - 1) | abs < 0.05 else 'SCHREIBEN FEHLGESCHLAGEN' }}, {{ 'RUECKSETZEN OK' if (states(repeat.item.entity) | float(-9999) - orig) | abs < 0.05 else 'RUECKSETZEN FEHLGESCHLAGEN' }}"
+        }
+       },
+       {
+        "if": [
+         {
+          "condition": "template",
+          "value_template": "{{ (states(repeat.item.entity) | float(-9999) - orig) | abs > 0.05 }}"
+         }
+        ],
+        "then": [
+         {
+          "action": "notify.mobile_app_birger_iphone",
+          "data": {
+           "title": "Heizung Parametertest: Ruecksetzen fehlgeschlagen",
+           "message": "{{ repeat.item.circuit }}/{{ repeat.item.name }} sollte {{ orig }} sein, gelesen {{ states(repeat.item.entity) }}"
+          }
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "action": "logbook.log",
+   "data": {
+    "name": "Heizung Parametertest",
+    "message": "Ende"
+   }
+  },
+  {
+   "action": "notify.mobile_app_birger_iphone",
+   "data": {
+    "title": "Heizung Parametertest beendet",
+    "message": "Ergebnis im Logbuch unter 'Heizung Parametertest'."
+   }
+  }
+ ]
+}

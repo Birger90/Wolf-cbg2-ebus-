@@ -1,0 +1,191 @@
+{
+ "alias": "Heizung: Therme-Parameter schreiben (HG)",
+ "description": "Schreibt einen HG-Parameter der Wolf CGB-2 ueber ebusd (5 Byte an Master 03, Pruefbyte berechnet). Liest zurueck, wiederholt bis zu 2x. Keine Gas-/Abgasparameter (HG02, HG03, HG12).",
+ "mode": "queued",
+ "fields": {
+  "name": {
+   "description": "ebusd-Name in hc, z.B. Hg07",
+   "required": true,
+   "selector": {
+    "text": {}
+   }
+  },
+  "tn": {
+   "description": "Telegrammnummer (Wolf-DB), z.B. 322",
+   "required": true,
+   "selector": {
+    "number": {
+     "min": 0,
+     "max": 65535,
+     "mode": "box"
+    }
+   }
+  },
+  "wert": {
+   "description": "Zielwert in Anzeigeeinheit (z.B. 1 oder 75.0)",
+   "required": true,
+   "selector": {
+    "number": {
+     "min": -100,
+     "max": 10000,
+     "step": 0.1,
+     "mode": "box"
+    }
+   }
+  },
+  "teiler": {
+   "description": "1 fuer ganze Zahlen, 10 fuer Werte mit einer Nachkommastelle",
+   "default": 1,
+   "selector": {
+    "number": {
+     "min": 1,
+     "max": 100,
+     "mode": "box"
+    }
+   }
+  },
+  "minimum": {
+   "description": "Erlaubtes Minimum (Bereichspruefung)",
+   "default": -100,
+   "selector": {
+    "number": {
+     "min": -100,
+     "max": 10000,
+     "step": 0.1,
+     "mode": "box"
+    }
+   }
+  },
+  "maximum": {
+   "description": "Erlaubtes Maximum (Bereichspruefung)",
+   "default": 10000,
+   "selector": {
+    "number": {
+     "min": -100,
+     "max": 10000,
+     "step": 0.1,
+     "mode": "box"
+    }
+   }
+  }
+ },
+ "sequence": [
+  {
+   "variables": {
+    "teiler": "{{ teiler | default(1) | int }}",
+    "minimum": "{{ minimum | default(-100) | float }}",
+    "maximum": "{{ maximum | default(10000) | float }}",
+    "sensor": "sensor.heating_ebusd_hc_{{ name | lower }}",
+    "raw": "{{ (((wert | float) * (teiler | default(1) | int)) | round(0) | int) % 65536 }}"
+   }
+  },
+  {
+   "variables": {
+    "payload": "{%- macro wolfcrc(hexdata) -%}\n{%- set ns = namespace(c=0) -%}\n{%- for i in range(0, hexdata|length, 2) -%}\n  {%- set b = hexdata[i:i+2] | int(base=16) -%}\n  {%- for _ in range(8) -%}\n    {%- if ns.c >= 128 -%}\n      {%- set ns.c = ((ns.c * 2) % 256) | bitwise_xor(92) -%}\n    {%- else -%}\n      {%- set ns.c = (ns.c * 2) % 256 -%}\n    {%- endif -%}\n  {%- endfor -%}\n  {%- set ns.c = ns.c | bitwise_xor(b) -%}\n{%- endfor -%}\n{{ '%02x' % ns.c }}\n{%- endmacro -%}\n{%- set t = tn | int -%}\n{%- set r = raw | int -%}\n{%- set d = '%02x%02x%02x%02x' % (t % 256, t // 256, r % 256, r // 256) -%}\n{{ wolfcrc(d) }} {{ d[0:2] }} {{ d[2:4] }} {{ d[4:6] }} {{ d[6:8] }}"
+   }
+  },
+  {
+   "if": [
+    {
+     "condition": "template",
+     "value_template": "{{ name | lower in ['hg02', 'hg03', 'hg12', 'hg10'] or (wert | float) < minimum or (wert | float) > maximum }}"
+    }
+   ],
+   "then": [
+    {
+     "action": "persistent_notification.create",
+     "data": {
+      "title": "Heizung: Schreiben abgelehnt",
+      "message": "{{ name }} = {{ wert }} liegt ausserhalb {{ minimum }}..{{ maximum }} oder ist gesperrt."
+     }
+    },
+    {
+     "stop": "Bereichspruefung fehlgeschlagen",
+     "error": true
+    }
+   ]
+  },
+  {
+   "action": "logbook.log",
+   "data": {
+    "name": "Heizung eBus",
+    "entity_id": "{{ sensor }}",
+    "message": "schreibe Therme {{ name }} (TN {{ tn }}) = {{ wert }}, Telegramm {{ payload }}"
+   }
+  },
+  {
+   "repeat": {
+    "until": [
+     {
+      "condition": "template",
+      "value_template": "{{ (states(sensor) | float(-9999) - (wert | float)) | abs < 0.05 or repeat.index >= 3 }}"
+     }
+    ],
+    "sequence": [
+     {
+      "action": "mqtt.publish",
+      "data": {
+       "topic": "ebusd/hc/HgRaw/set",
+       "payload": "{{ payload }}"
+      }
+     },
+     {
+      "delay": {
+       "seconds": 3
+      }
+     },
+     {
+      "action": "mqtt.publish",
+      "data": {
+       "topic": "ebusd/hc/{{ name }}/get",
+       "payload": ""
+      }
+     },
+     {
+      "delay": {
+       "seconds": 4
+      }
+     }
+    ]
+   }
+  },
+  {
+   "if": [
+    {
+     "condition": "template",
+     "value_template": "{{ (states(sensor) | float(-9999) - (wert | float)) | abs >= 0.05 }}"
+    }
+   ],
+   "then": [
+    {
+     "action": "persistent_notification.create",
+     "data": {
+      "title": "Heizung: Schreiben fehlgeschlagen",
+      "message": "Therme {{ name }} = {{ wert }} nach 3 Versuchen nicht bestaetigt, gelesen: {{ states(sensor) }}"
+     }
+    },
+    {
+     "action": "notify.mobile_app_birger_iphone",
+     "data": {
+      "title": "Heizung: Schreiben fehlgeschlagen",
+      "message": "Therme {{ name }} = {{ wert }} nicht bestaetigt (gelesen {{ states(sensor) }})"
+     }
+    },
+    {
+     "stop": "Schreiben nicht bestaetigt",
+     "error": true
+    }
+   ],
+   "else": [
+    {
+     "action": "logbook.log",
+     "data": {
+      "name": "Heizung eBus",
+      "entity_id": "{{ sensor }}",
+      "message": "Therme {{ name }} = {{ wert }} bestaetigt"
+     }
+    }
+   ]
+  }
+ ]
+}

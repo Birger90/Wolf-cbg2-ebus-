@@ -56,15 +56,37 @@ Folgerung: Das Prüfbyte hängt nur vom Inhalt ab (gleicher Wert = gleiches Byte
 | 21:45 | 5 Byte an `35`, Wert 60, CRC 0a | 31 | erster Versuch nicht angekommen, zweiter Versuch 21:47 → **60** |
 | 22:02 | 5 Byte an `35`, Prüfbyte absichtlich `00` | 31 | Wert → **50**, BM-2 prüft das Prüfbyte beim Schreiben nicht |
 | 22:03 | 5 Byte an `35`, Prüfbyte `00`, Wert 60 | 31 | Wert → **60** |
+| 22:3x | Therme: 9 Byte an `03` mit Anhang `9d010000` (offizielles ebusd-Format), HG07 = 2 | 31 | HG07 bleibt 1 |
+| 22:4x | **Therme: 5 Byte an `03`, CRC `ac`** (`ac 4201 0200`) | 31 | ebusd `done` (ACK), HG07 → **2** |
+| 20.10. 06:11 | Therme: 5 Byte an `03`, Prüfbyte `00` (`00 4201 0100`) | 31 | `read timeout`, HG07 bleibt 2 → **Therme prüft das Prüfbyte** |
+| 06:18 | Therme: 5 Byte an `03`, CRC `48` (`48 4201 0100`) | 31 | HG07 → **1** |
+| 19.10. 23:05 | BM-2: Programmwahl DHK TN 10100 = 2 (`d4 7427 0200`) | 31 | HkProgram → Permanent, Heizkreis Heizbetrieb, Brenner an |
+| 20.10. 06:00 | BM-2: TN 10100 = 1 (`30 7427 0100`) | 31 | HkProgram → Auto |
+
+## Parametertest 20.10.2026 (script.heizung_parametertest)
+
+Jeder schreibbare Parameter: lesen, Wert+1 schreiben, zurücklesen, Originalwert schreiben, zurücklesen.
+Therme über `HgRaw` mit berechnetem Prüfbyte, BM-2/MK über die statischen Nachrichten (Präfix `00`).
+
+| Gerät | Parameter | Ergebnis |
+|---|---|---|
+| Therme (03) | HG01, HG04, HG07, HG08, HG09, HG15, HG16, HG17, HG22, HG25, HG33, HG38, HG39, HG60 | alle 14: Schreiben OK, Rücksetzen OK (HG07/HG09 je ein Wiederholversuch) |
+| BM-2 (35) | WwSoll, WwMin, HkDaytemp, HkCurveBasetemp, HkCurveStart, HkCurveNormoutside, HkCurveFlowtemp, HkSetpointcorr, HkWintersummer, HkEcoabs | Test läuft (20.10. 06:33), Ergebnis folgt |
+| MK (86) | MkDaytemp, MkCurveBasetemp, MkCurveStart, MkCurveNormoutside, MkCurveFlowtemp, MkSetpointcorr, MkWintersummer, MkEcoabs | Test läuft, Ergebnis folgt |
+
+Nicht getestet (absichtlich): Programmwahl (nur der einmalige Notfall-Schreibvorgang oben), 1x Warmwasser (löst eine
+Speicherladung aus), HG02/HG03/HG12 (Gas), HG21/HG62 (liefern `unknown`).
+
+## Weitere Telegrammnummern
+
+- TN 5250 (BM-2): Wartung Fälligkeitsdatum, Typ BM2Date (ism7mqtt `BM2DateConverterTemplate`):
+  Tag = (v & 31) + 1, Monat = ((v >> 5) & 15) + 1, Jahr = 2000 + (v >> 9). Gelesen 13096 → 09.10.2025, identisch mit der Cloud.
 
 ## Offen / nicht verifiziert
 
 - Warum die 9-Byte-Form des ISM7 von ebusd aus nicht angenommen wird.
 - Bedeutung des Anhangs TN 349 = 0 (ISM7) bzw. TN 413 = 0 (offizielles ebusd-Format für die Therme).
-- Schreiben an die Therme (HG-Parameter, Master `03`, Anhang `9d010000`) ist auf der CGB-2 noch nicht getestet.
-  Andere Wolf-Geräte (FGB-K-28, CGG-2) nehmen es laut Discussion #779 an.
-- Schreiben an den Mischerkreis (`86`) ist nicht getestet.
-- Ob die Therme das Prüfbyte beim Schreiben prüft, ist unbekannt (COB-15 laut dktz: ja).
+- Ob der Mischerkreis (`86`) das Prüfbyte prüft: die statischen Zeilen mit Präfix `00` werden im Parametertest geprüft.
 
 ## Geräteerkennung (ebusd-Scan)
 

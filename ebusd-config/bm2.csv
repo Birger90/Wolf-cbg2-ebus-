@@ -1,7 +1,8 @@
 type,circuit,level,name,comment,qq,zz,pbsb,id,*name,part,type,divisor/values,unit,comment
 # Wolf BM-2 Bedienmodul, Slave 35: System, direkter Heizkreis, Warmwasser.
-# Lesen mit CRC-Praefix (wie das ISM7). Schreiben: 5 Byte an 35 mit Praefix 00 (verifiziert 19.10.2026, TN 19).
+# Lesen mit CRC-Praefix (wie das ISM7). Schreiben: 5 Byte an 35 mit Praefix 00 (verifiziert 19.10.2026, TN 19 und 279).
 # Programmwahl bewusst nur lesbar (Mieterwohnung haengt an beiden Kreisen).
+w,bm2,,BmRaw,Roh-Schreibtelegramm an das BM-2 - nur fuer Tests und Skripte,,35,5023,,data,,HEX:5,,,Pruefbyte+TN+Wert
 r5,bm2,,WwSoll,Warmwassersolltemperatur eingestellt (25-65 C),,35,5022,541300,value,,SIN,10,°C,TN 19
 w,bm2,,WwSoll,Warmwassersolltemperatur eingestellt (25-65 C),,35,5023,001300,value,,SIN,10,°C,TN 19
 r9,bm2,,WwMin,Warmwasserminimaltemperatur (25-65 C),,35,5022,199801,value,,SIN,10,°C,TN 408
@@ -35,6 +36,7 @@ w,bm2,,HkEcoabs,ECO/ABS (-10-40 C),,35,5023,001701,value,,SIN,10,°C,TN 279
 r,bm2,,HkControllertype,Reglertyp,,35,5022,ec9214,value,,UIN,0=Notbetrieb;1=Witterungsgefuehrt;2=Reiner_Raumregler;3=Witterungsgefuehrt_mit_Raumeinfluss;4=Erweiterter_Raumeinfuss,,TN 5266
 r9,bm2,,Maintenance,Wartung betriebsabhaengig,,35,5022,b88114,value,,UIN,,%,TN 5249
 r,bm2,,MaintenanceMode,Wartungsmeldung,,35,5022,a66a02,value,,UIN,0=Aus;1=Betriebsabhaengig;2=Datumsabhaengig,,TN 618
+r9,bm2,,MaintenanceDate,Wartung Faelligkeitsdatum roh (BM2Date: Tag=(v&31)+1 Monat=((v>>5)&15)+1 Jahr=2000+(v>>9)),,35,5022,5c8214,value,,UIN,,,TN 5250
 r9,bm2,,ParallelMode,Freigabe Parallelbetrieb,,35,5022,d82300,value,,UIN,0=Aus;1=Ein,,TN 35
 r9,bm2,,OneTimeHotwater,1x Warmwasser,,35,5022,a78527,value,,UIN,0=Aus;1=Ein,,TN 10117
 w,bm2,,OneTimeHotwater,1x Warmwasser,,35,5023,008527,value,,UIN,0=Aus;1=Ein,,TN 10117
