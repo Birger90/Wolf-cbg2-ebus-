@@ -1,5 +1,8 @@
 type,circuit,level,name,comment,qq,zz,pbsb,id,*name,part,type,divisor/values,unit,comment
-# Wolf Mischermodul MM, Slave 52 (Kromschroeder). Nur lesen.
+# Wolf Mischermodul MM, Slave 52 (Kromschroeder).
+# Schreiben: Kromschroeder-Geraet wie die Therme, deshalb Roh-Schreibnachricht MmRaw mit Pruefbyte aus Home Assistant
+# (script.heizung_therme_schreiben, kreis=mm). Zieladresse 52 - ob 52 oder ein Master (f0/f1) Schreibtelegramme annimmt, zeigt der Test.
+w,mm,,MmRaw,Roh-Schreibtelegramm an das Mischermodul (Pruefbyte+TN+Wert) nur ueber script.heizung_therme_schreiben kreis=mm,,52,5023,,data,,HEX:5,,,Pruefbyte+TN+Wert
 r2,mm,,Flowtemp,Vorlauftemperatur Mischer,,52,5022,900f00,value,,SIN,10,°C,TN 15
 r2,mm,,Flowtempdesired,Mischersolltemperatur,,52,5022,2c0400,value,,SIN,10,°C,TN 4
 r3,mm,,Pump,Ausgang Mischerkreispumpe MKP,,52,5022,705200,value,,UIN,0=Aus;1=Ein,,TN 82
@@ -8,6 +11,6 @@ r9,mm,,TvMin,Minimalbegrenzung Mischerkreis TV-min (0-80 C),,52,5022,812b01,valu
 r9,mm,,TvMax,Maximalbegrenzung Mischerkreis TV-max (20-80 C),,52,5022,642800,value,,SIN,10,°C,TN 40
 r9,mm,,CurveDistance,Heizkurvenabstand (0-30 K),,52,5022,ed1101,value,,SIN,10,K,TN 273
 r9,mm,,PumpOverrun,Nachlaufzeit Heizkreis (0-30 min),,52,5022,c14201,value,,UIN,,min,TN 322
-r,mm,,MixerPband,P-Bereich Mischer (5-40 K),,52,5022,618f01,value,,SIN,10,K,TN 399
+r9,mm,,MixerPband,P-Bereich Mischer (5-40 K),,52,5022,618f01,value,,SIN,10,K,TN 399
 r,mm,,Config,Konfiguration MM (1-11),,52,5022,6a210a,value,,UIN,,,TN 2593
 r,mm,,EbusPower,eBus Einspeisung,,52,5022,45fbfd,value,,UIN,0=Aus;1=Ein;2=Auto,,TN 65019

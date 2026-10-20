@@ -14,7 +14,7 @@ import sys
 
 HERE = os.path.dirname(__file__)
 sys.path.insert(0, os.path.join(HERE, "..", "tools"))
-from gen_ebusd_config import HC, BM2, MK  # noqa: E402
+from gen_ebusd_config import HC, BM2, MK, MM  # noqa: E402
 
 # Jinja-Makro: CRC8 Polynom 0x5C, Startwert 0, pro Byte c = shift8(c) XOR byte (identisch zu tools/wolf_crc.py,
 # in HA gegen 5 Mitschnitte geprueft: 42010200->ac, 1300f4015d010000->b0, 74270200->d4, 42010100->48,
@@ -44,12 +44,14 @@ PAYLOAD_TEMPLATE = CRC_MACRO + """
 
 def therme_schreiben():
     return {
-        "alias": "Heizung: Therme-Parameter schreiben (HG)",
-        "description": "Schreibt einen HG-Parameter der Wolf CGB-2 ueber ebusd (5 Byte an Master 03, Pruefbyte berechnet). "
+        "alias": "Heizung: Therme-/MM-Parameter schreiben (Pruefbyte)",
+        "description": "Schreibt einen Parameter mit Pruefbyte ueber ebusd: kreis=hc -> Therme (5 Byte an Master 03, HgRaw), kreis=mm -> Mischermodul (5 Byte an 52, MmRaw). "
                        "Liest zurueck, wiederholt bis zu 2x. Gesperrt bleiben nur HG12 (Gasart) und HG10 (eBus-Adresse).",
         "mode": "queued",
         "fields": {
-            "name": {"description": "ebusd-Name in hc, z.B. Hg07", "required": True, "selector": {"text": {}}},
+            "kreis": {"description": "ebusd-Kreis: hc (Therme) oder mm (Mischermodul)", "default": "hc",
+                      "selector": {"select": {"options": ["hc", "mm"]}}},
+            "name": {"description": "ebusd-Name im Kreis, z.B. Hg07 oder PumpOverrun", "required": True, "selector": {"text": {}}},
             "tn": {"description": "Telegrammnummer (Wolf-DB), z.B. 322", "required": True,
                    "selector": {"number": {"min": 0, "max": 65535, "mode": "box"}}},
             "wert": {"description": "Zielwert in Anzeigeeinheit (z.B. 1 oder 75.0)", "required": True,
@@ -66,12 +68,14 @@ def therme_schreiben():
                 "teiler": "{{ teiler | default(1) | int }}",
                 "minimum": "{{ minimum | default(-100) | float }}",
                 "maximum": "{{ maximum | default(10000) | float }}",
-                "sensor": "sensor.heating_ebusd_hc_{{ name | lower }}",
+                "kreis": "{{ kreis | default('hc') }}",
+                "rawtopic": "ebusd/{{ kreis | default('hc') }}/{{ 'HgRaw' if (kreis | default('hc')) == 'hc' else 'MmRaw' }}/set",
+                "sensor": "sensor.heating_ebusd_{{ kreis | default('hc') }}_{{ name | lower }}",
                 "raw": "{{ (((wert | float) * (teiler | default(1) | int)) | round(0) | int) % 65536 }}",
             }},
             {"variables": {"payload": PAYLOAD_TEMPLATE}},
             {"if": [{"condition": "template",
-                     "value_template": "{{ name | lower in ['hg12', 'hg10'] or (wert | float) < minimum or (wert | float) > maximum }}"}],
+                     "value_template": "{{ (kreis == 'hc' and name | lower in ['hg12', 'hg10']) or (kreis == 'mm' and name | lower in ['config', 'ebuspower']) or (wert | float) < minimum or (wert | float) > maximum }}"}],
              "then": [
                  {"action": "persistent_notification.create",
                   "data": {"title": "Heizung: Schreiben abgelehnt",
@@ -80,15 +84,15 @@ def therme_schreiben():
              ]},
             {"action": "logbook.log",
              "data": {"name": "Heizung eBus", "entity_id": "{{ sensor }}",
-                      "message": "schreibe Therme {{ name }} (TN {{ tn }}) = {{ wert }}, Telegramm {{ payload }}"}},
+                      "message": "schreibe {{ kreis }}/{{ name }} (TN {{ tn }}) = {{ wert }}, Telegramm {{ payload }}"}},
             # Variablen sind in HA seit 2025.4 blockweise gueltig, deshalb wird der Rueckleswert direkt verglichen.
             {"repeat": {
                 "until": [{"condition": "template",
                            "value_template": "{{ (states(sensor) | float(-9999) - (wert | float)) | abs < 0.05 or repeat.index >= 3 }}"}],
                 "sequence": [
-                    {"action": "mqtt.publish", "data": {"topic": "ebusd/hc/HgRaw/set", "payload": "{{ payload }}"}},
+                    {"action": "mqtt.publish", "data": {"topic": "{{ rawtopic }}", "payload": "{{ payload }}"}},
                     {"delay": {"seconds": 3}},
-                    {"action": "mqtt.publish", "data": {"topic": "ebusd/hc/{{ name }}/get", "payload": ""}},
+                    {"action": "mqtt.publish", "data": {"topic": "ebusd/{{ kreis }}/{{ name }}/get", "payload": ""}},
                     {"delay": {"seconds": 4}},
                 ],
             }},
@@ -97,16 +101,16 @@ def therme_schreiben():
              "then": [
                  {"action": "persistent_notification.create",
                   "data": {"title": "Heizung: Schreiben fehlgeschlagen",
-                           "message": "Therme {{ name }} = {{ wert }} nach 3 Versuchen nicht bestaetigt, gelesen: {{ states(sensor) }}"}},
+                           "message": "{{ kreis }}/{{ name }} = {{ wert }} nach 3 Versuchen nicht bestaetigt, gelesen: {{ states(sensor) }}"}},
                  {"action": "notify.mobile_app_birger_iphone",
                   "data": {"title": "Heizung: Schreiben fehlgeschlagen",
-                           "message": "Therme {{ name }} = {{ wert }} nicht bestaetigt (gelesen {{ states(sensor) }})"}},
+                           "message": "{{ kreis }}/{{ name }} = {{ wert }} nicht bestaetigt (gelesen {{ states(sensor) }})"}},
                  {"stop": "Schreiben nicht bestaetigt", "error": True},
              ],
              "else": [
                  {"action": "logbook.log",
                   "data": {"name": "Heizung eBus", "entity_id": "{{ sensor }}",
-                           "message": "Therme {{ name }} = {{ wert }} bestaetigt"}},
+                           "message": "{{ kreis }}/{{ name }} = {{ wert }} bestaetigt"}},
              ]},
         ],
     }
@@ -114,13 +118,14 @@ def therme_schreiben():
 
 def test_items():
     items = []
-    for tn, name, comment, typ, div, unit, prio, writable in HC:
-        if writable and name not in ("Hg21", "Hg62"):  # Hg21/Hg62 liefern 'unknown', nicht testbar
-            items.append({"circuit": "hc", "name": name, "tn": tn, "teiler": 10 if div == "10" else 1,
-                          "entity": f"sensor.heating_ebusd_hc_{name.lower()}"})
+    for table, circ in ((HC, "hc"), (MM, "mm")):  # Therme und Mischermodul: Pruefbyte-Skript
+        for tn, name, comment, typ, div, unit, prio, writable in table:
+            if writable and name not in ("Hg21", "Hg62"):  # Hg21/Hg62 liefern 'unknown', nicht testbar
+                items.append({"circuit": circ, "name": name, "tn": tn, "teiler": 10 if div == "10" else 1,
+                              "entity": f"sensor.heating_ebusd_{circ}_{name.lower()}"})
     for table, circ in ((BM2, "bm2"), (MK, "mk")):
         for tn, name, comment, typ, div, unit, prio, writable in table:
-            if writable and name not in ("OneTimeHotwater",):  # loest eine Speicherladung aus, kein Test
+            if writable and name not in ("OneTimeHotwater",) and not name.endswith("Program"):  # 1x WW loest eine Speicherladung aus; Programmwahl ist eine Aufzaehlung (+1 sinnlos, einmalig 19.10. getestet)
                 items.append({"circuit": circ, "name": name, "tn": tn, "teiler": 10 if div == "10" else 1,
                               "entity": f"number.heating_ebusd_{circ}_{name.lower()}"})
     return items
@@ -142,9 +147,9 @@ def parametertest():
 
     def write_block():
         return [
-            {"if": [{"condition": "template", "value_template": "{{ repeat.item.circuit == 'hc' }}"}],
+            {"if": [{"condition": "template", "value_template": "{{ repeat.item.circuit in ['hc', 'mm'] }}"}],
              "then": [{"action": "script.heizung_therme_schreiben", "continue_on_error": True,
-                       "data": {"name": "{{ repeat.item.name }}", "tn": "{{ repeat.item.tn }}", "wert": "{{ ziel }}",
+                       "data": {"kreis": "{{ repeat.item.circuit }}", "name": "{{ repeat.item.name }}", "tn": "{{ repeat.item.tn }}", "wert": "{{ ziel }}",
                                 "teiler": "{{ repeat.item.teiler }}"}}],
              "else": write_bm},
         ]

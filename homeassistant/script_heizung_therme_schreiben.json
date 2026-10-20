@@ -1,10 +1,22 @@
 {
- "alias": "Heizung: Therme-Parameter schreiben (HG)",
- "description": "Schreibt einen HG-Parameter der Wolf CGB-2 ueber ebusd (5 Byte an Master 03, Pruefbyte berechnet). Liest zurueck, wiederholt bis zu 2x. Gesperrt bleiben nur HG12 (Gasart) und HG10 (eBus-Adresse).",
+ "alias": "Heizung: Therme-/MM-Parameter schreiben (Pruefbyte)",
+ "description": "Schreibt einen Parameter mit Pruefbyte ueber ebusd: kreis=hc -> Therme (5 Byte an Master 03, HgRaw), kreis=mm -> Mischermodul (5 Byte an 52, MmRaw). Liest zurueck, wiederholt bis zu 2x. Gesperrt bleiben nur HG12 (Gasart) und HG10 (eBus-Adresse).",
  "mode": "queued",
  "fields": {
+  "kreis": {
+   "description": "ebusd-Kreis: hc (Therme) oder mm (Mischermodul)",
+   "default": "hc",
+   "selector": {
+    "select": {
+     "options": [
+      "hc",
+      "mm"
+     ]
+    }
+   }
+  },
   "name": {
-   "description": "ebusd-Name in hc, z.B. Hg07",
+   "description": "ebusd-Name im Kreis, z.B. Hg07 oder PumpOverrun",
    "required": true,
    "selector": {
     "text": {}
@@ -75,7 +87,9 @@
     "teiler": "{{ teiler | default(1) | int }}",
     "minimum": "{{ minimum | default(-100) | float }}",
     "maximum": "{{ maximum | default(10000) | float }}",
-    "sensor": "sensor.heating_ebusd_hc_{{ name | lower }}",
+    "kreis": "{{ kreis | default('hc') }}",
+    "rawtopic": "ebusd/{{ kreis | default('hc') }}/{{ 'HgRaw' if (kreis | default('hc')) == 'hc' else 'MmRaw' }}/set",
+    "sensor": "sensor.heating_ebusd_{{ kreis | default('hc') }}_{{ name | lower }}",
     "raw": "{{ (((wert | float) * (teiler | default(1) | int)) | round(0) | int) % 65536 }}"
    }
   },
@@ -88,7 +102,7 @@
    "if": [
     {
      "condition": "template",
-     "value_template": "{{ name | lower in ['hg12', 'hg10'] or (wert | float) < minimum or (wert | float) > maximum }}"
+     "value_template": "{{ (kreis == 'hc' and name | lower in ['hg12', 'hg10']) or (kreis == 'mm' and name | lower in ['config', 'ebuspower']) or (wert | float) < minimum or (wert | float) > maximum }}"
     }
    ],
    "then": [
@@ -110,7 +124,7 @@
    "data": {
     "name": "Heizung eBus",
     "entity_id": "{{ sensor }}",
-    "message": "schreibe Therme {{ name }} (TN {{ tn }}) = {{ wert }}, Telegramm {{ payload }}"
+    "message": "schreibe {{ kreis }}/{{ name }} (TN {{ tn }}) = {{ wert }}, Telegramm {{ payload }}"
    }
   },
   {
@@ -125,7 +139,7 @@
      {
       "action": "mqtt.publish",
       "data": {
-       "topic": "ebusd/hc/HgRaw/set",
+       "topic": "{{ rawtopic }}",
        "payload": "{{ payload }}"
       }
      },
@@ -137,7 +151,7 @@
      {
       "action": "mqtt.publish",
       "data": {
-       "topic": "ebusd/hc/{{ name }}/get",
+       "topic": "ebusd/{{ kreis }}/{{ name }}/get",
        "payload": ""
       }
      },
@@ -161,14 +175,14 @@
      "action": "persistent_notification.create",
      "data": {
       "title": "Heizung: Schreiben fehlgeschlagen",
-      "message": "Therme {{ name }} = {{ wert }} nach 3 Versuchen nicht bestaetigt, gelesen: {{ states(sensor) }}"
+      "message": "{{ kreis }}/{{ name }} = {{ wert }} nach 3 Versuchen nicht bestaetigt, gelesen: {{ states(sensor) }}"
      }
     },
     {
      "action": "notify.mobile_app_birger_iphone",
      "data": {
       "title": "Heizung: Schreiben fehlgeschlagen",
-      "message": "Therme {{ name }} = {{ wert }} nicht bestaetigt (gelesen {{ states(sensor) }})"
+      "message": "{{ kreis }}/{{ name }} = {{ wert }} nicht bestaetigt (gelesen {{ states(sensor) }})"
      }
     },
     {
@@ -182,7 +196,7 @@
      "data": {
       "name": "Heizung eBus",
       "entity_id": "{{ sensor }}",
-      "message": "Therme {{ name }} = {{ wert }} bestaetigt"
+      "message": "{{ kreis }}/{{ name }} = {{ wert }} bestaetigt"
      }
     }
    ]

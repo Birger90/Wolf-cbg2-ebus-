@@ -37,9 +37,12 @@ ISM7 (noch)     ──┘
 |---|---|---|
 | `08` (Master `03`) | Therme | Temperaturen, Druck, Brennerstatus, Zähler, HG-Parameter |
 | `35` (Master `30`) | BM-2 | Systemparameter, direkter Heizkreis, Warmwasser |
-| `52` | Mischermodul MM | Mischer-Vorlauf, Mischersoll, Pumpe, MM-Parameter |
+| `52` | Mischermodul MM | Mischer-Vorlauf, Mischersoll, Pumpe, MM-Parameter; Schreiben über `MmRaw` mit Prüfbyte (noch nicht getestet) |
 | `86` | Mischerkreis (MK) | Programmwahl, Heizkurve, Tagtemperatur des Mischerkreises |
 | `ff` | ISM7 | Master, liest alles zyklisch |
+| `04` | ISM7 (Slave-Seite) | Slave-Adresse = Master + 5 (eBUS-Regel, 0xff+5 = 0x04); antwortet nicht auf Identifikation |
+| `f0`, `f1` | unbekannte Master | senden `RcTarget`-Broadcasts bzw. lesen das MM (`52`); `f6` = Slave zu `f1`. Welche Geräte das sind, ist offen |
+| `14` | Slave zu Master `0f` | Master `0f` ist im Log nie aufgetaucht; Gerät offen |
 
 Verifiziert über Vorlauftemperaturen: `35`/TN 10119 = Vorlauf direkter Heizkreis, `86`/TN 10119 = `52`/TN 15 = Mischer-Vorlauf,
 jeweils identisch mit der Wolf-Cloud.
@@ -114,8 +117,12 @@ das ISM7 am Bus hängt, kommen auch diese Werte passiv.
   `binary_sensor.heizung_wartung_fallig`.
 - Automationen: „Anlagendruck niedrig“ (`hc/Pressure` unter einstellbarer Schwelle, 5 min), „Datenausfall“,
   „Störung“ (`hc/Brennerstatus` = Stoerung oder `hc/Stb` = Ausgeloest, 2 min, mit Entwarnung), „Wartung fällig“.
-- Skripte: `heizung_therme_schreiben` (Therme, Prüfbyte), `heizung_ebus_schreiben` (BM-2/MK über die statischen
-  Nachrichten), `heizung_parametertest` (Testlauf aller schreibbaren Werte), `heizung_mqtt_raw` (Rohtelegramm, nur Test).
+- Skripte: `heizung_therme_schreiben` (Therme `kreis=hc` und Mischermodul `kreis=mm`, Prüfbyte), `heizung_ebus_schreiben`
+  (BM-2/MK über die statischen Nachrichten), `heizung_parametertest` (Testlauf aller 41 schreibbaren Werte inkl. MM),
+  `heizung_mqtt_raw` (Rohtelegramm, nur Test).
+- Bedienelemente (Template-Helfer, Stand 20.10.2026, siehe `docs/ha-helfer.md`): 16 Schieberegler `number.therme_hg01` …
+  `hg60` für die HG-Parameter (schreiben über `heizung_therme_schreiben`), drei Auswahlfelder
+  `select.heizung_programm_direkter_heizkreis`, `…_mischerkreis`, `…_warmwasser` (Programmwahl über `BmRaw`/`MkRaw`).
 - Dashboard „Heizung“ (`heizung-wolf`) liest ausschließlich eBus-Entitäten.
 
 ## Optimierung („Vorschlagen“ / „Automatisch“), Stand 20.10.2026

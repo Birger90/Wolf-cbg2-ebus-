@@ -182,16 +182,16 @@ MK = [  # Mischerkreis-Einstellungen, ZZ 86 (Schreiben: gleiches Format wie BM-2
     (5266,  "MkControllertype",  "Reglertyp MK",                               "UIN", V_REGLERTYP, "", None, False),
 ]
 
-MM = [  # Mischermodul MM, ZZ 52 (nur lesen)
+MM = [  # Mischermodul MM, ZZ 52 (Kromschroeder). "schreibbar" = Freigabe fuer MmRaw-Schreiben per HA-Skript (Pruefbyte wie Therme, keine statischen w-Zeilen)
     (15,    "Flowtemp",          "Vorlauftemperatur Mischer",                  "SIN", "10", "°C", 2, False),
     (4,     "Flowtempdesired",   "Mischersolltemperatur",                      "SIN", "10", "°C", 2, False),
     (82,    "Pump",              "Ausgang Mischerkreispumpe MKP",              "UIN", V_AUS_EIN, "", 3, False),
     (2701,  "OutputA1",          "Ausgang A1",                                 "UIN", V_AUS_EIN, "", 9, False),
-    (299,   "TvMin",             "Minimalbegrenzung Mischerkreis TV-min (0-80 C)", "SIN", "10", "°C", 9, False),
-    (40,    "TvMax",             "Maximalbegrenzung Mischerkreis TV-max (20-80 C)", "SIN", "10", "°C", 9, False),
-    (273,   "CurveDistance",     "Heizkurvenabstand (0-30 K)",                 "SIN", "10", "K",  9, False),
-    (322,   "PumpOverrun",       "Nachlaufzeit Heizkreis (0-30 min)",          "UIN", "",   "min", 9, False),
-    (399,   "MixerPband",        "P-Bereich Mischer (5-40 K)",                 "SIN", "10", "K",  None, False),
+    (299,   "TvMin",             "Minimalbegrenzung Mischerkreis TV-min (0-80 C)", "SIN", "10", "°C", 9, True),
+    (40,    "TvMax",             "Maximalbegrenzung Mischerkreis TV-max (20-80 C)", "SIN", "10", "°C", 9, True),
+    (273,   "CurveDistance",     "Heizkurvenabstand (0-30 K)",                 "SIN", "10", "K",  9, True),
+    (322,   "PumpOverrun",       "Nachlaufzeit Heizkreis (0-30 min)",          "UIN", "",   "min", 9, True),
+    (399,   "MixerPband",        "P-Bereich Mischer (5-40 K)",                 "SIN", "10", "K",  9, True),
     (2593,  "Config",            "Konfiguration MM (1-11)",                    "UIN", "",   "",   None, False),
     (65019, "EbusPower",         "eBus Einspeisung",                           "UIN", V_EBUS_EINSP, "", None, False),
 ]
@@ -239,7 +239,11 @@ def main():
           raw_write("mk", "MkRaw", "86", "Roh-Schreibtelegramm an den Mischerkreis - nur fuer Tests und Skripte"),
           ] + rows("mk", "86", MK, "crc")
 
-    mm = [HEADER, "# Wolf Mischermodul MM, Slave 52 (Kromschroeder). Nur lesen."] + rows("mm", "52", MM, "crc")
+    mm = [HEADER, "# Wolf Mischermodul MM, Slave 52 (Kromschroeder).",
+          "# Schreiben: Kromschroeder-Geraet wie die Therme, deshalb Roh-Schreibnachricht MmRaw mit Pruefbyte aus Home Assistant",
+          "# (script.heizung_therme_schreiben, kreis=mm). Zieladresse 52 - ob 52 oder ein Master (f0/f1) Schreibtelegramme annimmt, zeigt der Test.",
+          raw_write("mm", "MmRaw", "52", "Roh-Schreibtelegramm an das Mischermodul (Pruefbyte+TN+Wert) nur ueber script.heizung_therme_schreiben kreis=mm"),
+          ] + rows("mm", "52", MM, "crc", static_writes=False)
 
     mc = [HEADER,
           "# Passive Telegramme Regler -> Mischermodul aus der offiziellen ebusd-Konfiguration (kromschroeder/50..mc.csv)",

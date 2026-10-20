@@ -126,6 +126,41 @@
       "entity": "sensor.heating_ebusd_hc_hg60"
      },
      {
+      "circuit": "mm",
+      "name": "TvMin",
+      "tn": 299,
+      "teiler": 10,
+      "entity": "sensor.heating_ebusd_mm_tvmin"
+     },
+     {
+      "circuit": "mm",
+      "name": "TvMax",
+      "tn": 40,
+      "teiler": 10,
+      "entity": "sensor.heating_ebusd_mm_tvmax"
+     },
+     {
+      "circuit": "mm",
+      "name": "CurveDistance",
+      "tn": 273,
+      "teiler": 10,
+      "entity": "sensor.heating_ebusd_mm_curvedistance"
+     },
+     {
+      "circuit": "mm",
+      "name": "PumpOverrun",
+      "tn": 322,
+      "teiler": 1,
+      "entity": "sensor.heating_ebusd_mm_pumpoverrun"
+     },
+     {
+      "circuit": "mm",
+      "name": "MixerPband",
+      "tn": 399,
+      "teiler": 10,
+      "entity": "sensor.heating_ebusd_mm_mixerpband"
+     },
+     {
       "circuit": "bm2",
       "name": "WwSoll",
       "tn": 19,
@@ -138,20 +173,6 @@
       "tn": 408,
       "teiler": 10,
       "entity": "number.heating_ebusd_bm2_wwmin"
-     },
-     {
-      "circuit": "bm2",
-      "name": "HkProgram",
-      "tn": 10100,
-      "teiler": 1,
-      "entity": "number.heating_ebusd_bm2_hkprogram"
-     },
-     {
-      "circuit": "bm2",
-      "name": "WwProgram",
-      "tn": 10101,
-      "teiler": 1,
-      "entity": "number.heating_ebusd_bm2_wwprogram"
      },
      {
       "circuit": "bm2",
@@ -215,13 +236,6 @@
       "tn": 279,
       "teiler": 10,
       "entity": "number.heating_ebusd_bm2_hkecoabs"
-     },
-     {
-      "circuit": "mk",
-      "name": "MkProgram",
-      "tn": 10100,
-      "teiler": 1,
-      "entity": "number.heating_ebusd_mk_mkprogram"
      },
      {
       "circuit": "mk",
@@ -331,7 +345,7 @@
         "if": [
          {
           "condition": "template",
-          "value_template": "{{ repeat.item.circuit == 'hc' }}"
+          "value_template": "{{ repeat.item.circuit in ['hc', 'mm'] }}"
          }
         ],
         "then": [
@@ -339,6 +353,7 @@
           "action": "script.heizung_therme_schreiben",
           "continue_on_error": true,
           "data": {
+           "kreis": "{{ repeat.item.circuit }}",
            "name": "{{ repeat.item.name }}",
            "tn": "{{ repeat.item.tn }}",
            "wert": "{{ ziel }}",
@@ -387,7 +402,7 @@
         "if": [
          {
           "condition": "template",
-          "value_template": "{{ repeat.item.circuit == 'hc' }}"
+          "value_template": "{{ repeat.item.circuit in ['hc', 'mm'] }}"
          }
         ],
         "then": [
@@ -395,6 +410,7 @@
           "action": "script.heizung_therme_schreiben",
           "continue_on_error": true,
           "data": {
+           "kreis": "{{ repeat.item.circuit }}",
            "name": "{{ repeat.item.name }}",
            "tn": "{{ repeat.item.tn }}",
            "wert": "{{ ziel }}",
@@ -446,7 +462,7 @@
           "if": [
            {
             "condition": "template",
-            "value_template": "{{ repeat.item.circuit == 'hc' }}"
+            "value_template": "{{ repeat.item.circuit in ['hc', 'mm'] }}"
            }
           ],
           "then": [
@@ -454,6 +470,7 @@
             "action": "script.heizung_therme_schreiben",
             "continue_on_error": true,
             "data": {
+             "kreis": "{{ repeat.item.circuit }}",
              "name": "{{ repeat.item.name }}",
              "tn": "{{ repeat.item.tn }}",
              "wert": "{{ ziel }}",

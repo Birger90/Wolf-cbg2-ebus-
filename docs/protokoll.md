@@ -84,6 +84,11 @@ Speicherladung aus), HG02/HG03/HG12 (Gas), HG21/HG62 (liefern `unknown`).
 
 ## Offen / nicht verifiziert
 
+- Mischermodul (`52`) schreiben: `MmRaw` (5 Byte mit Prüfbyte wie bei der Therme) ist angelegt, `script.heizung_therme_schreiben`
+  mit `kreis=mm` und der Parametertest (TvMin, TvMax, CurveDistance, PumpOverrun, MixerPband) sind vorbereitet, aber
+  noch nicht gelaufen (Bus am 20.10. nachmittags wegen WLAN-Abbrüchen des Adapters nicht nutzbar). Falls `52` nicht
+  quittiert: Versuch an die Master `f0` / `f1`.
+
 - Warum die 9-Byte-Form des ISM7 von ebusd aus nicht angenommen wird.
 - Bedeutung des Anhangs TN 349 = 0 (ISM7) bzw. TN 413 = 0 (offizielles ebusd-Format für die Therme).
 - Mischerkreis (`86`) nimmt Schreibtelegramme mit Präfix `00` an (Parametertest 20.10.), prüft das Prüfbyte also wie das BM-2 nicht.
@@ -93,4 +98,8 @@ Speicherladung aus), HG02/HG03/HG12 (Gas), HG21/HG62 (liefern `unknown`).
 - `08`: Kromschröder, Ident ` !`, SW 2002, HW 0000
 - `35`: Wolf, SW 0204, HW 0100
 - `52`: Kromschröder, SW 0100
-- `86`, `04`, `14`, `f6`: antworten nicht auf die Identifikationsanfrage
+- `86`, `04`, `14`, `f6`: antworten nicht auf die Identifikationsanfrage.
+  Ableitung nach eBUS-Regel „Slave = Master + 5 (mod 256)" ([ebusd-Wiki eBUS background](https://github.com/john30/ebusd/wiki/eBUS-background)):
+  `04` = Slave des ISM7 (`ff`), `f6` = Slave von Master `f1`, `14` = Slave von Master `0f`. `f0` und `f1` sind als Master
+  im Log sichtbar (`f1` sendet `RcTarget`-Broadcasts, `f0` liest das MM mit PBSB 5014); Master `0f` wurde nie gesehen.
+  Welche Geräte hinter `f0`/`f1` stecken, ist nicht verifiziert.
