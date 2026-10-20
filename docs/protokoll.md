@@ -224,6 +224,46 @@ im Log `received poll-read bm2 FaultCode QQ=ff: 15`). In HA: `sensor.heating_ebu
 `sensor.heizung_storung_{therme,bm_2,mischermodul}` (Klartext über Makro `wolf_fault_text`), Automation
 „Heizung: Stoerungscode" (Push bei Code ≠ 0 und Entwarnung).
 
+## Busanalyse 20.10.2026, 23:15–23:28 (alle noch unbekannten Telegramme)
+
+Grundlage: ~900 als `unknown` geloggte Telegramme, Telegrammnummern gegen die Wolf-Datenbank (alle Gerätetypen) geprüft.
+
+### Neu dekodiert und in ebusd übernommen
+
+| Telegramm | Inhalt | Beleg | ebusd |
+|---|---|---|---|
+| `30 fe 0301`, 14 Byte, alle 30 s | BM-2-Status: Byte 1–2 aktuelle Außentemperatur ×10 (SIN), Byte 3–4 Raumtemperatur ×10 (`0080` = kein Fühler), Byte 6 Störungscode | `65 00` = 10,1; um 23:18:30 `ce ff` = **−5,0** direkt nach dem Testwert; 22:43 Byte 6 = `0f` = 15 während „T außen“ | `Broadcast BmStatus` |
+| `03 fe 0503`, 8 Byte | Feuerungsautomat: Byte 5 Kesseltemperatur ×2, Byte 6 Rücklauf, Byte 7 Warmwasser | 3 Messpunkte + 23:27 `25.0;25;57` | `Broadcast FaStatus` |
+| TN 371 an `08` (BM-2 liest laufend) | Ausgänge als Bitfeld: Bit 4 Heizkreispumpe, Bit 5 3-Wege-Ventil, Bit 6 A1, Bit 7 Speicherladepumpe (Wolf-DB CGB-2); Bit 1/2 bei anderen Geräten Gasventil 1/2 | 21:18 Brenner ein: 22 = Bit 1,2,4; 23:28 aus: 4 = Bit 2 | `hc Outputs` |
+
+### Dekodiert, aber nicht übernommen (nur Doku)
+
+ISM7-Blockabfragen (`ff … 5022 0b`, 5 TN je Telegramm, Antwort 10 Byte), Inhalt jeweils plausibel geprüft:
+- an `08`: TN 554/10010/10013/10067/10068 (Brennerstunden 15400, Druck, Abgas 29,0, Betriebsart 13 Standby, Brennerstatus 0);
+  TN 22/328/367/370/371 (Rücklauf 26,0, Typ 33 = CGB-2, Modulation 0, Brenner 0, Ausgänge 4);
+  TN 2/3/12/13/14 (Kesselsoll 5,0, WW-Soll 10,0, Außen `0080`, Vorlauf 25,1, WW 57,5)
+- an `35`: TN 10158/10159/10164/10165/10179, 10145/10150/10155/10156/10157, 10101/10109/10117/10119/10134, 19/5249/5250/5266/10100
+- an `86`: dieselben HK-TNs für den Mischerkreis
+- Einzelabfragen ISM7: TN 550–553 (Starts/Netzstunden), 10071 (Pumpe), 10888 („erweiterte Statistik aktiv“, Antwort `0080`), an `52` TN 86 und 87 (Antwort 0, nicht in der Datenbank)
+
+BM-2 (`30`) liest an `08` zusätzlich (Prefix `cc`, Wolf-DB-Namen soweit vorhanden): 10063 IO-Istwert (3), 10006 Eingang E1
+(65088 = „Geöffnet“), 10806/10807 Eingang E3/E4 (`0080`), 10804/10805 Funktion A3/A4 (0), 2751 Funktion A1 (1), 10033
+Anlagenkonfiguration (1), 10096 WW-Schnellstart (0), 10833 Status EA-Modul (0 = nicht vorhanden), 10007 Sammlertemperatur
+(`0080`), 10876 Heizkreisdurchfluss (`0080`, nur CGB-2 38–100 kW), 1113 (`1516` = 5653; bei COB „Brennerstunden 2. Stufe“,
+für CGB-2 nicht dokumentiert), 12057, 10870, 10090, 10083, 10039, 10711, 10084, 10074, 10073, 10034, 10003, 10002, 5000
+(nicht in der Datenbank für CGB-2). An `52`: 756, 2593 Konfiguration (3), 711 Konstanttemperatur (750 → 75,0), 45 (150 → 15,0),
+14 (`0080`). An `ff`: TN 10920/10921 (SmartHome-System, Plug-in-Version; ohne Antwort, `ff` ist Master).
+
+BM-2-Broadcasts `30 fe 5023` (Schreiben an alle): TN 35 = 0 (Parallelbetrieb), TN 10830 = 0, TN 2560 = 20 (beide nicht in der DB für BM-2).
+
+### Noch offen
+
+- `5014` (`30 → 50` und `f0 → 52`), Antwort 9 Byte: Byte 3–4 sind beim MM (`52`) die Mischervorlauftemperatur als D2B
+  (21:18 `4d 24` = 36,30 °C = ebusd mm/Flowtemp 36,3; 23:22 `00 19` = 25,0); bei `50` steht dort `00 9c` (ungültig → kein
+  Fühler). Byte 8–9 beim MM `6e 28` = 40,43 (Hypothese: Mischer-Soll). `50` antwortet, ist aber kein bekanntes Gerät.
+- `03 f1 0800`: Feuerungsautomat an Master `f1`, Format wie RcTarget (Werte `0080` = ungültig).
+- Was die Master `f0`/`f1` sind (nicht verifiziert).
+
 ## Weitere Telegrammnummern
 
 - TN 5250 (BM-2): Wartung Fälligkeitsdatum, Typ BM2Date (ism7mqtt `BM2DateConverterTemplate`):

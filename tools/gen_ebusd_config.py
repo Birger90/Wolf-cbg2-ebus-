@@ -299,7 +299,11 @@ def main():
                  "u,Broadcast,,RcOperation,room controller operational data,,fe,0801,,temp,,D2B,,°C,boiler effective temperature,buffertemp,,D2B,,°C,hot water effective temperature,emissiontest,,UCH,0=none;1=br1;2=br1stb;3=br12;4=br12stb,,emission test,hwc,,BI0,,,hot water active,pump,,BI1,,,pump active,buffer1,,BI2,,,buffer 1 active,buffer2,,BI3,,,buffer 2 active,loading,,BI4,,,loading pump active,hwcloading,,BI5,,,hot water loading pump active,tbfconnect,,BI6,,,TBF connected,returntemp,,D2B,,°C,return flow temperature",
                  "u,Broadcast,,ControlCmd,control commands,,fe,0802,,desiredtemp,,D2B,,°C,boiler target temperature,hwcdesiredtemp,,D2B,,°C,hot water target temperature,expected,,SCH,,%,expected performance,device,,UCH,,,first device with error,error,,UCH,,,error code",
                  "# Roh-Mitschnitt der 8-Byte-Broadcasts PBSB 0503 (eBUS-Standard: Betriebsdaten des Feuerungsautomaten an den Regler; Layout nicht dokumentiert, Kandidat fuer Stoerungscode):",
-                 "u,Broadcast,,FaStatusRaw,Betriebsdaten Feuerungsautomat roh (0503 von 03),03,fe,0503,,data,,HEX:8,,,8 Bytes",
+                 "# Teildekodiert 20.10.2026 (3 Messpunkte): Byte5 Kesseltemperatur/2, Byte6 Ruecklauf, Byte7 Warmwasser (ganze Grad).",
+                 "u,Broadcast,,FaStatus,Betriebsdaten Feuerungsautomat (0503 von 03),03,fe,0503,,block,,UCH,,,Blocknummer (immer 1),status,,UCH,,,Statusbyte (bisher immer 0),burner,,UCH,,,Brennerzustand? (00 aus/40 Softstart/48 ein),b4,,UCH,,,unbekannt (ff),flowtemp,,UCH,2,°C,Kesseltemperatur,returntemp,,UCH,,°C,Ruecklauftemperatur,hwctemp,,UCH,,°C,Warmwassertemperatur,b8,,UCH,,,unbekannt (3f)",
+                 "# BM-2 Broadcast 0301 (14 Byte, alle 30 s). Verifiziert: Byte1-2 aktuelle Aussentemperatur x10 (65 00 = 10.1, ce ff = -5.0 nach Testwert),",
+                 "# Byte3-4 Raumtemperatur x10 (0080 = kein Fuehler), Byte6 = Stoerungscode (0f = 15 waehrend 'T aussen' 22:43). Rest unbekannt.",
+                 "u,Broadcast,,BmStatus,BM-2 Status-Broadcast (0301 von 30),30,fe,0301,,outsidetemp,,SIN,10,°C,Aussentemperatur,roomtemp,,SIN,10,°C,Raumtemperatur,b5,,UCH,,,unbekannt,faultcode,,UCH,,,Stoerungscode,b7,,UCH,,,unbekannt,b8,,UCH,,,unbekannt (immer 1),rest,,HEX:6,,,unbekannt",
                  "u,Broadcast,,F1StatusRaw,Betriebsdaten Master f1 roh (0503 von f1),f1,fe,0503,,data,,HEX:8,,,8 Bytes"
                  ]
 
@@ -311,6 +315,9 @@ def main():
              "r5,hc,,FaultCode,Aktueller Stoerungscode Therme (TN 1),,08,5022,5c0100,value,,UIN,,,TN 1",
              "r5,bm2,,FaultCode,Aktueller Stoerungscode BM-2 (TN 1),,35,5022,5c0100,value,,UIN,,,TN 1",
              "r5,mm,,FaultCode,Aktueller Stoerungscode Mischermodul (TN 1),,52,5022,5c0100,value,,UIN,,,TN 1",
+             "# TN 371 Ausgaenge als Bitfeld (Wolf-DB CGB-2: Bit4 Heizkreispumpe, Bit5 3-Wege-Ventil, Bit6 Ausgang A1, Bit7 Speicherladepumpe,",
+             "# Bit8 A3, Bit9 A4; Bit1/Bit2 bei anderen Geraeten Gasventil 1/2 - fuer CGB-2 nicht dokumentiert). Das BM-2 liest TN 371 laufend mit Praefix cc -> passiv.",
+             "r,hc,,Outputs,Ausgaenge Feuerungsautomat (TN 371 Bitfeld),,08,5022,cc7301,b0,,BI0,,,Bit0,b1,,BI1,,,Bit1 (Gasventil 1?),b2,,BI2,,,Bit2 (Gasventil 2?),b3,,BI3,,,Bit3,pump,,BI4,0=Aus;1=Ein,,Heizkreispumpe,valve,,BI5,0=Heizung;1=Warmwasser,,3-Wege-Ventil,a1,,BI6,0=Aus;1=Ein,,Ausgang A1,loadpump,,BI7,0=Aus;1=Ein,,Speicherladepumpe,hi,,UCH,,,High-Byte (Bit0 = Ausgang A3 Bit1 = Ausgang A4)",
              ]
 
     for fname, lines in [("hc.csv", hc), ("bm2.csv", bm2), ("mk.csv", mk), ("mm.csv", mm), ("mc.csv", mc), ("broadcast.csv", broadcast), ("fault.csv", fault)]:

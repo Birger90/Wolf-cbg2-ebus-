@@ -6,3 +6,6 @@ type,circuit,level,name,comment,qq,zz,pbsb,id,*name,part,type,divisor/values,uni
 r5,hc,,FaultCode,Aktueller Stoerungscode Therme (TN 1),,08,5022,5c0100,value,,UIN,,,TN 1
 r5,bm2,,FaultCode,Aktueller Stoerungscode BM-2 (TN 1),,35,5022,5c0100,value,,UIN,,,TN 1
 r5,mm,,FaultCode,Aktueller Stoerungscode Mischermodul (TN 1),,52,5022,5c0100,value,,UIN,,,TN 1
+# TN 371 Ausgaenge als Bitfeld (Wolf-DB CGB-2: Bit4 Heizkreispumpe, Bit5 3-Wege-Ventil, Bit6 Ausgang A1, Bit7 Speicherladepumpe,
+# Bit8 A3, Bit9 A4; Bit1/Bit2 bei anderen Geraeten Gasventil 1/2 - fuer CGB-2 nicht dokumentiert). Das BM-2 liest TN 371 laufend mit Praefix cc -> passiv.
+r,hc,,Outputs,Ausgaenge Feuerungsautomat (TN 371 Bitfeld),,08,5022,cc7301,b0,,BI0,,,Bit0,b1,,BI1,,,Bit1 (Gasventil 1?),b2,,BI2,,,Bit2 (Gasventil 2?),b3,,BI3,,,Bit3,pump,,BI4,0=Aus;1=Ein,,Heizkreispumpe,valve,,BI5,0=Heizung;1=Warmwasser,,3-Wege-Ventil,a1,,BI6,0=Aus;1=Ein,,Ausgang A1,loadpump,,BI7,0=Aus;1=Ein,,Speicherladepumpe,hi,,UCH,,,High-Byte (Bit0 = Ausgang A3 Bit1 = Ausgang A4)
