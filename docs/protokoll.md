@@ -78,6 +78,20 @@ Therme über `HgRaw` mit berechnetem Prüfbyte, BM-2/MK über die statischen Nac
 Nicht getestet (absichtlich): Programmwahl (nur der einmalige Notfall-Schreibvorgang oben), 1x Warmwasser (löst eine
 Speicherladung aus), HG02/HG03/HG12 (Gas), HG21/HG62 (liefern `unknown`).
 
+## Parametertest 20.10.2026, 20:43–20:56 (41 Parameter, nach WLAN-Wechsel des Adapters)
+
+| Gerät | Ergebnis |
+|---|---|
+| Therme (03), 16 Parameter inkl. HG02/HG03 | 15 OK; HG08 übersprungen (kein Lesewert im 4-s-Fenster nach dem ebusd-Neustart) |
+| Mischermodul (52), 5 Parameter | **alle 5 OK** (TvMin, TvMax, CurveDistance, PumpOverrun, MixerPband), Schreiben über `MmRaw` mit CRC, ACK vom Modul |
+| BM-2 (35), 11 Parameter | 8 OK; WwSoll, HkDaytemp, HkCurveStart: erstes Telegramm nicht angekommen (Wert blieb), Rücksetzen OK |
+| Mischerkreis (86), 10 Parameter | 6 OK; MkSparfaktor, MkSetpointcorr, MkWintersummer, MkEcoabs: erstes Telegramm nicht angekommen, Rücksetzen OK |
+
+Deutung: Therme und MM quittieren (ACK) und das Skript wiederholt bis zum bestätigten Rücklesewert, deshalb 0 Verluste.
+BM-2 und MK liefern kein ACK (`read timeout`), die statischen Schreibzeilen senden einmal ohne Wiederholung: 7 von 21
+Telegrammen gingen verloren (am Morgen bei leerem Bus 1 von 18). Konsequenz: auch BM-2/MK nur mit Rücklesen und
+Wiederholung schreiben (siehe Skripte).
+
 ## Weitere Telegrammnummern
 
 - TN 5250 (BM-2): Wartung Fälligkeitsdatum, Typ BM2Date (ism7mqtt `BM2DateConverterTemplate`):
