@@ -190,6 +190,27 @@ ebusd sendete 22:55:11 und 22:56:17 exakt die Form von `0f` (`fe 0700`: 5,7 °C 
 (Wert von `0f`). Das BM-2 übernimmt die Außentemperatur also nicht von Master `31`. Schreibdefinition entfernt, das
 getrennte Mitlesen von `0f` bleibt (`u,Broadcast,,OutsidetempRadio,…,0f,fe,0700`).
 
+### Zweiter Test: Ersatzwert mit Absenderadresse `0f` (Freigabe Birger 23:10, Ergebnis **positiv**)
+
+MQTT kann keine fremde Absenderadresse setzen (ebusd `mqtthandler.cpp` ruft `readFromBus()` immer mit der eigenen
+Adresse auf; die QQ-Spalte der CSV gilt nur für passive Nachrichten). Deshalb: ebusd mit `--enablehex`, in Home Assistant
+`shell_command.ebusd_cmd` (sendet eine Zeile an den TCP-Kommandoport 8888 der App `b4d7ad18-ebusd`, Antwort als
+`service_response.stdout`; dafür `configuration.yaml` ergänzt und HA neu gestartet, Sicherung in `homeassistant/backup/`).
+
+| Zeit | Aktion | Ergebnis |
+|---|---|---|
+| 23:14:0x | `read -f -c bm2 Outsidetemp` | 10.1 |
+| 23:14:20 | `hex -s 0f fe0700099a0affffffffffffff` (10,6 °C als D2B `9a 0a`, Rest `ff`, Absender `0f`) | `done broadcast` |
+| 23:14:2x | `read -f -c bm2 Outsidetemp` | **10.6** – vom BM-2 übernommen |
+| 23:14:35 | echter Empfänger `0f` sendet 10,148 | – |
+| 23:14:4x | `read -f -c bm2 Outsidetemp` | 10.1 – wieder der echte Wert |
+
+Folgerung: Das BM-2 filtert nach Absenderadresse `0f`, nicht nach Inhalt. Mit `-s 0f` lässt sich bei einem Ausfall des
+Funkfühlers ein Ersatzwert einspeisen. Offen/Risiko: Sendet der echte Empfänger gleichzeitig (gleiche Adresse), gibt es eine
+Buskollision; deshalb nur in der Mitte zwischen zwei Empfänger-Telegrammen senden (Empfänger sendet bei ca. hh:mm:35).
+Ob das BM-2 bei einem echten Ausfall (Empfänger sendet -127,977) dem Ersatzwert oder dem ungültigen Wert folgt, ist nicht
+getestet – beide kämen von `0f`, es zählt vermutlich der jeweils letzte.
+
 Alternative, von Birger selbst geprüft: Programmwahl „Permanent" → Therme geht in Heizbetrieb (zeitgleich war die
 Außentemperatur wieder da, Anteil nicht trennbar).
 

@@ -1,0 +1,5 @@
+# ebusd-Kommando ueber den TCP-Kommandoport (8888) der ebusd-App senden, z. B. "hex -s 0f fe0700..."
+# (MQTT kann keine fremde Absenderadresse). Antwort in stdout -> response_variable. Angelegt 20.10.2026.
+shell_command:
+  ebusd_cmd: >-
+    python3 -c "import socket,sys; s=socket.create_connection(('b4d7ad18-ebusd',8888),5); s.settimeout(8); s.sendall((sys.argv[1]+'\n').encode()); print(s.recv(4096).decode().strip())" "{{ cmd }}"
