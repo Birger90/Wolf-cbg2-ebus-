@@ -37,7 +37,7 @@ ISM7 (noch)     ──┘
 |---|---|---|
 | `08` (Master `03`) | Therme | Temperaturen, Druck, Brennerstatus, Zähler, HG-Parameter |
 | `35` (Master `30`) | BM-2 | Systemparameter, direkter Heizkreis, Warmwasser |
-| `52` | Mischermodul MM | Mischer-Vorlauf, Mischersoll, Pumpe, MM-Parameter; Schreiben über `MmRaw` mit Prüfbyte (noch nicht getestet) |
+| `52` | Mischermodul MM | Mischer-Vorlauf, Mischersoll, Pumpe, MM-Parameter; Schreiben über `MmRaw` mit Prüfbyte an `52` (verifiziert 20.10.2026) |
 | `86` | Mischerkreis (MK) | Programmwahl, Heizkurve, Tagtemperatur des Mischerkreises |
 | `ff` | ISM7 | Master, liest alles zyklisch |
 | `04` | ISM7 (Slave-Seite) | Slave-Adresse = Master + 5 (eBUS-Regel, 0xff+5 = 0x04); antwortet nicht auf Identifikation |
@@ -122,7 +122,8 @@ das ISM7 am Bus hängt, kommen auch diese Werte passiv.
   `heizung_mqtt_raw` (Rohtelegramm, nur Test).
 - Bedienelemente (Template-Helfer, Stand 20.10.2026, siehe `docs/ha-helfer.md`): 16 Schieberegler `number.therme_hg01` …
   `hg60` für die HG-Parameter (schreiben über `heizung_therme_schreiben`), drei Auswahlfelder
-  `select.heizung_programm_direkter_heizkreis`, `…_mischerkreis`, `…_warmwasser` (Programmwahl über `BmRaw`/`MkRaw`).
+  `select.heizung_programm_direkter_heizkreis`, `…_mischerkreis`, `…_warmwasser` (Programmwahl über `BmRaw`/`MkRaw`),
+  fünf Regler `number.mischer_*` für das Mischermodul (TV-min, TV-max, Heizkurvenabstand, Nachlaufzeit, P-Bereich).
 - Dashboard „Heizung“ (`heizung-wolf`) liest ausschließlich eBus-Entitäten.
 
 ## Optimierung („Vorschlagen“ / „Automatisch“), Stand 20.10.2026

@@ -42,6 +42,24 @@ Nicht als Regler angelegt: HG12 Gasart, HG10 eBus-Adresse (im Skript gesperrt), 
 Nach dem Schreiben folgt nach 3 s ein `…/get`, damit der Sensor den neuen Wert liest. Prüfbyte `00` reicht, weil das BM-2
 und der Mischerkreis das Prüfbyte beim Schreiben nicht prüfen (Tests 19./20.10.2026).
 
-## Mischermodul (geplant)
+## Schieberegler Mischermodul (Template-Number)
 
-Regler für TvMin, TvMax, CurveDistance, PumpOverrun, MixerPband folgen, sobald der Parametertest mit `kreis=mm` gelaufen ist.
+Schreibweg verifiziert 20.10.2026 20:42: `MmRaw` 5 Byte mit Prüfbyte an Slave `52` wird quittiert (ebusd `sent write`, kein
+Timeout), Rücklesen sofort korrekt (PumpOverrun 5 → 6 → 5). `set_value` = `script.heizung_therme_schreiben` mit `kreis=mm`.
+
+| Entität | ebusd-Name | TN | Bereich | Teiler |
+|---|---|---|---|---|
+| `number.mischer_tv_min_minimalbegrenzung` | TvMin | 299 | 0–80 °C | 10 |
+| `number.mischer_tv_max_maximalbegrenzung` | TvMax | 40 | 20–80 °C | 10 |
+| `number.mischer_heizkurvenabstand` | CurveDistance | 273 | 0–30 K | 10 |
+| `number.mischer_nachlaufzeit_heizkreis` | PumpOverrun | 322 | 0–30 min | 1 |
+| `number.mischer_p_bereich` | MixerPband | 399 | 5–40 K | 10 |
+
+Nicht als Regler: `Config` (Modulfunktion 1–11) und `EbusPower` – im Skript gesperrt.
+
+## CSV-Dateien ohne Samba in den Add-on-Ordner schreiben
+
+Der File editor (core_configurator) kann per Ingress-API schreiben: `enforce_basepath` kurz auf `false`, App neu starten,
+dann `POST /api/save` mit `filename=/app_configs/b4d7ad18_ebusd/ebusd-config/<name>.csv&text=<Inhalt>` (form-urlencoded),
+anschließend `enforce_basepath` wieder auf `true`. Lesen geht mit `GET /api/file?filename=…`. Der Ordner heißt im File-editor-Container
+`/app_configs/…`, in der ebusd-App `/config/ebusd-config`.

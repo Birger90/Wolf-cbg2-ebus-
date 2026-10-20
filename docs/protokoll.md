@@ -60,6 +60,7 @@ Folgerung: Das Prüfbyte hängt nur vom Inhalt ab (gleicher Wert = gleiches Byte
 | 22:4x | **Therme: 5 Byte an `03`, CRC `ac`** (`ac 4201 0200`) | 31 | ebusd `done` (ACK), HG07 → **2** |
 | 20.10. 06:11 | Therme: 5 Byte an `03`, Prüfbyte `00` (`00 4201 0100`) | 31 | `read timeout`, HG07 bleibt 2 → **Therme prüft das Prüfbyte** |
 | 06:18 | Therme: 5 Byte an `03`, CRC `48` (`48 4201 0100`) | 31 | HG07 → **1** |
+| 20:42 | **Mischermodul: 5 Byte an Slave `52`, CRC `80`** (`80 4201 0600`) | 31 | ebusd `sent write` (ACK, kein Timeout), PumpOverrun 5 → **6**; 20:42:49 `… 0500` → **5** |
 | 19.10. 23:05 | BM-2: Programmwahl DHK TN 10100 = 2 (`d4 7427 0200`) | 31 | HkProgram → Permanent, Heizkreis Heizbetrieb, Brenner an |
 | 20.10. 06:00 | BM-2: TN 10100 = 1 (`30 7427 0100`) | 31 | HkProgram → Auto |
 
@@ -84,14 +85,12 @@ Speicherladung aus), HG02/HG03/HG12 (Gas), HG21/HG62 (liefern `unknown`).
 
 ## Offen / nicht verifiziert
 
-- Mischermodul (`52`) schreiben: `MmRaw` (5 Byte mit Prüfbyte wie bei der Therme) ist angelegt, `script.heizung_therme_schreiben`
-  mit `kreis=mm` und der Parametertest (TvMin, TvMax, CurveDistance, PumpOverrun, MixerPband) sind vorbereitet, aber
-  noch nicht gelaufen (Bus am 20.10. nachmittags wegen WLAN-Abbrüchen des Adapters nicht nutzbar). Falls `52` nicht
-  quittiert: Versuch an die Master `f0` / `f1`.
 
 - Warum die 9-Byte-Form des ISM7 von ebusd aus nicht angenommen wird.
 - Bedeutung des Anhangs TN 349 = 0 (ISM7) bzw. TN 413 = 0 (offizielles ebusd-Format für die Therme).
 - Mischerkreis (`86`) nimmt Schreibtelegramme mit Präfix `00` an (Parametertest 20.10.), prüft das Prüfbyte also wie das BM-2 nicht.
+- Mischermodul (`52`): Schreiben mit CRC an die Slave-Adresse funktioniert und wird quittiert (anders als bei der Therme, die
+  den Master `03` braucht). Ob `52` das Prüfbyte prüft, ist nicht getestet.
 
 ## Geräteerkennung (ebusd-Scan)
 
