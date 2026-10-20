@@ -71,8 +71,8 @@ Therme über `HgRaw` mit berechnetem Prüfbyte, BM-2/MK über die statischen Nac
 | Gerät | Parameter | Ergebnis |
 |---|---|---|
 | Therme (03) | HG01, HG04, HG07, HG08, HG09, HG15, HG16, HG17, HG22, HG25, HG33, HG38, HG39, HG60 | alle 14: Schreiben OK, Rücksetzen OK (HG07/HG09 je ein Wiederholversuch) |
-| BM-2 (35) | WwSoll, WwMin, HkDaytemp, HkCurveBasetemp, HkCurveStart, HkCurveNormoutside, HkCurveFlowtemp, HkSetpointcorr, HkWintersummer, HkEcoabs | Test läuft (20.10. 06:33), Ergebnis folgt |
-| MK (86) | MkDaytemp, MkCurveBasetemp, MkCurveStart, MkCurveNormoutside, MkCurveFlowtemp, MkSetpointcorr, MkWintersummer, MkEcoabs | Test läuft, Ergebnis folgt |
+| BM-2 (35) | WwSoll, WwMin, HkDaytemp, HkCurveBasetemp, HkCurveStart, HkCurveNormoutside, HkCurveFlowtemp, HkSetpointcorr, HkWintersummer, HkEcoabs | alle 10: Schreiben OK, Rücksetzen OK |
+| MK (86) | MkDaytemp, MkCurveBasetemp, MkCurveStart, MkCurveNormoutside, MkCurveFlowtemp, MkSetpointcorr, MkWintersummer, MkEcoabs | alle 8 OK; MkSetpointcorr brauchte im Testlauf einen zweiten Versuch (erstes Telegramm verloren, Wiederholung 06:39 angekommen) |
 
 Nicht getestet (absichtlich): Programmwahl (nur der einmalige Notfall-Schreibvorgang oben), 1x Warmwasser (löst eine
 Speicherladung aus), HG02/HG03/HG12 (Gas), HG21/HG62 (liefern `unknown`).
@@ -86,7 +86,7 @@ Speicherladung aus), HG02/HG03/HG12 (Gas), HG21/HG62 (liefern `unknown`).
 
 - Warum die 9-Byte-Form des ISM7 von ebusd aus nicht angenommen wird.
 - Bedeutung des Anhangs TN 349 = 0 (ISM7) bzw. TN 413 = 0 (offizielles ebusd-Format für die Therme).
-- Ob der Mischerkreis (`86`) das Prüfbyte prüft: die statischen Zeilen mit Präfix `00` werden im Parametertest geprüft.
+- Mischerkreis (`86`) nimmt Schreibtelegramme mit Präfix `00` an (Parametertest 20.10.), prüft das Prüfbyte also wie das BM-2 nicht.
 
 ## Geräteerkennung (ebusd-Scan)
 

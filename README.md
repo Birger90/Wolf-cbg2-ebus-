@@ -110,6 +110,8 @@ das ISM7 am Bus hängt, kommen auch diese Werte passiv.
   (utility_meter „Brennerstarts pro Tag“, „Brennerstunden pro Tag“ aus `hc/BurnerHours`).
 - `binary_sensor.heizung_ebus_daten_aktuell` (Template): ebusd-Signal an und `hc/Flowtemp` jünger als 10 min; Basis der
   Automation „Heizung: Datenausfall“.
+- `sensor.heizung_wartung_fallig_am_ebus` (Template, date): Wartungsdatum aus `bm2/MaintenanceDate` (BM2Date-Dekodierung), Basis von
+  `binary_sensor.heizung_wartung_fallig`.
 - Automationen: „Anlagendruck niedrig“ (`hc/Pressure` unter einstellbarer Schwelle, 5 min), „Datenausfall“,
   „Störung“ (`hc/Brennerstatus` = Stoerung oder `hc/Stb` = Ausgeloest, 2 min, mit Entwarnung), „Wartung fällig“.
 - Skripte: `heizung_therme_schreiben` (Therme, Prüfbyte), `heizung_ebus_schreiben` (BM-2/MK über die statischen
