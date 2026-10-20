@@ -286,6 +286,11 @@ def main():
                  "# Schreibform des Standard-Broadcasts wurde am 20.10.2026 einmal getestet (BM-2 uebernimmt die Uhrzeit nicht) und danach entfernt:",
                  "# kurz darauf fiel die Aussentemperatur des Funkempfaengers (Master 0f) aus - Zusammenhang nicht verifiziert, deshalb keine Broadcasts von ebusd.",
                  "# w,Broadcast,,Datetime,Datum Uhrzeit senden,,fe,0700,,outsidetemp,,D2B,,°C,Temperatur,time,,BTI,,,Uhrzeit,date,,BDA,,,Datum",
+                 "# Aussentemperatur vom Funkempfaenger (Master 0f) getrennt mitlesen: derselbe 0700-Broadcast, aber nur mit Temperatur (Zeit/Datum = ff).",
+                 "u,Broadcast,,OutsidetempRadio,Aussentemperatur vom Funkempfaenger Master 0f,0f,fe,0700,,outsidetemp,,D2B,,°C,Aussentemperatur,rest,,HEX:7,,,Zeit und Datum ungueltig",
+                 "# Ersatz-Aussentemperatur von ebusd senden wurde am 20.10.2026 22:55/22:56 getestet (gleiche Form wie Master 0f, 2x 5.7 C):",
+                 "# das BM-2 uebernimmt den Wert nicht (TN 10195 blieb bei 10.1 vom Funkempfaenger). Definition deshalb wieder entfernt:",
+                 "# w,Broadcast,,OutsidetempSet,Ersatz-Aussentemperatur senden wie Master 0f,,fe,0700,,outsidetemp,,D2B,,°C,Aussentemperatur,rest,,HEX:7,,,Zeit und Datum ungueltig (ff)",
                  "r,Broadcast,,Id,Identifikation,,,0704,,mf,,UCH,6=Dungs;15=FH_Ostfalia;16=TEM;17=Lamberti;20=CEB;21=Landis-Staefa;22=FERRO;23=MONDIAL;24=Wikon;25=Wolf;32=RAWE;48=Satronic;64=ENCON;80=Kromschroeder;96=Eberle;101=EBV;117=Graesslin;133=ebm-papst;149=SIG;165=Theben;167=Thermowatt;181=Vaillant;192=Toby;197=Weishaupt;253=ebusd,,Geraete-Hersteller,id,,STR:5,,,Geraete-ID,sw,,PIN,,,Software Version,hw,,PIN,,,Hardware-Version",
                  "u,Broadcast,,IdAnswer,answer to identification query,,fe,0704,,mf,,UCH,6=Dungs;15=FH_Ostfalia;16=TEM;17=Lamberti;20=CEB;21=Landis-Staefa;22=FERRO;23=MONDIAL;24=Wikon;25=Wolf;32=RAWE;48=Satronic;64=ENCON;80=Kromschroeder;96=Eberle;101=EBV;117=Graesslin;133=ebm-papst;149=SIG;165=Theben;167=Thermowatt;181=Vaillant;192=Toby;197=Weishaupt;253=ebusd,,Geraete-Hersteller,id,,STR:5,,,Geraete-ID,sw,,PIN,,,Software Version,hw,,PIN,,,Hardware-Version",
                  "u,Broadcast,,Signoflife,Lebenszeichen,,fe,07ff,,",
@@ -298,7 +303,17 @@ def main():
                  "u,Broadcast,,F1StatusRaw,Betriebsdaten Master f1 roh (0503 von f1),f1,fe,0503,,data,,HEX:8,,,8 Bytes"
                  ]
 
-    for fname, lines in [("hc.csv", hc), ("bm2.csv", bm2), ("mk.csv", mk), ("mm.csv", mm), ("mc.csv", mc), ("broadcast.csv", broadcast)]:
+    fault = [HEADER,
+             "# Aktueller Stoerungscode je Geraet: TN 1 (nicht in der Wolf-Parameterdatenbank fuer CGB-2/BM-2/MM, aber das ISM7 liest",
+             "# ihn alle 15 s auf 08/35/52 mit Pruefbyte 5c). Beobachtet 20.10.2026 22:38: BM-2 antwortet 15 = Aussenfuehler defekt,",
+             "# waehrend das BM-2 'T aussen' meldet; vorher und auf Therme/MM 0. Praefix 5c = CRC von 01 00, dadurch werden die",
+             "# ISM7-Abfragen passiv mitgelesen. Code -> Text: docs/fehlercodes-cgb2.md bzw. custom_templates/wolf_bm2.jinja.",
+             "r5,hc,,FaultCode,Aktueller Stoerungscode Therme (TN 1),,08,5022,5c0100,value,,UIN,,,TN 1",
+             "r5,bm2,,FaultCode,Aktueller Stoerungscode BM-2 (TN 1),,35,5022,5c0100,value,,UIN,,,TN 1",
+             "r5,mm,,FaultCode,Aktueller Stoerungscode Mischermodul (TN 1),,52,5022,5c0100,value,,UIN,,,TN 1",
+             ]
+
+    for fname, lines in [("hc.csv", hc), ("bm2.csv", bm2), ("mk.csv", mk), ("mm.csv", mm), ("mc.csv", mc), ("broadcast.csv", broadcast), ("fault.csv", fault)]:
         with open(os.path.join(OUT, fname), "w", encoding="utf-8") as f:
             f.write("\n".join(lines) + "\n")
         print(f"{fname}: {len(lines)} Zeilen")

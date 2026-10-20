@@ -159,29 +159,49 @@ Der Rohwert läuft jetzt als `sensor.ebusd_broadcast_fastatusraw_data` in die HA
 einer echten Störung Byte 2/3 verglichen werden können. Eine Spezifikation für 0503 habe ich nicht gefunden (die eBUS-
 Spezifikation von 2004 auf mikrocontroller.net beschreibt nur 05 01/05 02).
 
-## Vorfall 20.10.2026 ab ca. 22:20: Außentemperatur ungültig, Anlage in AT-Frostschutz
+## Vorfall 20.10.2026, 22:22–22:50: Außentemperatur ungültig, Anlage in AT-Frostschutz
 
 | Zeit | Beobachtung |
 |---|---|
-| bis 22:06:35 | Master `0f` sendet jede Minute `Broadcast Datetime` nur mit Außentemperatur: 10,695 °C (nur dieses Feld, Zeit/Datum leer); `bm2/Outsidetemp` 10,6 °C (unverändert seit 20:27) |
-| 22:07:05 | Test: 9-Byte-Schreibtelegramm (Time+Date) an `35`, vom BM-2 ignoriert |
-| 22:07:28 | Test: ebusd sendet selbst einen `Datetime`-Broadcast `31 fe 0700` mit `10.6;22:08:00;20.10.2026` |
-| 22:18 | ebusd-Neustart (bm2.csv), Log für 22:08–22:22 nicht mehr verfügbar |
-| ab 22:22:35 | `0f` sendet **-127,977** (ungültig) statt der Außentemperatur, dauerhaft (Stand 22:39) |
-| 22:26:50 | `bm2/Outsidetemp` (TN 10195) → `-`/unknown, später auch `OutsidetempAvg` (BM-2 und MK) |
-| 22:30:15 | `RcTarget`-Broadcast von `f1`: Außentemperatur springt von 10,598 auf **51,203** (vorher stabil) |
-| 22:32:38–58 | `MkStatus` und `HkStatus` → **AT_Frostschutz**, Therme `Betriebsart` → **Frostschutz**, Heizkreispumpe 55 %, Brenner aus, Wärmeanforderung `Operation` = off/5 °C |
+| bis 22:06:35 | Master `0f` sendet jede Minute `fe 0700` nur mit Außentemperatur (Zeit/Datum `ff`): 10,695 °C; `bm2/Outsidetemp` 10,6 °C |
+| 22:07:05 / 22:07:28 | Tests: 9-Byte-Schreibtelegramm an `35` (ignoriert) und ein `Datetime`-Broadcast von ebusd (`31 fe 0700`, 10,6; 22:08:00; 20.10.2026) |
+| 22:18 | ebusd-Neustart, Log 22:08–22:22 nicht verfügbar |
+| ab 22:22:35 | `0f` sendet **-127,977** (ungültig) |
+| 22:26:50 | `bm2/Outsidetemp` (TN 10195) → `-`; später auch `OutsidetempAvg` (BM-2, MK) |
+| 22:30:15 | `RcTarget`-Broadcast von `f1`: Außentemperatur 51,203 statt 10,598 |
+| 22:32:38–58 | `MkStatus`/`HkStatus` → **AT_Frostschutz**, Therme → **Frostschutz**, Pumpe 55 %, Brenner aus, `Operation` off/5 °C: **keine Heizung**, nur Frostschutz; Warmwasser unabhängig (Speicher 58,7 °C) |
+| 22:38:10 | ISM7-Abfrage TN 1 am BM-2 (`ff 35 5022 03 5c 01 00`) antwortet **15** statt 0 → BM-2 zeigt „T außen"; Birger quittiert 22:43, Störung kommt sofort wieder |
+| 22:50:35 | `0f` sendet wieder gültig: 10,148 °C – **von selbst**, vor allen weiteren Tests |
+| 22:55:19 | ISM7 schreibt Partymodus (App): `ff 30 5023 15 71 a627 0100 a727 0117 a827 3435 a927 0117 aa27 3335` – 21 Byte, 5 TN/Wert-Paare in einem Telegramm an Master `30` |
+| 22:55:18 / 22:56:55 | `bm2/Outsidetemp` 10,1 °C, TN 1 = 0 („keine Störung"), `HkDemand` Partymodus, Therme Heizbetrieb Soll 46 °C |
 
-Fakten: Der Außentemperaturwert kommt an dieser Anlage von Master `0f` (Hypothese: Wolf-Funkempfänger des
-Funkaußenfühlers, nicht verifiziert). Ohne gültige Außentemperatur gehen beide Heizkreise in AT-Frostschutz.
+Fakten: Die Außentemperatur dieser Anlage kommt ausschließlich vom Master `0f` (Hypothese Funkempfänger, nicht
+verifiziert). Ohne gültigen Wert: beide Heizkreise AT-Frostschutz, keine Wärmeanforderung. Birger hat eine neue
+Batterie für den Funkaußenfühler bestellt; der Ausfall dauerte 28 min.
 
-Nicht verifiziert: ob der von ebusd gesendete Datetime-Broadcast (22:07:28) den Empfänger gestört hat oder der
-Funkfühler unabhängig davon ausgefallen ist (Batterie/Funkstrecke). Zeitliche Nähe spricht für eine Prüfung, der
-Wert war aber schon 2 h konstant. Konsequenz: **keine Broadcasts mehr von ebusd senden**; die Schreibzeile
-`w,Broadcast,,Datetime` bleibt nur dokumentiert und wird aus der aktiven Konfiguration entfernt.
+Nicht verifiziert: Ursache des Ausfalls. Der ebusd-Broadcast von 22:07:28 liegt zeitlich davor; das BM-2 ignoriert
+Broadcasts von `31` nachweislich (siehe unten), ob der Empfänger `0f` darauf reagiert, bleibt offen. Der Wert kam ohne
+weiteres Zutun zurück. Konsequenz bleibt: keine Broadcasts von ebusd.
 
-Fehlercode-Tabelle (`docs/fehlercodes-cgb2.md`): 15 = „Außenfühler defekt oder Wärmeerzeuger vom Netz getrennt" –
-gilt für den Fühler an der Therme; wie das BM-2 den Funkfühlerausfall anzeigt, ist nicht dokumentiert.
+### Test „Ersatz-Außentemperatur per eBus" (Freigabe Birger 22:50, Ergebnis negativ)
+
+ebusd sendete 22:55:11 und 22:56:17 exakt die Form von `0f` (`fe 0700`: 5,7 °C als D2B, dann 7× `ff`; Log
+`sent update-read Broadcast Datetime QQ=31: 5.699;-:-:-;-.-.-`). `bm2/Outsidetemp` blieb 4 s und 9 s später bei 10,1 °C
+(Wert von `0f`). Das BM-2 übernimmt die Außentemperatur also nicht von Master `31`. Schreibdefinition entfernt, das
+getrennte Mitlesen von `0f` bleibt (`u,Broadcast,,OutsidetempRadio,…,0f,fe,0700`).
+
+Alternative, von Birger selbst geprüft: Programmwahl „Permanent" → Therme geht in Heizbetrieb (zeitgleich war die
+Außentemperatur wieder da, Anteil nicht trennbar).
+
+### Störungscode gefunden: TN 1
+
+Das ISM7 liest alle 15 s `5c 01 00` (Prüfbyte 5c = CRC von `01 00`, also TN 1) auf `08`, `35` und `52`. Antworten:
+Therme 0, Mischermodul 0, BM-2 **15** während der „T außen"-Störung und 0 danach. TN 1 ist in der Wolf-Parameterdatenbank
+für CGB-2/BM-2/MM nicht enthalten (nur für CWL als „Lüftungsstufe"), passt aber exakt zur Fehlertabelle (15 = Außenfühler
+defekt). Deshalb `fault.csv` mit `FaultCode` für hc/bm2/mm (r5, Präfix 5c → die ISM7-Abfragen werden passiv mitgelesen,
+im Log `received poll-read bm2 FaultCode QQ=ff: 15`). In HA: `sensor.heating_ebusd_{hc,bm2,mm}_faultcode` (Zahl),
+`sensor.heizung_storung_{therme,bm_2,mischermodul}` (Klartext über Makro `wolf_fault_text`), Automation
+„Heizung: Stoerungscode" (Push bei Code ≠ 0 und Entwarnung).
 
 ## Weitere Telegrammnummern
 

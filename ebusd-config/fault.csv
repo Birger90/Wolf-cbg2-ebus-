@@ -1,0 +1,8 @@
+type,circuit,level,name,comment,qq,zz,pbsb,id,*name,part,type,divisor/values,unit,comment
+# Aktueller Stoerungscode je Geraet: TN 1 (nicht in der Wolf-Parameterdatenbank fuer CGB-2/BM-2/MM, aber das ISM7 liest
+# ihn alle 15 s auf 08/35/52 mit Pruefbyte 5c). Beobachtet 20.10.2026 22:38: BM-2 antwortet 15 = Aussenfuehler defekt,
+# waehrend das BM-2 'T aussen' meldet; vorher und auf Therme/MM 0. Praefix 5c = CRC von 01 00, dadurch werden die
+# ISM7-Abfragen passiv mitgelesen. Code -> Text: docs/fehlercodes-cgb2.md bzw. custom_templates/wolf_bm2.jinja.
+r5,hc,,FaultCode,Aktueller Stoerungscode Therme (TN 1),,08,5022,5c0100,value,,UIN,,,TN 1
+r5,bm2,,FaultCode,Aktueller Stoerungscode BM-2 (TN 1),,35,5022,5c0100,value,,UIN,,,TN 1
+r5,mm,,FaultCode,Aktueller Stoerungscode Mischermodul (TN 1),,52,5022,5c0100,value,,UIN,,,TN 1

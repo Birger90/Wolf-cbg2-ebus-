@@ -113,3 +113,16 @@ Abweichung (durch den Template-Sensor ersetzt).
 Entity-Duplikat behoben: `sensor.heating_ebusd_bm2_maintenancedate` (unique_id `…_0`, veraltet, `unavailable`) gelöscht und
 `…_maintenancedate_2` (unique_id `…_value`) auf die alte ID umbenannt; der Wartungs-Helfer liefert wieder `2025-10-09`.
 
+## Störungscode und Außentemperatur-Überwachung (angelegt 20.10.2026 abends)
+
+| Entität / Automation | Inhalt |
+|---|---|
+| `sensor.heating_ebusd_hc_faultcode`, `…_bm2_faultcode`, `…_mm_faultcode` | aktueller Störungscode (TN 1) von Therme, BM-2, Mischermodul; 0 = keine Störung |
+| `sensor.heizung_storung_therme`, `…_bm_2`, `…_mischermodul` | Klartext, z. B. „15 Außenfühler defekt oder Wärmeerzeuger vom Netz getrennt" (Makro `wolf_fault_text` in `wolf_bm2.jinja`, Tabelle aus `docs/fehlercodes-cgb2.md`) |
+| `automation.heizung_stoerungscode` | Push, wenn ein Code länger als 30 s ≠ 0 ist, und Entwarnung bei Rückkehr auf 0 |
+| `sensor.ebusd_broadcast_outsidetempradio_outsidetemp` | Außentemperatur direkt vom Funkempfänger `0f` (Discovery von Hand, Topic `ebusd/Broadcast/OutsidetempRadio`); `unknown`, solange `0f` ungültig sendet |
+| `automation.heizung_aussentemperatur_fehlt` | Push, wenn `bm2/Outsidetemp` 15 min `unknown`/`unavailable` ist (bei laufendem ebusd), Entwarnung bei Rückkehr |
+| `sensor.ebusd_broadcast_fastatusraw_data` | Rohwert des 0503-Broadcasts der Therme für die Historie |
+
+Hintergrund: Vorfall 20.10.2026 22:22–22:50 (protokoll.md) – ohne Außentemperatur gehen beide Heizkreise in
+AT-Frostschutz und die Anlage heizt nicht. Ersatzwert per eBus funktioniert nicht (BM-2 nimmt nur `0f`).

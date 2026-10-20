@@ -50,3 +50,18 @@
 {% macro macro_bm2_date_raw(dt, returns) -%}
   {% do returns((dt.day - 1) + (dt.month - 1) * 32 + (dt.year - 2000) * 512) %}
 {%- endmacro %}
+
+{# Stoerungscode (TN 1, ebusd FaultCode) in Klartext. device: 'hc' (Therme CGB-2), 'bm2' (BM-2), 'mm' (Mischermodul).
+   Quelle der Texte: fault_messages.xml der Wolf-Smartset-Parameterdatenbank (docs/fehlercodes-cgb2.md). #}
+{% macro wolf_fault_text(entity_id, device) -%}
+  {%- set codes_hc = {1: 'STB Übertemperatur', 2: 'TB Übertemperatur', 3: 'dt-eSTB-Drift', 4: 'Keine Flammenbildung', 5: 'Flammenausfall', 6: 'Übertemperatur Vorlauf', 7: 'Abgasfühler Übertemperatur', 8: 'Abgasklappe schaltet nicht', 9: 'Fehlercode unbekannt', 10: 'eSTB Fühler defekt', 11: 'Flammenvortäuschung', 12: 'Kesselfühler defekt', 13: 'Abgastemperaturfühler defekt', 14: 'Speicherfühler defekt', 15: 'Außenfühler defekt oder Wärmeerzeuger vom Netz getrennt', 16: 'Rücklauffühler defekt', 18: 'Externer Sicherheitskreis', 19: 'Öldrucksensor defekt', 20: 'Ventiltest fehlgeschlagen', 22: 'Luftdruck', 23: 'Luftdruck', 24: 'Drehzahl nicht erreicht', 26: 'Stillstand-Drehzahl nicht erreicht', 27: 'Warmwasserauslauffühler defekt', 30: 'Parameter CRC Fehler', 32: '24V Überwachung', 35: 'BCC nicht korrekt aufgesteckt', 36: 'BCC defekt', 37: 'BCC nicht kompatibel', 38: 'Parametersatz des FA fehlerhaft', 39: 'BCC Systemfehler', 40: 'Fehler Strömung- /Druckerhöhungsprüfung', 41: 'Strömungsüberwachung', 42: 'Kondensatpumpe', 44: 'Abgasdruckschalter', 52: 'Max. Speicherladezeit', 53: 'IO-Regelabweichung', 54: 'SCOT Aktoren', 55: 'SCOT Systemfehler', 56: 'Kalibration Werksgrenze', 57: 'Kalibration Abweichung', 58: 'Kalibration Timeout', 59: 'Kalibration Werksgrenze', 60: 'Syphon verstopft', 66: 'Öldruck zwei Mal nicht erreicht', 67: 'Verhältnis Öldruck zu Pumpendrehzahl zwei Mal unplausibel', 78: 'Sammlerfühler defekt', 83: 'Öldruck erreicht Ruhewert nicht', 84: 'Ölpumpe erreicht keinen Stillstand', 85: 'Relaistest fehlgeschlagen', 86: 'Zünddruck drei Mal nicht erreicht', 90: 'Kommunikation zwischen Regelungsplatine und Feuerungsautomat gestört', 95: 'Prog. Mode', 96: 'Entriegelung', 98: 'Flammenverstärker', 99: 'Systemfehler', 107: 'Druck Heizkreis', 116: 'ESM (E1)'} -%}
+  {%- set codes_bm2 = {15: 'Außenfühler defekt oder Wärmeerzeuger vom Netz getrennt', 92: 'BM2-System fehlt', 133: 'Modul nicht kompatibel'} -%}
+  {%- set codes_mm = {52: 'Max. Speicherladezeit', 70: 'Defekter Mischerkreis-/Rücklauffühler', 71: 'Defekter Speicher-, Puffer- oder Bypassfühler an E1', 79: 'Defekter Rücklauf- oder Bypassfühler (E2)', 81: 'EEPROM Fehler', 91: 'Bus-Adresse', 97: 'Defekte Bypasspumpe'} -%}
+  {%- set code = states(entity_id) | int(-1) -%}
+  {%- set codes = codes_hc if device == 'hc' else (codes_bm2 if device == 'bm2' else codes_mm) -%}
+  {%- if code < 0 -%}unknown
+  {%- elif code == 0 -%}keine Störung
+  {%- elif code in codes -%}{{ code }} {{ codes[code] }}
+  {%- else -%}{{ code }} unbekannter Code
+  {%- endif -%}
+{%- endmacro %}

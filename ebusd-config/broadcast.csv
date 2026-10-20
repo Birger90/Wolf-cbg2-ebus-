@@ -4,6 +4,11 @@ u,Broadcast,,Datetime,Datum Uhrzeit,,fe,0700,,outsidetemp,,D2B,,°C,Temperatur,t
 # Schreibform des Standard-Broadcasts wurde am 20.10.2026 einmal getestet (BM-2 uebernimmt die Uhrzeit nicht) und danach entfernt:
 # kurz darauf fiel die Aussentemperatur des Funkempfaengers (Master 0f) aus - Zusammenhang nicht verifiziert, deshalb keine Broadcasts von ebusd.
 # w,Broadcast,,Datetime,Datum Uhrzeit senden,,fe,0700,,outsidetemp,,D2B,,°C,Temperatur,time,,BTI,,,Uhrzeit,date,,BDA,,,Datum
+# Aussentemperatur vom Funkempfaenger (Master 0f) getrennt mitlesen: derselbe 0700-Broadcast, aber nur mit Temperatur (Zeit/Datum = ff).
+u,Broadcast,,OutsidetempRadio,Aussentemperatur vom Funkempfaenger Master 0f,0f,fe,0700,,outsidetemp,,D2B,,°C,Aussentemperatur,rest,,HEX:7,,,Zeit und Datum ungueltig
+# Ersatz-Aussentemperatur von ebusd senden wurde am 20.10.2026 22:55/22:56 getestet (gleiche Form wie Master 0f, 2x 5.7 C):
+# das BM-2 uebernimmt den Wert nicht (TN 10195 blieb bei 10.1 vom Funkempfaenger). Definition deshalb wieder entfernt:
+# w,Broadcast,,OutsidetempSet,Ersatz-Aussentemperatur senden wie Master 0f,,fe,0700,,outsidetemp,,D2B,,°C,Aussentemperatur,rest,,HEX:7,,,Zeit und Datum ungueltig (ff)
 r,Broadcast,,Id,Identifikation,,,0704,,mf,,UCH,6=Dungs;15=FH_Ostfalia;16=TEM;17=Lamberti;20=CEB;21=Landis-Staefa;22=FERRO;23=MONDIAL;24=Wikon;25=Wolf;32=RAWE;48=Satronic;64=ENCON;80=Kromschroeder;96=Eberle;101=EBV;117=Graesslin;133=ebm-papst;149=SIG;165=Theben;167=Thermowatt;181=Vaillant;192=Toby;197=Weishaupt;253=ebusd,,Geraete-Hersteller,id,,STR:5,,,Geraete-ID,sw,,PIN,,,Software Version,hw,,PIN,,,Hardware-Version
 u,Broadcast,,IdAnswer,answer to identification query,,fe,0704,,mf,,UCH,6=Dungs;15=FH_Ostfalia;16=TEM;17=Lamberti;20=CEB;21=Landis-Staefa;22=FERRO;23=MONDIAL;24=Wikon;25=Wolf;32=RAWE;48=Satronic;64=ENCON;80=Kromschroeder;96=Eberle;101=EBV;117=Graesslin;133=ebm-papst;149=SIG;165=Theben;167=Thermowatt;181=Vaillant;192=Toby;197=Weishaupt;253=ebusd,,Geraete-Hersteller,id,,STR:5,,,Geraete-ID,sw,,PIN,,,Software Version,hw,,PIN,,,Hardware-Version
 u,Broadcast,,Signoflife,Lebenszeichen,,fe,07ff,,

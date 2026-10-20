@@ -1,0 +1,24 @@
+{
+  "alias": "Heizung: Aussentemperatur fehlt",
+  "description": "Meldet, wenn das BM-2 15 Minuten lang keine gueltige Aussentemperatur hat (TN 10195 unknown/unavailable bei laufendem ebusd) - dann gehen beide Heizkreise in AT-Frostschutz (beobachtet 20.10.2026, Quelle der Aussentemperatur ist Master 0f, vermutlich der Funkempfaenger). Gibt Entwarnung, sobald wieder ein Wert kommt.",
+  "mode": "single",
+  "triggers": [
+    {"trigger": "state", "entity_id": "sensor.heating_ebusd_bm2_outsidetemp", "to": ["unknown", "unavailable"], "for": {"minutes": 15}, "id": "fehlt"},
+    {"trigger": "state", "entity_id": "sensor.heating_ebusd_bm2_outsidetemp", "from": ["unknown", "unavailable"], "id": "wieder_da"}
+  ],
+  "conditions": [{"condition": "state", "entity_id": "binary_sensor.heating_ebusd_global_signal", "state": "on"}],
+  "actions": [
+    {"choose": [
+      {"conditions": [{"condition": "trigger", "id": "fehlt"}],
+       "sequence": [
+         {"action": "notify.mobile_app_birger_iphone", "data": {"title": "Heizung: Aussentemperatur fehlt", "message": "Das BM-2 hat seit 15 min keine gueltige Aussentemperatur (Funkaussenfuehler/Empfaenger pruefen). Heizkreis: {{ states('sensor.heating_ebusd_bm2_hkstatus') }}, Mischerkreis: {{ states('sensor.heating_ebusd_mk_mkstatus') }}, Therme: {{ states('sensor.heating_ebusd_hc_betriebsart') }}."}},
+         {"action": "logbook.log", "data": {"name": "Heizung eBus", "entity_id": "sensor.heating_ebusd_bm2_outsidetemp", "message": "Aussentemperatur seit 15 min ungueltig, Push gesendet"}}
+       ]},
+      {"conditions": [{"condition": "trigger", "id": "wieder_da"}, {"condition": "template", "value_template": "{{ trigger.to_state.state | is_number }}"}],
+       "sequence": [
+         {"action": "notify.mobile_app_birger_iphone", "data": {"title": "Heizung: Aussentemperatur wieder da", "message": "BM-2 Aussentemperatur wieder {{ trigger.to_state.state }} °C."}},
+         {"action": "logbook.log", "data": {"name": "Heizung eBus", "entity_id": "sensor.heating_ebusd_bm2_outsidetemp", "message": "Aussentemperatur wieder gueltig: {{ trigger.to_state.state }} °C"}}
+       ]}
+    ]}
+  ]
+}
