@@ -73,8 +73,9 @@ Der Generator schreibt deshalb keine Kommas in Kommentare.
 
 ## Uhrzeit, Datum, Party-/Urlaubsmodus des BM-2 (angelegt 20.10.2026)
 
-Rohwerte aus ebusd (`bm2.csv`): `Time` TN 10161, `Date` TN 10160, `PartyStart/-End(Date)` TN 10153/10151/10154/10152,
-`HolidayStart/-End(Date)` TN 10148/10146/10149/10147, `AntilegionellaStart` TN 10141, `MaintenanceDate` TN 5250.
+Rohwerte aus ebusd (`bm2.csv`): `Time` TN 10161, `Date` TN 10160 (beide nur lesbar, siehe protokoll.md),
+`PartyStart/-End(Date)` TN 10153/10151/10154/10152, `HolidayStart/-End(Date)` TN 10148/10146/10149/10147,
+`AntilegionellaStart` TN 10141, `MaintenanceDate` TN 5250.
 Kodierung (ism7mqtt `BM2TimeConverterTemplate.cs` / `BM2DateConverterTemplate.cs`, an der Anlage verifiziert):
 Zeit = Stunde·256 + Minute; Datum = (Tag−1) + (Monat−1)·32 + (Jahr−2000)·512.
 
@@ -82,17 +83,25 @@ Die Dekodierung steckt einmal in `config/custom_templates/wolf_bm2.jinja` (Kopie
 Makros `bm2_time`, `bm2_date`, `bm2_date_de`, `bm2_datetime_de`, `macro_bm2_time_raw`, `macro_bm2_date_raw`.
 Nach Änderungen an der Datei: Aktion `homeassistant.reload_custom_templates`.
 
+Die laufende Uhr kommt nicht aus dem gepollten TN 10161, sondern aus dem Standard-Broadcast `0700`, den das BM-2 jede
+Minute sendet (ebusd `Broadcast/Datetime`, MQTT-Topic `ebusd/Broadcast/Datetime`, JSON `time`/`date`). Dafür wurden zwei
+MQTT-Discovery-Einträge von Hand veröffentlicht (retained, Gerät „ebusd broadcast"):
+`homeassistant/sensor/ebusd_broadcast_Datetime_time/config` → `sensor.ebusd_broadcast_datetime_time` (`hh:mm:ss`) und
+`…_Datetime_date/config` → `sensor.ebusd_broadcast_datetime_date` (`tt.mm.jjjj`).
+
 | Entität | Inhalt |
 |---|---|
-| `sensor.heizung_bm_2_uhrzeit` | Uhr des BM-2 als `HH:MM` (Pollpriorität 9, also einige Minuten alt) |
-| `sensor.heizung_bm_2_datum` | Datum des BM-2 (device_class date) |
+| `sensor.heizung_bm_2_uhrzeit` | Uhr des BM-2 als `HH:MM`, aus dem minütlichen Broadcast |
+| `sensor.heizung_bm_2_datum` | Datum des BM-2 (device_class date), aus dem Broadcast |
+| `sensor.heizung_bm_2_uhrabweichung` | BM-2-Uhr minus Empfangszeitpunkt des Broadcasts in Minuten (eine Nachkommastelle, ±5 s); am 20.10.2026 abends +6,1 min |
+| `automation.heizung_bm_2_uhr_pruefen` | täglich 09:04: Push, wenn die Abweichung ≥ 2 min ist (stellen geht nur am BM-2, siehe protokoll.md) |
 | `sensor.heizung_wartung_fallig_am_ebus` | Wartungsdatum, jetzt über dasselbe Makro |
 | `sensor.heizung_partymodus_zeitraum` | `TT.MM.JJJJ HH:MM bis TT.MM.JJJJ HH:MM`; solange der Partymodus aus ist, führt das BM-2 Start = jetzt und Ende = jetzt + 3 h mit |
 | `sensor.heizung_urlaubsmodus_zeitraum` | analog für den Urlaubsmodus |
 | `sensor.heizung_antilegionellen_startzeit` | Startzeit der Antilegionellenfunktion (gelesen 12:30, Wochentag in `sensor.heating_ebusd_bm2_antilegionella`) |
-| `input_number.heizung_bm_2_uhrabweichung` | zuletzt gemessene Abweichung BM-2-Uhr minus HA-Zeit in Minuten (wird vom Skript gesetzt) |
-| `script.heizung_bm2_uhr_stellen` | liest Zeit/Datum frisch, misst die Abweichung; ab 2 min, bei falschem Datum oder mit `erzwingen: true` werden `Date` und `Time` über `script.heizung_ebus_schreiben` gestellt (Uhrzeit nur in den ersten 35 s einer Minute) |
-| `automation.heizung_bm_2_uhr_taeglich_pruefen` | ruft das Skript täglich 03:17 auf (nach der Sommer-/Winterzeitumstellung) |
+
+Verworfen: ein Skript „BM-2 Uhr stellen" (Schreiben auf TN 10161/10160 wirkungslos) und ein `input_number` für die
+Abweichung (durch den Template-Sensor ersetzt).
 
 Entity-Duplikat behoben: `sensor.heating_ebusd_bm2_maintenancedate` (unique_id `…_0`, veraltet, `unavailable`) gelöscht und
 `…_maintenancedate_2` (unique_id `…_value`) auf die alte ID umbenannt; der Wartungs-Helfer liefert wieder `2025-10-09`.

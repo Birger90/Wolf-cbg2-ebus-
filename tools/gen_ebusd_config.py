@@ -162,8 +162,11 @@ BM2 = [  # BM-2, ZZ 35 (System, direkter Heizkreis, Warmwasser). Schreiben: 5 By
     (10157, "CircTimeprogram",   "Zeitprogramm Zirkulation Heizgeraet aktiv (1-3)", "UIN", "", "", 9, True),
     (10130, "CommonSwitch",      "Programmwahlschalter gemeinsam",             "UIN", V_AUS_EIN, "", 9, True),
     (10102, "DstAuto",           "Winter-/Sommerzeitumstellung",               "UIN", V_DST, "",   9, True),
-    (10161, "Time",              "Uhrzeit BM-2 roh (BM2Time: Stunde=v div 256 Minute=v mod 256)", "UIN", "", "", 9, True),
-    (10160, "Date",              "Datum BM-2 roh (BM2Date: Tag=(v&31)+1 Monat=((v>>5)&15)+1 Jahr=2000+(v>>9))", "UIN", "", "", 9, True),
+    # Uhr des BM-2: nur lesen. Schreibversuche 20.10.2026 (5 Byte Praefix 00, 5 Byte CRC, 9 Byte Time+Date mit CRC,
+    # Datetime-Broadcast 0700) wurden alle ignoriert; Wolf-DB: Parameter 220032/220033 ReadOnly=True.
+    # Die laufende Uhr kommt genauer aus dem Datetime-Broadcast des BM-2 (broadcast.csv, jede Minute).
+    (10161, "Time",              "Uhrzeit BM-2 roh (BM2Time: Stunde=v div 256 Minute=v mod 256) - nicht schreibbar", "UIN", "", "", 9, False),
+    (10160, "Date",              "Datum BM-2 roh (BM2Date: Tag=(v&31)+1 Monat=((v>>5)&15)+1 Jahr=2000+(v>>9)) - nicht schreibbar", "UIN", "", "", 9, False),
     (10150, "PartyMode",         "Partymodus",                                 "UIN", V_AKTIV, "", 9, True),
     (10153, "PartyStart",        "Partymodus Start Uhrzeit roh (BM2Time)",     "UIN", "",   "",   9, True),
     (10154, "PartyStartDate",    "Partymodus Start Datum roh (BM2Date)",       "UIN", "",   "",   9, True),

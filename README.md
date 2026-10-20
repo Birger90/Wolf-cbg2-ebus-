@@ -125,6 +125,13 @@ das ISM7 am Bus hängt, kommen auch diese Werte passiv.
   `hg60` für die HG-Parameter (schreiben über `heizung_therme_schreiben`), drei Auswahlfelder
   `select.heizung_programm_direkter_heizkreis`, `…_mischerkreis`, `…_warmwasser` (Programmwahl über `BmRaw`/`MkRaw`),
   fünf Regler `number.mischer_*` für das Mischermodul (TV-min, TV-max, Heizkurvenabstand, Nachlaufzeit, P-Bereich).
+- Uhr und Kalender des BM-2 (20.10.2026 abends): `sensor.heizung_bm_2_uhrzeit`/`…_datum` aus dem minütlichen
+  Datetime-Broadcast des BM-2 (zwei von Hand veröffentlichte MQTT-Discovery-Sensoren, `homeassistant/mqtt_discovery_broadcast.md`),
+  `sensor.heizung_bm_2_uhrabweichung` (BM-2 geht derzeit ca. 6 min vor), Automation „BM-2 Uhr prüfen“ (Push ab 2 min).
+  Stellen über den eBus geht nicht (vier Verfahren getestet, `docs/protokoll.md`). Dazu `sensor.heizung_partymodus_zeitraum`,
+  `…_urlaubsmodus_zeitraum`, `…_antilegionellen_startzeit`; Dekodierung zentral in `custom_templates/wolf_bm2.jinja`.
+  Neu in `bm2.csv`: Party-/Urlaubsmodus (Ein/Aus, Start/Ende), Zeitprogramm-Nummern HK/WW/Zirkulation, Programmwahlschalter
+  gemeinsam, Sommer-/Winterzeit, Absenkstopp, Antilegionellen-Wochentag/-Startzeit (als `select`/`number`/`sensor` in HA).
 - Dashboard „Heizung“ (`heizung-wolf`) liest ausschließlich eBus-Entitäten.
 
 ## Optimierung („Vorschlagen“ / „Automatisch“), Stand 20.10.2026

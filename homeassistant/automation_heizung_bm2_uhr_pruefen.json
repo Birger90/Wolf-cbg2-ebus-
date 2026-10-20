@@ -1,0 +1,19 @@
+{
+  "alias": "Heizung: BM-2 Uhr pruefen",
+  "description": "Meldet einmal taeglich, wenn die Uhr des BM-2 um 2 Minuten oder mehr von der Home-Assistant-Zeit abweicht. Quelle: sensor.heizung_bm_2_uhrabweichung (aus dem minuetlichen Datetime-Broadcast des BM-2). Stellen geht nur am BM-2 selbst - Schreibversuche ueber den eBus (TN 10161/10160, Datetime-Broadcast) ignoriert das BM-2 (Test 20.10.2026).",
+  "mode": "single",
+  "triggers": [{"trigger": "time", "at": "09:04:00"}],
+  "conditions": [
+    {"condition": "or", "conditions": [
+      {"condition": "numeric_state", "entity_id": "sensor.heizung_bm_2_uhrabweichung", "above": 2},
+      {"condition": "numeric_state", "entity_id": "sensor.heizung_bm_2_uhrabweichung", "below": -2}
+    ]}
+  ],
+  "actions": [
+    {"action": "notify.mobile_app_birger_iphone", "data": {
+      "title": "Heizung: BM-2 Uhr stellen",
+      "message": "Die Uhr des BM-2 geht {{ states('sensor.heizung_bm_2_uhrabweichung') | float(0) | abs }} min {{ 'vor' if states('sensor.heizung_bm_2_uhrabweichung') | float(0) > 0 else 'nach' }} (BM-2 {{ states('sensor.heizung_bm_2_uhrzeit') }}). Bitte am BM-2 stellen - ueber den eBus geht das nicht."
+    }},
+    {"action": "logbook.log", "data": {"name": "Heizung BM-2 Uhr", "entity_id": "sensor.heizung_bm_2_uhrabweichung", "message": "Abweichung {{ states('sensor.heizung_bm_2_uhrabweichung') }} min, Hinweis gesendet"}}
+  ]
+}

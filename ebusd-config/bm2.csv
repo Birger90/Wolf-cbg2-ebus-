@@ -48,10 +48,8 @@ r9,bm2,,CommonSwitch,Programmwahlschalter gemeinsam,,35,5022,df9227,value,,UIN,0
 w,bm2,,CommonSwitch,Programmwahlschalter gemeinsam,,35,5023,009227,value,,UIN,0=Aus;1=Ein,,TN 10130
 r9,bm2,,DstAuto,Winter-/Sommerzeitumstellung,,35,5022,477627,value,,UIN,0=Aus;1=Auto,,TN 10102
 w,bm2,,DstAuto,Winter-/Sommerzeitumstellung,,35,5023,007627,value,,UIN,0=Aus;1=Auto,,TN 10102
-r9,bm2,,Time,Uhrzeit BM-2 roh (BM2Time: Stunde=v div 256 Minute=v mod 256),,35,5022,07b127,value,,UIN,,,TN 10161
-w,bm2,,Time,Uhrzeit BM-2 roh (BM2Time: Stunde=v div 256 Minute=v mod 256),,35,5023,00b127,value,,UIN,,,TN 10161
-r9,bm2,,Date,Datum BM-2 roh (BM2Date: Tag=(v&31)+1 Monat=((v>>5)&15)+1 Jahr=2000+(v>>9)),,35,5022,5bb027,value,,UIN,,,TN 10160
-w,bm2,,Date,Datum BM-2 roh (BM2Date: Tag=(v&31)+1 Monat=((v>>5)&15)+1 Jahr=2000+(v>>9)),,35,5023,00b027,value,,UIN,,,TN 10160
+r9,bm2,,Time,Uhrzeit BM-2 roh (BM2Time: Stunde=v div 256 Minute=v mod 256) - nicht schreibbar,,35,5022,07b127,value,,UIN,,,TN 10161
+r9,bm2,,Date,Datum BM-2 roh (BM2Date: Tag=(v&31)+1 Monat=((v>>5)&15)+1 Jahr=2000+(v>>9)) - nicht schreibbar,,35,5022,5bb027,value,,UIN,,,TN 10160
 r9,bm2,,PartyMode,Partymodus,,35,5022,7fa627,value,,UIN,0=Deaktiviert;1=Aktiviert,,TN 10150
 w,bm2,,PartyMode,Partymodus,,35,5023,00a627,value,,UIN,0=Deaktiviert;1=Aktiviert,,TN 10150
 r9,bm2,,PartyStart,Partymodus Start Uhrzeit roh (BM2Time),,35,5022,efa927,value,,UIN,,,TN 10153

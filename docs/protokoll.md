@@ -92,10 +92,39 @@ BM-2 und MK liefern kein ACK (`read timeout`), die statischen Schreibzeilen send
 Telegrammen gingen verloren (am Morgen bei leerem Bus 1 von 18). Konsequenz: auch BM-2/MK nur mit Rücklesen und
 Wiederholung schreiben (siehe Skripte).
 
+## Uhr des BM-2: Lesen ja, Stellen nein (20.10.2026, 21:52–22:08)
+
+Gelesen: TN 10161 `Time` = 5401 → 21:25 bei realer Zeit 21:19, TN 10160 `Date` = 13619 → 20.10.2026. Zusätzlich sendet das
+BM-2 (Master `30`) jede Minute den Standard-Broadcast `fe 0700` (ebusd `Broadcast Datetime`), z. B. `-;22:13:10;20.10.2026`
+um 22:06:58 → die BM-2-Uhr geht 6 min 12 s vor. Das ISM7 (`ff`) liest TN 10160 jede Minute, korrigiert die Uhr aber nicht.
+
+Schreibversuche, alle ohne Wirkung (Rücklesen unverändert, BM-2-Broadcast unverändert):
+
+| Zeit | Telegramm an `35` | Ergebnis |
+|---|---|---|
+| 21:53:00/07/14 | `00 b1 27 35 15` (TN 10161 = 21:53, Präfix 00, 3× über `script.heizung_ebus_schreiben`) | `read timeout`, Time bleibt 5435 |
+| 21:56:00 | `11 b1 27 38 15` (CRC korrekt) | ignoriert |
+| 22:07:05 | `71 b1 27 07 16 b0 27 33 35` (9 Byte: Time + Date mit CRC, Form des ISM7) | ignoriert |
+| 22:07:28 | Broadcast `31 fe 0700` `10.6;22:08:00;20.10.2026` (ebusd `Broadcast/Datetime/set`) | BM-2 sendet 22:07:58 weiter 22:14:10 |
+
+Wolf-Parameterdatenbank: „Uhrzeit"/„Datum" (PTID 220032/220033) sind `ReadOnly=True`; die schreibbar markierten
+„Uhrzeit BM2"/„Datum BM2" (330004/330005, dieselben TNs) sind nur Anzeigefelder im Party-/Urlaubsdialog
+(`sub_dialogs.xml`, `BM2PartyProgramTemplate`). Folgerung: Die Uhr des BM-2 lässt sich über den eBus nicht stellen,
+nur am Gerät. In Home Assistant bleibt die Überwachung (`sensor.heizung_bm_2_uhrabweichung`, Hinweis ab 2 min).
+Ob das ISM7/Wolf Link home die Uhr auf anderem Weg synchronisieren kann, konnte ich nicht verifizieren (keine Quelle).
+
+Nebenbefund: Solange Party-/Urlaubsmodus deaktiviert sind, führt das BM-2 `PartyStart`/`HolidayStart` = aktuelle Uhrzeit
+und `PartyEnd`/`HolidayEnd` = aktuelle Uhrzeit + 3 h nach (Datum entsprechend).
+
 ## Weitere Telegrammnummern
 
 - TN 5250 (BM-2): Wartung Fälligkeitsdatum, Typ BM2Date (ism7mqtt `BM2DateConverterTemplate`):
   Tag = (v & 31) + 1, Monat = ((v >> 5) & 15) + 1, Jahr = 2000 + (v >> 9). Gelesen 13096 → 09.10.2025, identisch mit der Cloud.
+- BM2Time (ism7mqtt `BM2TimeConverterTemplate`): Stunde = v // 256, Minute = v % 256 (entspricht ebusd-Typ `VTM`).
+  Gilt für TN 10161 Time, 10141 AntilegionellaStart (3102 → 12:30), Party 10153/10151, Urlaub 10148/10146.
+- BM2Date gilt auch für 10160 Date, Party 10154/10152, Urlaub 10149/10147.
+- Zeitprogramme aktiv: TN 10159 (HK bzw. MK), 10158 (WW), 10157 (Zirkulation), Werte 1–3; Programmwahlschalter gemeinsam
+  TN 10130; Sommer-/Winterzeit automatisch TN 10102; Absenkstopp TN 702; Antilegionellen-Wochentag TN 257 (0 Aus, 1–7 Mo–So, 8 täglich).
 
 ## Offen / nicht verifiziert
 
