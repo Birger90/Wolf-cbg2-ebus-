@@ -79,6 +79,9 @@ V_AUS_EIN = vals("0;Aus;1;Ein")
 V_WARTUNG = vals("0;Aus;1;Betriebsabhängig;2;Datumsabhängig")
 V_REGLERTYP = vals("0;Notbetrieb;1;Witterungsgeführt;2;Reiner Raumregler;3;Witterungsgeführt mit Raumeinfluss;4;Erweiterter Raumeinfuss")
 V_EBUS_EINSP = vals("0;Aus;1;Ein;2;Auto")
+V_AKTIV = vals("0;Deaktiviert;1;Aktiviert")
+V_DST = vals("0;Aus;1;Auto")
+V_LEGIONELLEN = vals("0;Aus;1;Montag;2;Dienstag;3;Mittwoch;4;Donnerstag;5;Freitag;6;Samstag;7;Sonntag;8;Täglich")
 
 # --- Tabellen: (TN, Name, Kommentar, Typ, Teiler|Werte, Einheit, Poll-Prio oder None, schreibbar) --------------
 # Typen: SIN/UIN = 16 Bit signed/unsigned little endian (Wolf-DB SS/US), Teiler 10 = SS10/US10, 100 = SS100/US100
@@ -153,6 +156,26 @@ BM2 = [  # BM-2, ZZ 35 (System, direkter Heizkreis, Warmwasser). Schreiben: 5 By
     (10165, "HkSetpointcorr",    "Sollwertkorrektur direkter Heizkreis (-4-4 K)", "SIN", "10", "K", 9, True),
     (278,   "HkWintersummer",    "Winter/Sommer Umschaltung (0-40 C)",         "SIN", "10", "°C", 9, True),
     (279,   "HkEcoabs",          "ECO/ABS (-10-40 C)",                         "SIN", "10", "°C", 9, True),
+    (702,   "Absenkstopp",       "Absenkstopp (-30-0 C)",                      "SIN", "10", "°C", 9, True),
+    (10159, "HkTimeprogram",     "Zeitprogramm direkter Heizkreis aktiv (1-3)", "UIN", "",  "",   9, True),
+    (10158, "WwTimeprogram",     "Zeitprogramm Warmwasser aktiv (1-3)",        "UIN", "",   "",   9, True),
+    (10157, "CircTimeprogram",   "Zeitprogramm Zirkulation Heizgeraet aktiv (1-3)", "UIN", "", "", 9, True),
+    (10130, "CommonSwitch",      "Programmwahlschalter gemeinsam",             "UIN", V_AUS_EIN, "", 9, True),
+    (10102, "DstAuto",           "Winter-/Sommerzeitumstellung",               "UIN", V_DST, "",   9, True),
+    (10161, "Time",              "Uhrzeit BM-2 roh (BM2Time: Stunde=v div 256 Minute=v mod 256)", "UIN", "", "", 9, True),
+    (10160, "Date",              "Datum BM-2 roh (BM2Date: Tag=(v&31)+1 Monat=((v>>5)&15)+1 Jahr=2000+(v>>9))", "UIN", "", "", 9, True),
+    (10150, "PartyMode",         "Partymodus",                                 "UIN", V_AKTIV, "", 9, True),
+    (10153, "PartyStart",        "Partymodus Start Uhrzeit roh (BM2Time)",     "UIN", "",   "",   9, True),
+    (10154, "PartyStartDate",    "Partymodus Start Datum roh (BM2Date)",       "UIN", "",   "",   9, True),
+    (10151, "PartyEnd",          "Partymodus Ende Uhrzeit roh (BM2Time)",      "UIN", "",   "",   9, True),
+    (10152, "PartyEndDate",      "Partymodus Ende Datum roh (BM2Date)",        "UIN", "",   "",   9, True),
+    (10145, "HolidayMode",       "Urlaubsmodus",                               "UIN", V_AKTIV, "", 9, True),
+    (10148, "HolidayStart",      "Urlaubsmodus Start Uhrzeit roh (BM2Time)",   "UIN", "",   "",   9, True),
+    (10149, "HolidayStartDate",  "Urlaubsmodus Start Datum roh (BM2Date)",     "UIN", "",   "",   9, True),
+    (10146, "HolidayEnd",        "Urlaubsmodus Ende Uhrzeit roh (BM2Time)",    "UIN", "",   "",   9, True),
+    (10147, "HolidayEndDate",    "Urlaubsmodus Ende Datum roh (BM2Date)",      "UIN", "",   "",   9, True),
+    (257,   "Antilegionella",    "Antilegionellenfunktion",                    "UIN", V_LEGIONELLEN, "", 9, False),
+    (10141, "AntilegionellaStart", "Startzeit Antilegionellenfunktion roh (BM2Time)", "UIN", "", "", 9, False),
     (5266,  "HkControllertype",  "Reglertyp",                                  "UIN", V_REGLERTYP, "", None, False),
     (5249,  "Maintenance",       "Wartung betriebsabhaengig",                  "UIN", "",   "%",  9, False),
     (618,   "MaintenanceMode",   "Wartungsmeldung",                            "UIN", V_WARTUNG, "", None, False),
@@ -179,6 +202,7 @@ MK = [  # Mischerkreis-Einstellungen, ZZ 86 (Schreiben: gleiches Format wie BM-2
     (10179, "OutsidetempAvg",    "Gemittelte Aussentemperatur MK",             "SIN", "10", "°C", 9, False),
     (278,   "MkWintersummer",    "Winter/Sommer Umschaltung MK (0-40 C)",      "SIN", "10", "°C", 9, True),
     (279,   "MkEcoabs",          "ECO/ABS MK (-10-40 C)",                      "SIN", "10", "°C", 9, True),
+    (10159, "MkTimeprogram",     "Zeitprogramm Mischerkreis aktiv (1-3)",      "UIN", "",   "",   9, True),
     (5266,  "MkControllertype",  "Reglertyp MK",                               "UIN", V_REGLERTYP, "", None, False),
 ]
 
@@ -210,8 +234,9 @@ def rows(circuit, zz, table, prefix_mode, static_writes=True):
 
 
 def raw_write(circuit, name, zz, comment):
-    """Roh-Schreibnachricht: Nutzdaten komplett als 5 Hex-Bytes (Pruefbyte TNlo TNhi Wertlo Werthi), z.B. '48 42 01 01 00'."""
-    return f"w,{circuit},,{name},{comment},,{zz},5023,,data,,HEX:5,,,Pruefbyte+TN+Wert"
+    """Roh-Schreibnachricht: Nutzdaten komplett als Hex-Bytes, normal 5 (Pruefbyte TNlo TNhi Wertlo Werthi), z.B. '48 42 01 01 00'.
+    Variable Laenge (HEX:*), damit auch die 9-Byte-Form des ISM7 (Pruefbyte TN Wert TN2 Wert2) getestet werden kann."""
+    return f"w,{circuit},,{name},{comment},,{zz},5023,,data,,HEX:*,,,Pruefbyte+TN+Wert"
 
 
 def main():
@@ -255,6 +280,8 @@ def main():
     broadcast = [HEADER,
                  "# Standard-Broadcasts (ebusd broadcast.csv + kromschroeder/broadcast.csv)",
                  "u,Broadcast,,Datetime,Datum Uhrzeit,,fe,0700,,outsidetemp,,D2B,,°C,Temperatur,time,,BTI,,,Uhrzeit,date,,BDA,,,Datum",
+                 "# Schreibform des Standard-Broadcasts (Test 20.10.2026: ob das BM-2 eine fremde Uhrzeit uebernimmt). Payload: <Temp>;<hh:mm:ss>;<tt.mm.jjjj>",
+                 "w,Broadcast,,Datetime,Datum Uhrzeit senden,,fe,0700,,outsidetemp,,D2B,,°C,Temperatur,time,,BTI,,,Uhrzeit,date,,BDA,,,Datum",
                  "r,Broadcast,,Id,Identifikation,,,0704,,mf,,UCH,6=Dungs;15=FH_Ostfalia;16=TEM;17=Lamberti;20=CEB;21=Landis-Staefa;22=FERRO;23=MONDIAL;24=Wikon;25=Wolf;32=RAWE;48=Satronic;64=ENCON;80=Kromschroeder;96=Eberle;101=EBV;117=Graesslin;133=ebm-papst;149=SIG;165=Theben;167=Thermowatt;181=Vaillant;192=Toby;197=Weishaupt;253=ebusd,,Geraete-Hersteller,id,,STR:5,,,Geraete-ID,sw,,PIN,,,Software Version,hw,,PIN,,,Hardware-Version",
                  "u,Broadcast,,IdAnswer,answer to identification query,,fe,0704,,mf,,UCH,6=Dungs;15=FH_Ostfalia;16=TEM;17=Lamberti;20=CEB;21=Landis-Staefa;22=FERRO;23=MONDIAL;24=Wikon;25=Wolf;32=RAWE;48=Satronic;64=ENCON;80=Kromschroeder;96=Eberle;101=EBV;117=Graesslin;133=ebm-papst;149=SIG;165=Theben;167=Thermowatt;181=Vaillant;192=Toby;197=Weishaupt;253=ebusd,,Geraete-Hersteller,id,,STR:5,,,Geraete-ID,sw,,PIN,,,Software Version,hw,,PIN,,,Hardware-Version",
                  "u,Broadcast,,Signoflife,Lebenszeichen,,fe,07ff,,",
@@ -262,6 +289,9 @@ def main():
                  "u,Broadcast,,RcTarget,room controller target values,,fe,0800,,desiredtemp,,D2B,,°C,boiler target temperature,outsidetemp,,D2B,,°C,Aussentemperatur,forced,,SCH,,%,forced performance,hwc,,BI0,,,hot water active,hc,,BI1,,,heat active,hwcdesiredtemp,,D2B,,°C,hot water target temperature",
                  "u,Broadcast,,RcOperation,room controller operational data,,fe,0801,,temp,,D2B,,°C,boiler effective temperature,buffertemp,,D2B,,°C,hot water effective temperature,emissiontest,,UCH,0=none;1=br1;2=br1stb;3=br12;4=br12stb,,emission test,hwc,,BI0,,,hot water active,pump,,BI1,,,pump active,buffer1,,BI2,,,buffer 1 active,buffer2,,BI3,,,buffer 2 active,loading,,BI4,,,loading pump active,hwcloading,,BI5,,,hot water loading pump active,tbfconnect,,BI6,,,TBF connected,returntemp,,D2B,,°C,return flow temperature",
                  "u,Broadcast,,ControlCmd,control commands,,fe,0802,,desiredtemp,,D2B,,°C,boiler target temperature,hwcdesiredtemp,,D2B,,°C,hot water target temperature,expected,,SCH,,%,expected performance,device,,UCH,,,first device with error,error,,UCH,,,error code",
+                 "# Roh-Mitschnitt der 8-Byte-Broadcasts PBSB 0503 (eBUS-Standard: Betriebsdaten des Feuerungsautomaten an den Regler; Layout nicht dokumentiert, Kandidat fuer Stoerungscode):",
+                 "u,Broadcast,,FaStatusRaw,Betriebsdaten Feuerungsautomat roh (0503 von 03),03,fe,0503,,data,,HEX:8,,,8 Bytes",
+                 "u,Broadcast,,F1StatusRaw,Betriebsdaten Master f1 roh (0503 von f1),f1,fe,0503,,data,,HEX:8,,,8 Bytes"
                  ]
 
     for fname, lines in [("hc.csv", hc), ("bm2.csv", bm2), ("mk.csv", mk), ("mm.csv", mm), ("mc.csv", mc), ("broadcast.csv", broadcast)]:

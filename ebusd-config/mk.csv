@@ -1,6 +1,6 @@
 type,circuit,level,name,comment,qq,zz,pbsb,id,*name,part,type,divisor/values,unit,comment
 # Mischerkreis-Einstellungen (MK_BM-2), Slave 86. Lesen verifiziert, statische Schreibzeilen wie BM-2.
-w,mk,,MkRaw,Roh-Schreibtelegramm an den Mischerkreis - nur fuer Tests und Skripte,,86,5023,,data,,HEX:5,,,Pruefbyte+TN+Wert
+w,mk,,MkRaw,Roh-Schreibtelegramm an den Mischerkreis - nur fuer Tests und Skripte,,86,5023,,data,,HEX:*,,,Pruefbyte+TN+Wert
 r3,mk,,Flowtemp,Vorlauftemperatur Mischerkreis,,86,5022,1f8727,value,,SIN,10,°C,TN 10119
 r2,mk,,MkStatus,Mischerkreis Status,,86,5022,9fac27,value,,UIN,0=Aus;1=Heizbetrieb;2=Absenkbetrieb;3=Eco;4=Absenkstop;5=AT_Abschaltung;6=RT_Abschaltung;7=AT_Frostschutz;8=RT_Frostschutz;9=SmartHome;10=Warmwasservorrang;11=Kuehlbetrieb;12=TPW_ausgeloest;13=Heizvorrang_vor_Kuehlen,,TN 10156
 r5,mk,,MkDemand,Anforderung Mischerkreis,,86,5022,57ab27,value,,UIN,0=Initialisierung;1=Deaktiviert;2=Estrichtrocknung;3=Schornsteinfeger;4=Telefonfernschalter;5=Partymodus;6=Urlaubsmodus;7=Automatik_ein;8=Automatik_aus;9=Permanentbetrieb;10=Sparbetrieb;11=Standby;12=Externe_Deaktivierung;13=SmartHome;14=Automatik_Kuehlen_Ein;15=Automatik_Kuehlen_Aus;16=Permanent_Kuehlen,,TN 10155
@@ -26,4 +26,6 @@ r9,mk,,MkWintersummer,Winter/Sommer Umschaltung MK (0-40 C),,86,5022,251601,valu
 w,mk,,MkWintersummer,Winter/Sommer Umschaltung MK (0-40 C),,86,5023,001601,value,,SIN,10,°C,TN 278
 r9,mk,,MkEcoabs,ECO/ABS MK (-10-40 C),,86,5022,791701,value,,SIN,10,°C,TN 279
 w,mk,,MkEcoabs,ECO/ABS MK (-10-40 C),,86,5023,001701,value,,SIN,10,°C,TN 279
+r9,mk,,MkTimeprogram,Zeitprogramm Mischerkreis aktiv (1-3),,86,5022,7baf27,value,,UIN,,,TN 10159
+w,mk,,MkTimeprogram,Zeitprogramm Mischerkreis aktiv (1-3),,86,5023,00af27,value,,UIN,,,TN 10159
 r,mk,,MkControllertype,Reglertyp MK,,86,5022,ec9214,value,,UIN,0=Notbetrieb;1=Witterungsgefuehrt;2=Reiner_Raumregler;3=Witterungsgefuehrt_mit_Raumeinfluss;4=Erweiterter_Raumeinfuss,,TN 5266

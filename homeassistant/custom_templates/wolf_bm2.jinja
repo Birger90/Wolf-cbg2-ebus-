@@ -1,0 +1,52 @@
+{#
+  Wolf BM-2 Rohwerte aus ebusd dekodieren (Datei: config/custom_templates/wolf_bm2.jinja).
+  Nach Aenderungen: Aktion homeassistant.reload_custom_templates.
+  Quelle der Kodierung: ism7mqtt, BM2TimeConverterTemplate.cs und BM2DateConverterTemplate.cs
+  (https://github.com/zivillian/ism7mqtt). An der eigenen Anlage am 20.10.2026 verifiziert
+  (Time 5401 -> 21:25, Date 13619 -> 20.10.2026, MaintenanceDate 13096 -> 09.10.2025 = Cloudwert).
+
+  BM2Time: Stunde = Wert // 256, Minute = Wert % 256
+  BM2Date: Tag = (Wert % 32) + 1, Monat = ((Wert // 32) % 16) + 1, Jahr = 2000 + Wert // 512
+#}
+
+{# Uhrzeit "HH:MM" aus einer Entitaet mit BM2Time-Rohwert, sonst "unknown" #}
+{% macro bm2_time(entity_id) -%}
+  {%- set v = states(entity_id) | int(-1) -%}
+  {%- if v < 0 or v // 256 > 23 or v % 256 > 59 -%}unknown
+  {%- else -%}{{ '%02d:%02d' % (v // 256, v % 256) }}
+  {%- endif -%}
+{%- endmacro %}
+
+{# Datum ISO "YYYY-MM-DD" aus einer Entitaet mit BM2Date-Rohwert, sonst "unknown" #}
+{% macro bm2_date(entity_id) -%}
+  {%- set v = states(entity_id) | int(-1) -%}
+  {%- if v < 0 or (v // 32) % 16 > 11 or v % 32 > 30 -%}unknown
+  {%- else -%}{{ '%04d-%02d-%02d' % (2000 + v // 512, (v // 32) % 16 + 1, v % 32 + 1) }}
+  {%- endif -%}
+{%- endmacro %}
+
+{# Datum deutsch "TT.MM.JJJJ" aus einer Entitaet mit BM2Date-Rohwert, sonst "unknown" #}
+{% macro bm2_date_de(entity_id) -%}
+  {%- set v = states(entity_id) | int(-1) -%}
+  {%- if v < 0 or (v // 32) % 16 > 11 or v % 32 > 30 -%}unknown
+  {%- else -%}{{ '%02d.%02d.%04d' % (v % 32 + 1, (v // 32) % 16 + 1, 2000 + v // 512) }}
+  {%- endif -%}
+{%- endmacro %}
+
+{# "TT.MM.JJJJ HH:MM" aus Datum- und Zeit-Entitaet, sonst "unknown" #}
+{% macro bm2_datetime_de(date_entity, time_entity) -%}
+  {%- set d = bm2_date_de(date_entity) -%}
+  {%- set t = bm2_time(time_entity) -%}
+  {%- if d == 'unknown' or t == 'unknown' -%}unknown
+  {%- else -%}{{ d }} {{ t }}
+  {%- endif -%}
+{%- endmacro %}
+
+{# Rohwerte fuer das Schreiben: aus einem datetime-Objekt (z. B. now()) #}
+{% macro macro_bm2_time_raw(dt, returns) -%}
+  {% do returns(dt.hour * 256 + dt.minute) %}
+{%- endmacro %}
+
+{% macro macro_bm2_date_raw(dt, returns) -%}
+  {% do returns((dt.day - 1) + (dt.month - 1) * 32 + (dt.year - 2000) * 512) %}
+{%- endmacro %}

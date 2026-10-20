@@ -125,7 +125,7 @@ def test_items():
                               "entity": f"sensor.heating_ebusd_{circ}_{name.lower()}"})
     for table, circ in ((BM2, "bm2"), (MK, "mk")):
         for tn, name, comment, typ, div, unit, prio, writable in table:
-            if writable and name not in ("OneTimeHotwater",) and not name.endswith("Program"):  # 1x WW loest eine Speicherladung aus; Programmwahl ist eine Aufzaehlung (+1 sinnlos, einmalig 19.10. getestet)
+            if writable and name not in ("OneTimeHotwater",) and not name.endswith("Program") and not name.endswith("Timeprogram") and name not in ("Time", "Date", "DstAuto", "CommonSwitch") and not name.startswith(("Party", "Holiday")):  # 1x WW loest eine Speicherladung aus; Programmwahl ist eine Aufzaehlung (+1 sinnlos, einmalig 19.10. getestet)
                 items.append({"circuit": circ, "name": name, "tn": tn, "teiler": 10 if div == "10" else 1,
                               "entity": f"number.heating_ebusd_{circ}_{name.lower()}"})
     return items

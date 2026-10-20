@@ -2,7 +2,7 @@ type,circuit,level,name,comment,qq,zz,pbsb,id,*name,part,type,divisor/values,uni
 # Wolf Mischermodul MM, Slave 52 (Kromschroeder).
 # Schreiben: Kromschroeder-Geraet wie die Therme, deshalb Roh-Schreibnachricht MmRaw mit Pruefbyte aus Home Assistant
 # (script.heizung_therme_schreiben, kreis=mm). Zieladresse 52 - ob 52 oder ein Master (f0/f1) Schreibtelegramme annimmt, zeigt der Test.
-w,mm,,MmRaw,Roh-Schreibtelegramm an das Mischermodul (Pruefbyte+TN+Wert) nur ueber script.heizung_therme_schreiben kreis=mm,,52,5023,,data,,HEX:5,,,Pruefbyte+TN+Wert
+w,mm,,MmRaw,Roh-Schreibtelegramm an das Mischermodul (Pruefbyte+TN+Wert) nur ueber script.heizung_therme_schreiben kreis=mm,,52,5023,,data,,HEX:*,,,Pruefbyte+TN+Wert
 r2,mm,,Flowtemp,Vorlauftemperatur Mischer,,52,5022,900f00,value,,SIN,10,°C,TN 15
 r2,mm,,Flowtempdesired,Mischersolltemperatur,,52,5022,2c0400,value,,SIN,10,°C,TN 4
 r3,mm,,Pump,Ausgang Mischerkreispumpe MKP,,52,5022,705200,value,,UIN,0=Aus;1=Ein,,TN 82

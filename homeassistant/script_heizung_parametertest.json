@@ -238,6 +238,13 @@
       "entity": "number.heating_ebusd_bm2_hkecoabs"
      },
      {
+      "circuit": "bm2",
+      "name": "Absenkstopp",
+      "tn": 702,
+      "teiler": 10,
+      "entity": "number.heating_ebusd_bm2_absenkstopp"
+     },
+     {
       "circuit": "mk",
       "name": "MkDaytemp",
       "tn": 10109,
