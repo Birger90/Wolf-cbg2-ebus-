@@ -4,10 +4,12 @@ w,mk,,MkRaw,Roh-Schreibtelegramm an den Mischerkreis - nur fuer Tests und Skript
 r3,mk,,Flowtemp,Vorlauftemperatur Mischerkreis,,86,5022,1f8727,value,,SIN,10,°C,TN 10119
 r2,mk,,MkStatus,Mischerkreis Status,,86,5022,9fac27,value,,UIN,0=Aus;1=Heizbetrieb;2=Absenkbetrieb;3=Eco;4=Absenkstop;5=AT_Abschaltung;6=RT_Abschaltung;7=AT_Frostschutz;8=RT_Frostschutz;9=SmartHome;10=Warmwasservorrang;11=Kuehlbetrieb;12=TPW_ausgeloest;13=Heizvorrang_vor_Kuehlen,,TN 10156
 r5,mk,,MkDemand,Anforderung Mischerkreis,,86,5022,57ab27,value,,UIN,0=Initialisierung;1=Deaktiviert;2=Estrichtrocknung;3=Schornsteinfeger;4=Telefonfernschalter;5=Partymodus;6=Urlaubsmodus;7=Automatik_ein;8=Automatik_aus;9=Permanentbetrieb;10=Sparbetrieb;11=Standby;12=Externe_Deaktivierung;13=SmartHome;14=Automatik_Kuehlen_Ein;15=Automatik_Kuehlen_Aus;16=Permanent_Kuehlen,,TN 10155
-r3,mk,,MkProgram,Programmwahl Mischerkreis - NUR LESEN (Mieter),,86,5022,ff7427,value,,UIN,0=Standby;1=Auto;2=Permanent;3=Sparen,,TN 10100
+r3,mk,,MkProgram,Programmwahl Mischerkreis,,86,5022,ff7427,value,,UIN,0=Standby;1=Auto;2=Permanent;3=Sparen,,TN 10100
+w,mk,,MkProgram,Programmwahl Mischerkreis,,86,5023,007427,value,,UIN,0=Standby;1=Auto;2=Permanent;3=Sparen,,TN 10100
 r9,mk,,MkDaytemp,Tagtemperatur Mischerkreis (5-30 C),,86,5022,fb7d27,value,,SIN,10,°C,TN 10109
 w,mk,,MkDaytemp,Tagtemperatur Mischerkreis (5-30 C),,86,5023,007d27,value,,SIN,10,°C,TN 10109
 r9,mk,,MkSparfaktor,Sparfaktor Mischerkreis (0-10),,86,5022,8b8127,value,,SIN,10,,TN 10113
+w,mk,,MkSparfaktor,Sparfaktor Mischerkreis (0-10),,86,5023,008127,value,,SIN,10,,TN 10113
 r9,mk,,MkCurveBasetemp,Sockeltemperatur Heizkurve MK (10-60 C),,86,5022,6f7b27,value,,SIN,10,°C,TN 10107
 w,mk,,MkCurveBasetemp,Sockeltemperatur Heizkurve MK (10-60 C),,86,5023,007b27,value,,SIN,10,°C,TN 10107
 r9,mk,,MkCurveStart,Startpunkt Heizkurve MK (0-40 C),,86,5022,1f7e27,value,,SIN,10,°C,TN 10110

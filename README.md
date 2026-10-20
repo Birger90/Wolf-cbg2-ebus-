@@ -138,8 +138,8 @@ Bausteine (`homeassistant/gen_optimierung.py`):
 
 ## Sicherheitsregeln (für die HA-Automatisierung)
 
-- Programmwahl (Standby/Sparen) beider Heizkreise ist in ebusd **nur lesbar** definiert, die Mieterwohnung hängt an beiden Kreisen.
-- Keine Gas-/Abgasparameter (Gasart, Kalibrierung, untere Brennerleistung HG02).
+- Programmwahl beider Heizkreise ist schreibbar; die Mieterwohnung hängt an beiden Kreisen, also mit Bedacht.
+- Gesperrt bleiben nur HG12 (Gasart) und HG10 (eBus-Adresse). HG02/HG03 (Brennerleistung) sind schreibbar.
 - Jeder Schreibvorgang wird zurückgelesen und bei Bedarf einmal wiederholt.
 
 ## Quellen

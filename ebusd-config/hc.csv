@@ -33,8 +33,8 @@ r9,hc,,HeatToday,Erzeugte Waermemenge aktueller Tag,,08,5022,cc822a,value,,UIN,,
 r9,hc,,EnergyYesterday,Verbrauch Vortag,,08,5022,ccf832,value,,UIN,,kWh,TN 13048
 r9,hc,,HeatYesterday,Erzeugte Waermemenge Vortag,,08,5022,ccf932,value,,UIN,,kWh,TN 13049
 r9,hc,,Hg01,HG01 Schaltdifferenz Brenner (7-30 K),,08,5022,cc2200,value,,SIN,10,K,TN 34
-r9,hc,,Hg02,HG02 Untere Brennerleistung (%) - nicht schreiben,,08,5022,cc5a01,value,,UIN,,%,TN 346
-r9,hc,,Hg03,HG03 Obere Brennerleistung Warmwasser (%),,08,5022,cc5901,value,,UIN,,%,TN 345
+r9,hc,,Hg02,HG02 Untere Brennerleistung (1-100 %),,08,5022,cc5a01,value,,UIN,,%,TN 346
+r9,hc,,Hg03,HG03 Obere Brennerleistung Warmwasser (1-100 %),,08,5022,cc5901,value,,UIN,,%,TN 345
 r9,hc,,Hg04,HG04 Obere Brennerleistung Heizung (1-100 %),,08,5022,cc3f01,value,,UIN,,%,TN 319
 r9,hc,,Hg07,HG07 Nachlaufzeit Kesselkreispumpe (0-30 min),,08,5022,cc4201,value,,UIN,,min,TN 322
 r9,hc,,Hg08,HG08 Kesselmaximaltemperatur Heizung TV-max (40-90 C),,08,5022,cc8402,value,,SIN,10,°C,TN 644

@@ -46,7 +46,7 @@ def therme_schreiben():
     return {
         "alias": "Heizung: Therme-Parameter schreiben (HG)",
         "description": "Schreibt einen HG-Parameter der Wolf CGB-2 ueber ebusd (5 Byte an Master 03, Pruefbyte berechnet). "
-                       "Liest zurueck, wiederholt bis zu 2x. Keine Gas-/Abgasparameter (HG02, HG03, HG12).",
+                       "Liest zurueck, wiederholt bis zu 2x. Gesperrt bleiben nur HG12 (Gasart) und HG10 (eBus-Adresse).",
         "mode": "queued",
         "fields": {
             "name": {"description": "ebusd-Name in hc, z.B. Hg07", "required": True, "selector": {"text": {}}},
@@ -71,7 +71,7 @@ def therme_schreiben():
             }},
             {"variables": {"payload": PAYLOAD_TEMPLATE}},
             {"if": [{"condition": "template",
-                     "value_template": "{{ name | lower in ['hg02', 'hg03', 'hg12', 'hg10'] or (wert | float) < minimum or (wert | float) > maximum }}"}],
+                     "value_template": "{{ name | lower in ['hg12', 'hg10'] or (wert | float) < minimum or (wert | float) > maximum }}"}],
              "then": [
                  {"action": "persistent_notification.create",
                   "data": {"title": "Heizung: Schreiben abgelehnt",

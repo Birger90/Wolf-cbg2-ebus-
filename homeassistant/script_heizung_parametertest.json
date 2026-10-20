@@ -22,6 +22,20 @@
      },
      {
       "circuit": "hc",
+      "name": "Hg02",
+      "tn": 346,
+      "teiler": 1,
+      "entity": "sensor.heating_ebusd_hc_hg02"
+     },
+     {
+      "circuit": "hc",
+      "name": "Hg03",
+      "tn": 345,
+      "teiler": 1,
+      "entity": "sensor.heating_ebusd_hc_hg03"
+     },
+     {
+      "circuit": "hc",
       "name": "Hg04",
       "tn": 319,
       "teiler": 1,
@@ -127,10 +141,31 @@
      },
      {
       "circuit": "bm2",
+      "name": "HkProgram",
+      "tn": 10100,
+      "teiler": 1,
+      "entity": "number.heating_ebusd_bm2_hkprogram"
+     },
+     {
+      "circuit": "bm2",
+      "name": "WwProgram",
+      "tn": 10101,
+      "teiler": 1,
+      "entity": "number.heating_ebusd_bm2_wwprogram"
+     },
+     {
+      "circuit": "bm2",
       "name": "HkDaytemp",
       "tn": 10109,
       "teiler": 10,
       "entity": "number.heating_ebusd_bm2_hkdaytemp"
+     },
+     {
+      "circuit": "bm2",
+      "name": "HkSparfaktor",
+      "tn": 10113,
+      "teiler": 10,
+      "entity": "number.heating_ebusd_bm2_hksparfaktor"
      },
      {
       "circuit": "bm2",
@@ -183,10 +218,24 @@
      },
      {
       "circuit": "mk",
+      "name": "MkProgram",
+      "tn": 10100,
+      "teiler": 1,
+      "entity": "number.heating_ebusd_mk_mkprogram"
+     },
+     {
+      "circuit": "mk",
       "name": "MkDaytemp",
       "tn": 10109,
       "teiler": 10,
       "entity": "number.heating_ebusd_mk_mkdaytemp"
+     },
+     {
+      "circuit": "mk",
+      "name": "MkSparfaktor",
+      "tn": 10113,
+      "teiler": 10,
+      "entity": "number.heating_ebusd_mk_mksparfaktor"
      },
      {
       "circuit": "mk",
