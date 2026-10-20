@@ -116,6 +116,49 @@ Ob das ISM7/Wolf Link home die Uhr auf anderem Weg synchronisieren kann, konnte 
 Nebenbefund: Solange Party-/Urlaubsmodus deaktiviert sind, führt das BM-2 `PartyStart`/`HolidayStart` = aktuelle Uhrzeit
 und `PartyEnd`/`HolidayEnd` = aktuelle Uhrzeit + 3 h nach (Datum entsprechend).
 
+## Partymodus über den eBus (20.10.2026, 22:23–22:31)
+
+| Zeit | Aktion | Beobachtung |
+|---|---|---|
+| 22:23:26 | `00 a6 27 01 00` an `35` (TN 10150 = 1) | PartyMode → Aktiviert (Rücklesen 3 s später); BM-2 setzt Start = jetzt, Ende = jetzt + 3 h; 22:25:44 `HkDemand` = **Partymodus**; Therme 22:27 kurz Heizbetrieb/Softstart |
+| 22:26:21–35 | zweiter Skriptlauf: Mode = 1 (schon aktiv), dann `PartyEndDate` = 13619 (heute), dann `PartyEnd` = 22:56 | `HkDemand` → **Automatik_aus**, Partymodus intern beendet, Flag PartyMode blieb Aktiviert |
+| 22:29:13 | TN 10150 = 0 | PartyMode → Deaktiviert |
+| 22:30:0x | TN 10150 = 1 allein | 22:30:13 `HkDemand` = Partymodus |
+| 22:30:2x | `PartyEnd` = 5894 (23:06) über die statische Schreibzeile | übernommen, `HkDemand` bleibt Partymodus |
+| 22:30:5x | `PartyEndDate` = 13619 | übernommen, `HkDemand` bleibt Partymodus |
+| 22:31:23 | TN 10150 = 0 über `script.heizung_partymodus` (beenden) | PartyMode Deaktiviert, `HkDemand` Automatik_aus |
+
+Deutung: Beim Einschalten füllt das BM-2 Start/Ende selbst (Ende = Start + 3 h, ggf. nächster Tag). Ende-Datum und
+Ende-Zeit sind einzeln schreibbar; liegt der zusammengesetzte Endzeitpunkt zwischen zwei Schreibvorgängen in der
+Vergangenheit (hier: Datum heute + alte Zeit 01:27), beendet das BM-2 den Partymodus sofort. Deshalb erst Uhrzeit, dann
+Datum (bzw. umgekehrt, wenn das neue Enddatum später liegt). Alle Zeiten gelten in der BM-2-Uhr (geht 6 min vor).
+`script.heizung_partymodus` ist entsprechend aufgebaut; der Urlaubsmodus (TN 10145–10149) hat denselben Aufbau, wurde
+aber nicht getestet.
+
+Fehler in den Programmwahl-Selects behoben: eine native `state`-Bedingung rendert keine Templates (`state: "{{ option }}"`
+wurde wörtlich verglichen), dadurch kam nach jeder erfolgreichen Programmwahl eine falsche Push „nicht übernommen".
+Jetzt Template-Bedingung `not is_state(...)`.
+
+## Broadcast 0503 (FaStatusRaw) – Teildekodierung, Stand 20.10.2026
+
+`01 00 48 ff 61 29 3c 3f` (21:18, Brenner Ein, Vorlauf 48,5, Rücklauf 41,9) und `01 00 00 ff 46 24 3b 3f` (22:21, Brenner
+Aus, Vorlauf 35,0, Rücklauf 36,3, Warmwasser 59,5), `01 00 40 ff 38 1c 3b 3f` (22:27, Softstart, Vorlauf 28,4, Rücklauf 28,1):
+
+| Byte | Beobachtung | Deutung |
+|---|---|---|
+| 1 | immer `01` | Blocknummer |
+| 2 | immer `00` | Statusbyte (Kandidat für Störung/Flags – bisher nie ≠ 0) |
+| 3 | `48` bei Brenner Ein, `40` bei Softstart, `00` bei Aus | Brennerzustand/Stellgröße, nicht verifiziert |
+| 4 | immer `ff` | unbekannt |
+| 5 | `61`→48,5 / `46`→35,0 / `38`→28,0 | **Kesseltemperatur, Wert/2** (3 Treffer) |
+| 6 | `29`→41 / `24`→36 / `1c`→28 | **Rücklauftemperatur, ganze °C** (3 Treffer) |
+| 7 | `3c`→60 / `3b`→59 | Warmwassertemperatur ganze °C (Hwctemp 59,5) – plausibel, 2 Treffer |
+| 8 | immer `3f` | unbekannt (nicht Außentemperatur) |
+
+Der Rohwert läuft jetzt als `sensor.ebusd_broadcast_fastatusraw_data` in die HA-Historie (Discovery von Hand), damit bei
+einer echten Störung Byte 2/3 verglichen werden können. Eine Spezifikation für 0503 habe ich nicht gefunden (die eBUS-
+Spezifikation von 2004 auf mikrocontroller.net beschreibt nur 05 01/05 02).
+
 ## Weitere Telegrammnummern
 
 - TN 5250 (BM-2): Wartung Fälligkeitsdatum, Typ BM2Date (ism7mqtt `BM2DateConverterTemplate`):

@@ -100,6 +100,13 @@ MQTT-Discovery-Einträge von Hand veröffentlicht (retained, Gerät „ebusd bro
 | `sensor.heizung_urlaubsmodus_zeitraum` | analog für den Urlaubsmodus |
 | `sensor.heizung_antilegionellen_startzeit` | Startzeit der Antilegionellenfunktion (gelesen 12:30, Wochentag in `sensor.heating_ebusd_bm2_antilegionella`) |
 
+`script.heizung_partymodus` (Felder `aktion` starten/beenden, `stunden` 0,5–24): schreibt TN 10150 PartyMode über `BmRaw`
+(`00 a6 27 01 00` bzw. `…00 00`, bis zu 3 Versuche mit Rücklesen von `select.heating_ebusd_bm2_partymode`), beim Starten
+anschließend `PartyEndDate`/`PartyEnd` = jetzt + Dauer über `script.heizung_ebus_schreiben`. Datei
+`homeassistant/script_heizung_partymodus.json`. Reihenfolge der Ende-Schreibvorgänge ist entscheidend (protokoll.md):
+erst Uhrzeit, dann Datum, sonst beendet das BM-2 den Partymodus sofort. Getestet 20.10.2026: Einschalten → `HkDemand`
+= Partymodus, Ende setzen, Ausschalten → Automatik_aus. Die Zeiten laufen nach der BM-2-Uhr (geht ca. 6 min vor).
+
 Verworfen: ein Skript „BM-2 Uhr stellen" (Schreiben auf TN 10161/10160 wirkungslos) und ein `input_number` für die
 Abweichung (durch den Template-Sensor ersetzt).
 

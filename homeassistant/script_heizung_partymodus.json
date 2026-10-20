@@ -1,0 +1,258 @@
+{
+  "alias": "Heizung: Partymodus (BM-2)",
+  "description": "Schaltet den Partymodus des BM-2 (direkter Heizkreis: Heizbetrieb mit Tagtemperatur unabhaengig vom Zeitprogramm) ueber den eBus ein oder aus. Einschalten: TN 10150 PartyMode = 1 (Telegramm 00 a6 27 01 00 ueber BmRaw, bis zu 3 Versuche mit Ruecklesen; das BM-2 setzt dann Start = jetzt und Ende = jetzt + 3 h), danach Ende = jetzt + Stunden in PartyEnd (TN 10151) und PartyEndDate (TN 10152) ueber script.heizung_ebus_schreiben. Reihenfolge wichtig (Test 20.10.2026): Liegt Ende-Datum/-Zeit zwischen den beiden Schreibvorgaengen in der Vergangenheit, beendet das BM-2 den Partymodus sofort. Deshalb zuerst die Uhrzeit, dann das Datum - ausser das neue Enddatum liegt nach dem aktuellen Enddatum, dann umgekehrt. Ausschalten: PartyMode = 0. Die Zeiten beziehen sich auf die Uhr des BM-2 (sensor.heizung_bm_2_uhrabweichung). Kodierung Zeit = Stunde*256+Minute, Datum = (Tag-1)+(Monat-1)*32+(Jahr-2000)*512 (custom_templates/wolf_bm2.jinja).",
+  "mode": "queued",
+  "icon": "mdi:party-popper",
+  "fields": {
+    "aktion": {
+      "name": "Aktion",
+      "required": true,
+      "default": "starten",
+      "selector": {
+        "select": {
+          "options": [
+            "starten",
+            "beenden"
+          ]
+        }
+      }
+    },
+    "stunden": {
+      "name": "Dauer in Stunden",
+      "description": "Nur beim Starten: Ende = jetzt + Dauer (0.5 bis 24 h)",
+      "default": 3,
+      "selector": {
+        "number": {
+          "min": 0.5,
+          "max": 24,
+          "step": 0.5,
+          "mode": "box"
+        }
+      }
+    }
+  },
+  "sequence": [
+    {
+      "variables": {
+        "aktion": "{{ aktion | default('starten') }}",
+        "stunden": "{{ stunden | default(3) | float }}",
+        "code": "{{ '01' if (aktion | default('starten')) == 'starten' else '00' }}",
+        "ziel": "{{ 'Aktiviert' if (aktion | default('starten')) == 'starten' else 'Deaktiviert' }}"
+      }
+    },
+    {
+      "action": "logbook.log",
+      "data": {
+        "name": "Heizung eBus",
+        "entity_id": "select.heating_ebusd_bm2_partymode",
+        "message": "Partymodus {{ aktion }}{{ ' fuer ' ~ stunden ~ ' h' if aktion == 'starten' else '' }} (TN 10150 = {{ code }})"
+      }
+    },
+    {
+      "repeat": {
+        "sequence": [
+          {
+            "action": "mqtt.publish",
+            "data": {
+              "topic": "ebusd/bm2/BmRaw/set",
+              "payload": "00 a6 27 {{ code }} 00"
+            }
+          },
+          {
+            "delay": {
+              "seconds": 3
+            }
+          },
+          {
+            "action": "mqtt.publish",
+            "data": {
+              "topic": "ebusd/bm2/PartyMode/get",
+              "payload": ""
+            }
+          },
+          {
+            "delay": {
+              "seconds": 4
+            }
+          }
+        ],
+        "until": [
+          {
+            "condition": "template",
+            "value_template": "{{ is_state('select.heating_ebusd_bm2_partymode', ziel) or repeat.index >= 3 }}"
+          }
+        ]
+      }
+    },
+    {
+      "if": [
+        {
+          "condition": "template",
+          "value_template": "{{ not is_state('select.heating_ebusd_bm2_partymode', ziel) }}"
+        }
+      ],
+      "then": [
+        {
+          "action": "notify.mobile_app_birger_iphone",
+          "continue_on_error": true,
+          "data": {
+            "title": "Heizung: Partymodus nicht uebernommen",
+            "message": "PartyMode sollte {{ ziel }} sein, gelesen {{ states('select.heating_ebusd_bm2_partymode') }}"
+          }
+        },
+        {
+          "stop": "Partymodus nicht uebernommen",
+          "error": true
+        }
+      ]
+    },
+    {
+      "if": [
+        {
+          "condition": "template",
+          "value_template": "{{ aktion == 'starten' }}"
+        }
+      ],
+      "then": [
+        {
+          "variables": {
+            "ende": "{{ now() + timedelta(hours=stunden) }}",
+            "ende_zeit_raw": "{% from 'wolf_bm2.jinja' import macro_bm2_time_raw %}{% set f = macro_bm2_time_raw | as_function %}{{ f(now() + timedelta(hours=stunden)) }}",
+            "ende_datum_raw": "{% from 'wolf_bm2.jinja' import macro_bm2_date_raw %}{% set f = macro_bm2_date_raw | as_function %}{{ f(now() + timedelta(hours=stunden)) }}",
+            "ende_datum_alt": "{{ states('number.heating_ebusd_bm2_partyenddate') | int(-1) }}"
+          }
+        },
+        {
+          "if": [
+            {
+              "condition": "template",
+              "value_template": "{{ (ende_datum_raw | int) > (ende_datum_alt | int) }}"
+            }
+          ],
+          "then": [
+            {
+              "action": "script.heizung_ebus_schreiben",
+              "continue_on_error": true,
+              "data": {
+                "circuit": "bm2",
+                "name": "PartyEndDate",
+                "wert": "{{ ende_datum_raw }}",
+                "minimum": 13000,
+                "maximum": 40000
+              }
+            },
+            {
+              "action": "script.heizung_ebus_schreiben",
+              "continue_on_error": true,
+              "data": {
+                "circuit": "bm2",
+                "name": "PartyEnd",
+                "wert": "{{ ende_zeit_raw }}",
+                "minimum": 0,
+                "maximum": 5947
+              }
+            }
+          ],
+          "else": [
+            {
+              "action": "script.heizung_ebus_schreiben",
+              "continue_on_error": true,
+              "data": {
+                "circuit": "bm2",
+                "name": "PartyEnd",
+                "wert": "{{ ende_zeit_raw }}",
+                "minimum": 0,
+                "maximum": 5947
+              }
+            },
+            {
+              "action": "script.heizung_ebus_schreiben",
+              "continue_on_error": true,
+              "data": {
+                "circuit": "bm2",
+                "name": "PartyEndDate",
+                "wert": "{{ ende_datum_raw }}",
+                "minimum": 13000,
+                "maximum": 40000
+              }
+            }
+          ]
+        },
+        {
+          "action": "mqtt.publish",
+          "data": {
+            "topic": "ebusd/bm2/PartyStart/get",
+            "payload": ""
+          }
+        },
+        {
+          "action": "mqtt.publish",
+          "data": {
+            "topic": "ebusd/bm2/PartyStartDate/get",
+            "payload": ""
+          }
+        },
+        {
+          "action": "mqtt.publish",
+          "data": {
+            "topic": "ebusd/bm2/HkDemand/get",
+            "payload": ""
+          }
+        },
+        {
+          "delay": {
+            "seconds": 5
+          }
+        },
+        {
+          "action": "logbook.log",
+          "data": {
+            "name": "Heizung eBus",
+            "entity_id": "select.heating_ebusd_bm2_partymode",
+            "message": "Partymodus aktiv: {{ states('sensor.heizung_partymodus_zeitraum') }}, Anforderung Heizkreis {{ states('sensor.heating_ebusd_bm2_hkdemand') }}"
+          }
+        },
+        {
+          "if": [
+            {
+              "condition": "template",
+              "value_template": "{{ not is_state('sensor.heating_ebusd_bm2_hkdemand', 'Partymodus') }}"
+            }
+          ],
+          "then": [
+            {
+              "action": "notify.mobile_app_birger_iphone",
+              "continue_on_error": true,
+              "data": {
+                "title": "Heizung: Partymodus pruefen",
+                "message": "PartyMode ist {{ states('select.heating_ebusd_bm2_partymode') }}, aber Anforderung Heizkreis = {{ states('sensor.heating_ebusd_bm2_hkdemand') }} (erwartet Partymodus). Zeitraum {{ states('sensor.heizung_partymodus_zeitraum') }}."
+              }
+            }
+          ]
+        }
+      ],
+      "else": [
+        {
+          "action": "mqtt.publish",
+          "data": {
+            "topic": "ebusd/bm2/HkDemand/get",
+            "payload": ""
+          }
+        },
+        {
+          "delay": {
+            "seconds": 4
+          }
+        },
+        {
+          "action": "logbook.log",
+          "data": {
+            "name": "Heizung eBus",
+            "entity_id": "select.heating_ebusd_bm2_partymode",
+            "message": "Partymodus beendet, Anforderung Heizkreis {{ states('sensor.heating_ebusd_bm2_hkdemand') }}"
+          }
+        }
+      ]
+    }
+  ]
+}
