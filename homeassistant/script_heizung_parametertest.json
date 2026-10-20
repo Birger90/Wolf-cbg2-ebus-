@@ -363,27 +363,15 @@
         ],
         "else": [
          {
-          "action": "mqtt.publish",
+          "action": "script.heizung_ebus_schreiben",
+          "continue_on_error": true,
           "data": {
-           "topic": "ebusd/{{ repeat.item.circuit }}/{{ repeat.item.name }}/set",
-           "payload": "{{ ziel }}"
-          }
-         },
-         {
-          "delay": {
-           "seconds": 3
-          }
-         },
-         {
-          "action": "mqtt.publish",
-          "data": {
-           "topic": "ebusd/{{ repeat.item.circuit }}/{{ repeat.item.name }}/get",
-           "payload": ""
-          }
-         },
-         {
-          "delay": {
-           "seconds": 4
+           "circuit": "{{ repeat.item.circuit }}",
+           "name": "{{ repeat.item.name }}",
+           "wert": "{{ ziel }}",
+           "minimum": -100,
+           "maximum": 1000,
+           "sensor": "{{ repeat.item.entity }}"
           }
          }
         ]
@@ -420,27 +408,15 @@
         ],
         "else": [
          {
-          "action": "mqtt.publish",
+          "action": "script.heizung_ebus_schreiben",
+          "continue_on_error": true,
           "data": {
-           "topic": "ebusd/{{ repeat.item.circuit }}/{{ repeat.item.name }}/set",
-           "payload": "{{ ziel }}"
-          }
-         },
-         {
-          "delay": {
-           "seconds": 3
-          }
-         },
-         {
-          "action": "mqtt.publish",
-          "data": {
-           "topic": "ebusd/{{ repeat.item.circuit }}/{{ repeat.item.name }}/get",
-           "payload": ""
-          }
-         },
-         {
-          "delay": {
-           "seconds": 4
+           "circuit": "{{ repeat.item.circuit }}",
+           "name": "{{ repeat.item.name }}",
+           "wert": "{{ ziel }}",
+           "minimum": -100,
+           "maximum": 1000,
+           "sensor": "{{ repeat.item.entity }}"
           }
          }
         ]
@@ -480,27 +456,15 @@
           ],
           "else": [
            {
-            "action": "mqtt.publish",
+            "action": "script.heizung_ebus_schreiben",
+            "continue_on_error": true,
             "data": {
-             "topic": "ebusd/{{ repeat.item.circuit }}/{{ repeat.item.name }}/set",
-             "payload": "{{ ziel }}"
-            }
-           },
-           {
-            "delay": {
-             "seconds": 3
-            }
-           },
-           {
-            "action": "mqtt.publish",
-            "data": {
-             "topic": "ebusd/{{ repeat.item.circuit }}/{{ repeat.item.name }}/get",
-             "payload": ""
-            }
-           },
-           {
-            "delay": {
-             "seconds": 4
+             "circuit": "{{ repeat.item.circuit }}",
+             "name": "{{ repeat.item.name }}",
+             "wert": "{{ ziel }}",
+             "minimum": -100,
+             "maximum": 1000,
+             "sensor": "{{ repeat.item.entity }}"
             }
            }
           ]

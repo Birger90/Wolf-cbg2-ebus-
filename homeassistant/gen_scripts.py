@@ -132,12 +132,11 @@ def test_items():
 
 
 def parametertest():
-    write_bm = [  # BM-2 / MK: statische ebusd-Nachricht, Wert als Anzeigewert
-        {"action": "mqtt.publish", "data": {"topic": "ebusd/{{ repeat.item.circuit }}/{{ repeat.item.name }}/set",
-                                            "payload": "{{ ziel }}"}},
-        {"delay": {"seconds": 3}},
-        {"action": "mqtt.publish", "data": {"topic": "ebusd/{{ repeat.item.circuit }}/{{ repeat.item.name }}/get", "payload": ""}},
-        {"delay": {"seconds": 4}},
+    write_bm = [  # BM-2 / MK: ueber script.heizung_ebus_schreiben (statische ebusd-Nachricht, Ruecklesen, bis zu 3 Versuche;
+        # ohne Wiederholung gingen am 20.10. abends 7 von 21 Telegrammen verloren, BM-2/MK liefern kein ACK)
+        {"action": "script.heizung_ebus_schreiben", "continue_on_error": True,
+         "data": {"circuit": "{{ repeat.item.circuit }}", "name": "{{ repeat.item.name }}", "wert": "{{ ziel }}",
+                  "minimum": -100, "maximum": 1000, "sensor": "{{ repeat.item.entity }}"}},
     ]
 
     def write_step(ziel_var):

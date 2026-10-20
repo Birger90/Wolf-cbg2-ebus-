@@ -39,8 +39,10 @@ Nicht als Regler angelegt: HG12 Gasart, HG10 eBus-Adresse (im Skript gesperrt), 
 | `select.heizung_programm_mischerkreis` | `sensor.heating_ebusd_mk_mkprogram` | `ebusd/mk/MkRaw/set` = `00 74 27 <code> 00` (TN 10100 an 86) | wie oben |
 | `select.heizung_programm_warmwasser` | `sensor.heating_ebusd_bm2_wwprogram` | `ebusd/bm2/BmRaw/set` = `00 75 27 <code> 00` (TN 10101) | Standby 00, Auto 01, Permanent 02 |
 
-Nach dem Schreiben folgt nach 3 s ein `…/get`, damit der Sensor den neuen Wert liest. Prüfbyte `00` reicht, weil das BM-2
-und der Mischerkreis das Prüfbyte beim Schreiben nicht prüfen (Tests 19./20.10.2026).
+Ablauf: Telegramm senden, 3 s warten, `…/get`, 4 s warten, bis der Sensor die gewählte Option zeigt oder 3 Versuche
+erreicht sind; danach Push, falls der Wert nicht übernommen wurde. Prüfbyte `00` reicht, weil das BM-2 und der Mischerkreis
+das Prüfbyte beim Schreiben nicht prüfen (Tests 19./20.10.2026). Die Wiederholung ist nötig: BM-2 und MK quittieren nicht,
+im Parametertest am 20.10. abends ging jedes dritte Telegramm ohne Wiederholung verloren.
 
 ## Schieberegler Mischermodul (Template-Number)
 

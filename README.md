@@ -118,7 +118,8 @@ das ISM7 am Bus hängt, kommen auch diese Werte passiv.
 - Automationen: „Anlagendruck niedrig“ (`hc/Pressure` unter einstellbarer Schwelle, 5 min), „Datenausfall“,
   „Störung“ (`hc/Brennerstatus` = Stoerung oder `hc/Stb` = Ausgeloest, 2 min, mit Entwarnung), „Wartung fällig“.
 - Skripte: `heizung_therme_schreiben` (Therme `kreis=hc` und Mischermodul `kreis=mm`, Prüfbyte), `heizung_ebus_schreiben`
-  (BM-2/MK über die statischen Nachrichten), `heizung_parametertest` (Testlauf aller 41 schreibbaren Werte inkl. MM),
+  (BM-2/MK über die statischen Nachrichten inkl. Programmwahl, Rücklesen, bis zu 3 Versuche), `heizung_parametertest`
+  (Testlauf aller 41 schreibbaren Werte inkl. MM; BM-2/MK laufen über `heizung_ebus_schreiben`),
   `heizung_mqtt_raw` (Rohtelegramm, nur Test).
 - Bedienelemente (Template-Helfer, Stand 20.10.2026, siehe `docs/ha-helfer.md`): 16 Schieberegler `number.therme_hg01` …
   `hg60` für die HG-Parameter (schreiben über `heizung_therme_schreiben`), drei Auswahlfelder
