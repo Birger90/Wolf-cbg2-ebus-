@@ -274,6 +274,47 @@ BM-2-Broadcasts `30 fe 5023` (Schreiben an alle): TN 35 = 0 (Parallelbetrieb), T
 - Vergleichsquelle: Ein anderer Nutzer (simon42-Forum, „Ebusd V5.0 mit einem Wolf BM Bediengerät“) zeigt dasselbe 0503-Format
   `03fe0503 08 01 00 40 00 38 1c 2e 09` (Kessel 0x38/2 = 28, Rücklauf 0x1c = 28) → bestätigt die Byte-Zuordnung von FaStatus.
 
+### Durchgang 1 (21.10.2026, 01:30; Zeitraum 23:39–01:32)
+
+Anlagenzustand im ganzen Zeitraum: Therme Standby, Brenner aus (seit 22:58), Kesselsoll 5,0, Modulation 0, Pumpe 0,
+BM-2-Heizkreis „Eco“, Außentemperatur 10,3. Die Anlage kühlt aus (Vorlauf 24,8 → 23,3, Rücklauf 25,8 → 24,6,
+Speicher 57,2 → 54,3). Korrelationen mit Brenner/WW-Ladung waren deshalb in diesem Durchgang nicht möglich.
+
+**Was sich geändert hat:** von allen 48 `listen`-Sensoren nur `M5014_52_20 temp` (24,602 → 22,898 in 0,1-K-Schritten),
+parallel zu Therme-Vorlauf und MM-Vorlauf → bestätigt erneut Byte 3–4 der 5014-Antwort = Mischervorlauf. Alle übrigen Rohwerte
+(TN 10006, 1113, 10063, 10084, 10711, 10039, MM 2593/45/711, 5014 `temp2` 40,43, `b5` 3, `b7` 10, Adresse `50` usw.) blieben
+konstant. `temp2` = 40,43 blieb auch bei ausgekühltem Mischerkreis gleich → passt zu einem Sollwert/Parameter, nicht zu einem
+Messwert (Bedeutung weiter nicht verifiziert).
+
+**Ausgänge TN 371:** Seit 23:28 durchgehend 4 (nur Bit 2) bei Brenner aus; um 21:18 bei Brenner ein 22 (Bit 1, 2, 4).
+Bit 2 ist also auch bei ausgeschaltetem Brenner gesetzt → die aus anderen Wolf-Geräten übernommene Deutung
+„Bit 2 = Gasventil 2“ trifft hier nicht zu. Bit 1 korreliert bisher mit Brenner ein (1 Messpunkt, nicht verifiziert).
+
+**`grab result`, neu seit der Busanalyse:**
+
+- Master `f0` sendet ebenfalls einen `0301`-Broadcast: `f0 fe 0301 0e 67 00 00 80 00 00 00 01 00 00 00 00 00 00`
+  → gleiches Format wie beim BM-2 (`30`): Byte 1–2 = `67 00` = 10,3 °C Außentemperatur, Byte 3–4 `0080` = kein Raumfühler.
+  Hypothese: `f0` ist ein zweites BM-2-artiges Bediengerät (z. B. das BM-2 bzw. Bedienmodul des Mischerkreises).
+  Nicht verifiziert.
+- Einmalige ISM7-Abfragen (wohl beim Verbindungsaufbau der Wolf-App), Antworten gegen die Wolf-Datenbank geprüft:
+
+| Adresse | TN | Wolf-DB-Name | Rohwert | Deutung |
+|---|---|---|---|---|
+| `08` | 10878 | Herstelljahr | `0x13` = 19 | vermutlich 2019 (Jahreszahl ohne Jahrhundert, nicht verifiziert) |
+| `08` | 10877 | Herstellwoche | `0x2c` = 44 | KW 44 |
+| `08` | 10879 | – (nicht in der DB) | 2 | unbekannt |
+| `08` | 10880 | – (nicht in der DB) | `0x6a79` = 27257 | unbekannt |
+| `08` | 10075 | Warmwasserkonfiguration | 5 | Listeneintrag 5 = `DHWCoilStorNoHead` (Speicher mit Heizschlange) |
+| `08` | 2651 | Funktion E1 | 0 | – |
+| `08` | 410 | Firmware | `0xdc` = 220 | 2.20 (= ebusd `hc Firmware` 2.2) |
+| `35` | 10185 | BM-2 Softwareversion | `0x118` = 280 | Darstellung (2.80?) nicht verifiziert; ebusd-Ident meldet SW 0204 |
+| `35` | 10163 / 10162 | erkannte Geräte Low/High | 260 / `0x0800` | Bitfeld, Zuordnung nicht verifiziert |
+| `35` | 10180 | Anforderung Lüftung | 8 | – |
+| `35` | 10920 | SmartHome-System | 0 | – |
+| `35` | 10812 | Vereinfachter Modus | 0 | – |
+| `35`, `86` | 9024 / 9028 / 9007 | aktuelle Kreisart / Kühlkurve global / Raumeinfluss Kühlen | `0080` / `0080` / 0 | keine Kühlfunktion |
+| `52` | 410 | Firmware | 0 | MM liefert keine Version über TN 410 |
+
 ## Weitere Telegrammnummern
 
 - TN 5250 (BM-2): Wartung Fälligkeitsdatum, Typ BM2Date (ism7mqtt `BM2DateConverterTemplate`):
