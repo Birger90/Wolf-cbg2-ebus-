@@ -264,6 +264,16 @@ BM-2-Broadcasts `30 fe 5023` (Schreiben an alle): TN 35 = 0 (Parallelbetrieb), T
 - `03 f1 0800`: Feuerungsautomat an Master `f1`, Format wie RcTarget (Werte `0080` = ungültig).
 - Was die Master `f0`/`f1` sind (nicht verifiziert).
 
+## Nachtmitschnitt 20./21.10.2026 (Aufbau)
+
+- `ebusd-config/listen.csv`: passive Definitionen (Typ `r` ohne Priorität, ebusd fragt nicht selbst ab) für alle bisher
+  unbekannten Telegramme von BM-2 und ISM7; Discovery-Filter um `^listen$` erweitert → HA zeichnet die Rohwerte als
+  `sensor.heating_ebusd_listen_*` auf. Strings (HEX) werden von der HA-Integration nicht veröffentlicht, deshalb zusätzlich
+  ebusd `grab` (sammelt alle unbekannten Telegramme mit Anzahl und letztem Inhalt; Abruf `shell_command.ebusd_cmd` `grab result`).
+- Auswertung um 01:30, 04:30 und 07:30.
+- Vergleichsquelle: Ein anderer Nutzer (simon42-Forum, „Ebusd V5.0 mit einem Wolf BM Bediengerät“) zeigt dasselbe 0503-Format
+  `03fe0503 08 01 00 40 00 38 1c 2e 09` (Kessel 0x38/2 = 28, Rücklauf 0x1c = 28) → bestätigt die Byte-Zuordnung von FaStatus.
+
 ## Weitere Telegrammnummern
 
 - TN 5250 (BM-2): Wartung Fälligkeitsdatum, Typ BM2Date (ism7mqtt `BM2DateConverterTemplate`):
