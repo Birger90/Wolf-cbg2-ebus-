@@ -120,7 +120,7 @@ das ISM7 am Bus hängt, kommen auch diese Werte passiv.
 
 ## Optimierung („Vorschlagen“ / „Automatisch“), Stand 20.10.2026
 
-Grundlage: Wolf CGB-2 Montageanleitung 3063421_201512 (Textauszug in `docs/`, Kap. 22/23 HG-Parameter, Kap. 33 Pumpe,
+Grundlage: Wolf CGB-2 Montageanleitung 3063421_201512 (Kap. 22/23 HG-Parameter, Kap. 33 Pumpe,
 Kap. 40 Warnung 43) und die Auswertung vom 19.10.2026: tagsüber endete fast jeder Brennerlauf mit „Spreizung KF“ →
 „Gradientenüberwachung“ (laut Anleitung: Spreizung Brennkammerfühler/Kesselfühler zu hoch bzw. Kesseltemperatur steigt zu
 schnell = zu wenig Durchfluss), Neustart nach der Taktsperre (HG09 = 7 min). Nachts bei offenen Ventilen 12–25 min Läufe.
