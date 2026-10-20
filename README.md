@@ -118,6 +118,24 @@ das ISM7 am Bus hängt, kommen auch diese Werte passiv.
   Nachrichten), `heizung_parametertest` (Testlauf aller schreibbaren Werte), `heizung_mqtt_raw` (Rohtelegramm, nur Test).
 - Dashboard „Heizung“ (`heizung-wolf`) liest ausschließlich eBus-Entitäten.
 
+## Optimierung („Vorschlagen“ / „Automatisch“), Stand 20.10.2026
+
+Grundlage: Wolf CGB-2 Montageanleitung 3063421_201512 (Textauszug in `docs/`, Kap. 22/23 HG-Parameter, Kap. 33 Pumpe,
+Kap. 40 Warnung 43) und die Auswertung vom 19.10.2026: tagsüber endete fast jeder Brennerlauf mit „Spreizung KF“ →
+„Gradientenüberwachung“ (laut Anleitung: Spreizung Brennkammerfühler/Kesselfühler zu hoch bzw. Kesseltemperatur steigt zu
+schnell = zu wenig Durchfluss), Neustart nach der Taktsperre (HG09 = 7 min). Nachts bei offenen Ventilen 12–25 min Läufe.
+
+Bausteine (`homeassistant/gen_optimierung.py`):
+- history_stats „Schutzabschaltungen Spreizung/Gradient gestern“ und „heute“ (Zählung der Brennerstatus-Zustände).
+- `automation.heizung_optimierung_auswerten`, täglich 07:30: Vortag (Starts, Laufzeit, Schutzabschaltungen), Regeln in
+  Reihenfolge, höchstens ein Vorschlag, frühestens 24 h nach der letzten Änderung, offener Vorschlag wird nicht überschrieben.
+  Regeln: Starts > 40 und Schutzabschaltungen > 30 %: HG16 +10 (max 65) → HG39 = 3 → HG04 −8 (min 70); Starts > 40: HG09 +3 (max 15).
+- Modus `input_select.heizung_optimierung_modus`: Nur überwachen (Bericht), Vorschlagen (Push mit Übernehmen/Ablehnen,
+  Dashboard-Taste), Automatisch (schreibt direkt).
+- `script.heizung_vorschlag_uebernehmen` schreibt über die Schreib-Skripte (Bereichsprüfung, Rücklesen), setzt
+  `input_datetime.heizung_letzte_parameteranderung` und `input_text.heizung_letzte_optimierung`.
+- Nie angefasst: Heizkurven, Programmwahl, Warmwasser, Gas-/Abgasparameter (HG02, HG03, HG12, HG43–HG45).
+
 ## Sicherheitsregeln (für die HA-Automatisierung)
 
 - Programmwahl (Standby/Sparen) beider Heizkreise ist in ebusd **nur lesbar** definiert, die Mieterwohnung hängt an beiden Kreisen.
@@ -129,4 +147,5 @@ das ISM7 am Bus hängt, kommen auch diese Werte passiv.
 - [ebusd](https://github.com/john30/ebusd), [ebusd-configuration](https://github.com/john30/ebusd-configuration) (kromschroeder/08..hc.csv, 50..mc.csv, broadcast.csv)
 - [zivillian/ism7mqtt](https://github.com/zivillian/ism7mqtt) (Wolf-Parameterdatenbank: parameter.xml, converter.xml, device.xml)
 - [dktzde/ebusd-configuration-wolf](https://github.com/dktzde/ebusd-configuration-wolf) (CRC8-Beschreibung)
+- Wolf CGB-2(K) Montageanleitung für den Fachhandwerker, Art.-Nr. 3063421_201512 (farko.com/files/wolf_cgb-2_montageanleitung.pdf)
 - [ebusd Issue #1696](https://github.com/john30/ebusd/issues/1696), [Discussion #779](https://github.com/john30/ebusd/discussions/779)

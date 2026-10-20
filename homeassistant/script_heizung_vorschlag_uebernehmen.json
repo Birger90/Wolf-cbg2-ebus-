@@ -1,0 +1,127 @@
+{
+ "alias": "Heizung: Vorschlag uebernehmen",
+ "description": "Schreibt den offenen Optimierungsvorschlag (input_text.heizung_vorschlag_offen) ueber das passende Schreib-Skript, protokolliert und setzt den Zeitstempel der letzten Aenderung.",
+ "mode": "single",
+ "sequence": [
+  {
+   "variables": {
+    "v": "{{ states('input_text.heizung_vorschlag_offen') }}",
+    "p": "{{ states('input_text.heizung_vorschlag_offen').split('|') }}"
+   }
+  },
+  {
+   "if": [
+    {
+     "condition": "template",
+     "value_template": "{{ p | length < 9 }}"
+    }
+   ],
+   "then": [
+    {
+     "action": "persistent_notification.create",
+     "data": {
+      "title": "Heizung: kein Vorschlag",
+      "message": "Es liegt kein offener Vorschlag vor."
+     }
+    },
+    {
+     "stop": "kein Vorschlag"
+    }
+   ]
+  },
+  {
+   "variables": {
+    "circuit": "{{ p[0] }}",
+    "name": "{{ p[1] }}",
+    "tn": "{{ p[2] | int }}",
+    "teiler": "{{ p[3] | int }}",
+    "von": "{{ p[4] | float }}",
+    "nach": "{{ p[5] | float }}",
+    "minimum": "{{ p[6] | float }}",
+    "maximum": "{{ p[7] | float }}",
+    "grund": "{{ p[8] }}"
+   }
+  },
+  {
+   "action": "logbook.log",
+   "data": {
+    "name": "Heizung Optimierung",
+    "message": "uebernehme {{ circuit }}/{{ name }} {{ von }} -> {{ nach }} ({{ grund }})"
+   }
+  },
+  {
+   "if": [
+    {
+     "condition": "template",
+     "value_template": "{{ circuit == 'hc' }}"
+    }
+   ],
+   "then": [
+    {
+     "action": "script.heizung_therme_schreiben",
+     "data": {
+      "name": "{{ name }}",
+      "tn": "{{ tn }}",
+      "wert": "{{ nach }}",
+      "teiler": "{{ teiler }}",
+      "minimum": "{{ minimum }}",
+      "maximum": "{{ maximum }}"
+     }
+    }
+   ],
+   "else": [
+    {
+     "action": "script.heizung_ebus_schreiben",
+     "data": {
+      "circuit": "{{ circuit }}",
+      "name": "{{ name }}",
+      "wert": "{{ nach }}",
+      "minimum": "{{ minimum }}",
+      "maximum": "{{ maximum }}"
+     }
+    }
+   ]
+  },
+  {
+   "action": "input_datetime.set_datetime",
+   "target": {
+    "entity_id": "input_datetime.heizung_letzte_parameteranderung"
+   },
+   "data": {
+    "datetime": "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+   }
+  },
+  {
+   "action": "input_text.set_value",
+   "target": {
+    "entity_id": "input_text.heizung_letzte_optimierung"
+   },
+   "data": {
+    "value": "{{ now().strftime('%d.%m. %H:%M') }} {{ name }} {{ von }} -> {{ nach }} ({{ grund }})"
+   }
+  },
+  {
+   "action": "input_text.set_value",
+   "target": {
+    "entity_id": "input_text.heizung_vorschlag_offen"
+   },
+   "data": {
+    "value": ""
+   }
+  },
+  {
+   "action": "persistent_notification.dismiss",
+   "data": {
+    "notification_id": "heizung_vorschlag"
+   }
+  },
+  {
+   "action": "notify.mobile_app_birger_iphone",
+   "continue_on_error": true,
+   "data": {
+    "title": "Heizung: Parameter geaendert",
+    "message": "{{ name }} {{ von }} -> {{ nach }} geschrieben und bestaetigt."
+   }
+  }
+ ]
+}

@@ -1,0 +1,74 @@
+{
+ "alias": "Heizung: Vorschlag per Push beantwortet",
+ "description": "Reagiert auf die Tasten 'Uebernehmen'/'Ablehnen' der Vorschlags-Push-Nachricht.",
+ "mode": "single",
+ "triggers": [
+  {
+   "trigger": "event",
+   "event_type": "mobile_app_notification_action",
+   "event_data": {
+    "action": "HEIZUNG_UEBERNEHMEN"
+   },
+   "id": "ja"
+  },
+  {
+   "trigger": "event",
+   "event_type": "mobile_app_notification_action",
+   "event_data": {
+    "action": "HEIZUNG_ABLEHNEN"
+   },
+   "id": "nein"
+  }
+ ],
+ "actions": [
+  {
+   "choose": [
+    {
+     "conditions": [
+      {
+       "condition": "trigger",
+       "id": "ja"
+      }
+     ],
+     "sequence": [
+      {
+       "action": "script.heizung_vorschlag_uebernehmen"
+      }
+     ]
+    },
+    {
+     "conditions": [
+      {
+       "condition": "trigger",
+       "id": "nein"
+      }
+     ],
+     "sequence": [
+      {
+       "action": "logbook.log",
+       "data": {
+        "name": "Heizung Optimierung",
+        "message": "Vorschlag abgelehnt: {{ states('input_text.heizung_vorschlag_offen') }}"
+       }
+      },
+      {
+       "action": "input_text.set_value",
+       "target": {
+        "entity_id": "input_text.heizung_vorschlag_offen"
+       },
+       "data": {
+        "value": ""
+       }
+      },
+      {
+       "action": "persistent_notification.dismiss",
+       "data": {
+        "notification_id": "heizung_vorschlag"
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
