@@ -46,7 +46,6 @@ r9,hc,,Hg21,HG21 Kesselminimaltemperatur TK-min (20-90 C),,08,5022,cc1f00,value,
 r9,hc,,Hg22,HG22 Kesselmaximaltemperatur TK-max (50-90 C),,08,5022,cc2700,value,,SIN,10,°C,TN 39
 r9,hc,,Hg25,HG25 Kesseluebertemperatur bei Speicherladung (1-30 K),,08,5022,cc2d00,value,,SIN,10,K,TN 45
 r9,hc,,Hg33,HG33 Laufzeit Brennerhysterese (1-30 min),,08,5022,cc2100,value,,UIN,,min,TN 33
-r9,hc,,Hg37,HG37 Typ Pumpenregelung 0=Festwert 1=Linear 2=dT (Spreizung),,08,5022,cc3927,value,,UIN,,,TN 10041
 r9,hc,,Hg38,HG38 Soll-Spreizung dT Pumpenregelung (0-40 K),,08,5022,ccce05,value,,SIN,10,K,TN 1486
 r9,hc,,Hg39,HG39 Zeit Softstart (0-10 min),,08,5022,cc5301,value,,UIN,,min,TN 339
 r9,hc,,Hg60,HG60 Minimale Schalthysterese Brenner (2-30 K),,08,5022,cc382a,value,,SIN,10,K,TN 10808
