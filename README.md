@@ -1,122 +1,97 @@
-# Wolf CGB-2 am eBus mit ebusd und Home Assistant
+# Wolf CGB-2 · eBus · Home Assistant
 
-Lokaler Lese- **und Schreibzugriff** auf eine Wolf-Gasbrennwerttherme CGB-2-24 mit Bedienmodul BM-2, Mischermodul MM
-und Funk-Außenfühler über den eBus, ohne Wolf-Cloud. Stand 21.10.2026, alles an einer realen Anlage verifiziert (Werte
-gegen die Wolf-Cloud und das BM-2-Display verglichen, jeder Schreibweg mit Rücklesen und Zurückstellen getestet).
+Lokale Steuerung einer **Wolf-Gasbrennwerttherme CGB-2-24** mit Bedienmodul **BM-2**, Mischermodul **MM** und
+Funk-Außenfühler über den **eBus** – lesen *und schreiben*, ohne Wolf-Cloud, mit [ebusd](https://github.com/john30/ebusd)
+und Home Assistant.
+
+Alles hier ist an einer realen Anlage erprobt: Werte gegen Wolf-Cloud und BM-2-Display verglichen, jeder Schreibweg
+mit Rücklesen und Zurückstellen getestet. Belege, Mitschnitte und Fehlversuche stehen in [`docs/protokoll.md`](docs/protokoll.md).
+Stand: 21.10.2026.
 
 ```
 Therme CGB-2-24   ──┐
 BM-2 (Regler)     ──┤
-MM (Mischer)      ──┤ eBus ── eBUS Adapter Shield C5 (ESP32-C5, WLAN) ── ebusd (HA-App) ── MQTT ── Home Assistant
-Funkempfänger 0f  ──┤
-ISM7 (noch)       ──┘
+Mischermodul MM   ──┤ eBus ── eBUS Adapter Shield C5 ── WLAN ── ebusd (HA-App) ── MQTT ── Home Assistant
+Funkempfänger     ──┤
+ISM7 (optional)   ──┘
 ```
 
-## Stand in einem Satz
+---
 
-Alle für Betrieb und Optimierung relevanten Parameter von Therme, BM-2, Heizkreisen und Mischermodul sind lesbar und
-schreibbar; Störungscodes werden gelesen und im Klartext ausgegeben. Nicht über den eBus möglich: Störung quittieren,
-BM-2-Uhr stellen, Störungshistorie lesen (Details unten und in `docs/protokoll.md`).
+## Inhalt
 
-## Was im Repo liegt
+1. [Was geht – was nicht](#was-geht--was-nicht)
+2. [Hardware](#hardware)
+3. [Busteilnehmer](#busteilnehmer)
+4. [Installation](#installation)
+5. [Protokoll](#protokoll)
+6. [Parameterabdeckung](#parameterabdeckung)
+7. [Home Assistant](#home-assistant)
+8. [Sicherheitsregeln](#sicherheitsregeln)
+9. [Repo-Struktur](#repo-struktur)
+10. [Offene Punkte](#offene-punkte)
+11. [Quellen und Dank](#quellen-und-dank)
 
-| Pfad | Inhalt |
+---
+
+## Was geht – was nicht
+
+| Funktion | Stand |
 |---|---|
-| `ebusd-config/*.csv` | Nachrichtendefinitionen für ebusd (Therme, BM-2, Mischerkreis, Mischermodul, Broadcast) |
-| `ebusd-config/mqtt-hassio.cfg` | ebusd-MQTT-Integration für Home Assistant (angepasste Filter, alle Werte, schreibbare Nachrichten) |
-| `tools/wolf_crc.py` | Prüfbyte-Berechnung des Wolf-Protokolls, Selbsttest gegen 30 mitgeschnittene Telegramme |
-| `tools/gen_ebusd_config.py` | Generator, der die CSV-Dateien aus Tabellen erzeugt (Telegrammnummern aus der Wolf-Parameterdatenbank) |
-| `docs/protokoll.md` | Protokolldetails, Busadressen, Tests und Mitschnitte mit Belegen, was geht und was nicht |
-| `docs/fehlercodes-cgb2.md` | Störungs- und Warncodes CGB-2/BM-2/MM mit Abgleich gegen die Wolf-Anleitungen |
-| `docs/ha-helfer.md` | Alle Home-Assistant-Helfer, Skripte und Automationen (Heizung und Kabine) mit Entitätsnamen |
-| `homeassistant/gen_scripts.py` | Erzeugt die HA-Skripte `heizung_therme_schreiben` (Prüfbyte in Jinja) und `heizung_parametertest` als JSON |
-| `homeassistant/script_*.json` | Die erzeugten Skripte, per API/UI in Home Assistant anlegbar |
+| Temperaturen, Druck, Brennerstatus, Zähler, Modulation lesen | ✅ |
+| HG-Parameter der Therme schreiben | ✅ (Prüfbyte nötig) |
+| Mischermodul-Parameter (MI) schreiben | ✅ |
+| BM-2: Heizkurven, Programmwahl, Party, Urlaub, A-Parameter, Wartungsdatum | ✅ |
+| Aktueller Störungscode von Therme, BM-2, MM mit Klartext | ✅ |
+| Außentemperatur, BM-2-Uhr, BM-2-Status aus Broadcasts | ✅ |
+| Störung quittieren | ❌ läuft intern BM-2 ↔ Regelplatine, kein eBus-Telegramm |
+| BM-2-Uhr stellen | ❌ Uhr liegt im BM-2, alle Schreibversuche wirkungslos |
+| Störungshistorie des BM-2 (40 Einträge) | ❌ Telegrammnummer unbekannt |
+| HG-Parameter durch Mitschneiden am Display finden | ❌ das BM-2 liest sie intern, nicht über den eBus |
 
 ## Hardware
 
-- Wolf CGB-2-24 (Feuerungsautomat von Kromschröder), Software laut eBus-Scan 2002
-- Wolf BM-2, Software 02.04, sitzt in der Therme
-- Wolf MM (Mischermodul, Kromschröder), Konfiguration MI05 = 3 „Mischerkreis und direkter Heizkreis“
-- Wolf Funk-Außenfühler mit Funkempfänger (DCF77-Funkuhr), Master `0f`
-- [eBUS Adapter Shield C5](https://adapter.ebusd.eu/v5-c5/) am eBus-Anschluss der Therme, Betrieb über WLAN (`ens:IP:9999`)
-- Home Assistant OS auf Raspberry Pi mit der App [eBUSd von LukasGrebe](https://github.com/LukasGrebe/ha-addons) (ebusd 26.1) und Mosquitto
+| Gerät | Details |
+|---|---|
+| Wolf CGB-2-24 | Feuerungsautomat Kromschröder, eBus-Kennung SW 2002 |
+| Wolf BM-2 | SW 02.04, sitzt in der Therme |
+| Wolf Mischermodul MM | Kromschröder SW 0100, MI05 = 3 „Mischerkreis und direkter Heizkreis“ |
+| Wolf Funk-Außenfühler + Funkempfänger | Empfänger mit DCF77-Funkuhr, sendet als Master `0f` |
+| Wolf ISM7 / Link home | optional, für den Betrieb dieses Repos nicht nötig |
 
-## Busadressen dieser Anlage
+### Bus-Adapter
+
+- **[eBUS Adapter Shield C5](https://adapter.ebusd.eu/v5-c5/)** (ESP32-C5), angeschlossen am eBus-Anschluss der Therme.
+- Betrieb über **WLAN**, ebusd verbindet sich per TCP im Enhanced-Protokoll: `--device=ens:<IP>:9999`.
+- Firmware laut ebusd: `1.1[6911]`. Beobachtet: Symbolrate 57/s (max. 215), Arbitrierung 3–141 µs,
+  0 Neuverbindungen seit dem letzten Start.
+- ebusd sendet über den Adapter als Master `31` (Slave `36`); alle Schreibtests liefen über diesen Weg.
+
+### Software
+
+- Home Assistant OS mit der App [eBUSd von LukasGrebe](https://github.com/LukasGrebe/ha-addons), ebusd 26.1
+- Mosquitto als MQTT-Broker
+
+## Busteilnehmer
+
+Ausgabe von ebusd `info` und eigene Mitschnitte:
 
 | Adresse | Gerät | Inhalt |
 |---|---|---|
 | `08` (Master `03`) | Therme | Temperaturen, Druck, Brennerstatus, Zähler, HG-Parameter |
-| `35` (Master `30`) | BM-2 | Systemparameter (A-Parameter), direkter Heizkreis, Warmwasser, Uhr, Party/Urlaub, Wartung |
-| `52` | Mischermodul MM | Mischer-Vorlauf, Mischersoll, Pumpe, MI-Parameter; Schreiben über `MmRaw` mit Prüfbyte an `52` |
+| `35` (Master `30`) | BM-2 | A-Parameter, direkter Heizkreis, Warmwasser, Uhr, Party/Urlaub, Wartung |
 | `86` | Mischerkreis (MK) | Programmwahl, Heizkurve, Tagtemperatur des Mischerkreises |
-| `0f` | Funkempfänger Außenfühler | sendet jede Minute die Außentemperatur; Zeit/Datum sendet er als ungültig (DCF vermutlich nicht synchron) |
-| `ff` / `04` | ISM7 (Master / Slave) | liest alles zyklisch; Slave = Master + 5 |
-| `f0`, `f1` | unbekannte Master | senden `RcTarget`- bzw. `0503`-Broadcasts und lesen das MM; Gerät offen |
+| `52` | Mischermodul MM | Mischer-Vorlauf und -Soll, Pumpe, MI-Parameter |
+| `0f` | Funkempfänger | Außentemperatur jede Minute; Zeit/Datum sendet er als ungültig (DCF vermutlich nicht synchron) |
+| `ff` / `04` | ISM7 | liest alles zyklisch (Slave `04` = Master + 5) |
+| `31` / `36` | ebusd über den Adapter | |
+| `f0` / `f5`, `f1` | unbekannt | `f5` meldet sich als Kromschröder SW 0100 wie das MM; Zuordnung nicht verifiziert |
 
-Verifiziert über Vorlauftemperaturen: `35`/TN 10119 = Vorlauf direkter Heizkreis, `86`/TN 10119 = `52`/TN 15 = Mischer-Vorlauf,
-jeweils identisch mit der Wolf-Cloud.
+## Installation
 
-## Protokoll in Kürze
-
-Lesen (PBSB `5022`): `ZZ 50 22 03 <Prüfbyte> <TN lo> <TN hi>` → Antwort `02 <Wert lo> <Wert hi>` (`0080` = ungültig)
-Schreiben (PBSB `5023`): `ZZ 50 23 05 <Prüfbyte> <TN lo> <TN hi> <Wert lo> <Wert hi>`
-
-TN = Telegrammnummer aus der Wolf-Parameterdatenbank (identisch mit den Nummern im ISM7-Protokoll, siehe
-[zivillian/ism7mqtt](https://github.com/zivillian/ism7mqtt)). Werte sind 16 Bit little endian, bei Temperaturen ×10.
-
-**Prüfbyte** = CRC8 über alle folgenden Bytes, Polynom `0x5C`, Startwert `0x00`, pro Byte `c = shift8(c) XOR byte`.
-Entschlüsselt aus neun ISM7-Schreibtelegrammen und an allen 30 Mitschnitten bestätigt, siehe `tools/wolf_crc.py --verify`.
-Unabhängig davon beschreibt [dktzde/ebusd-configuration-wolf](https://github.com/dktzde/ebusd-configuration-wolf)
-dieselbe Formel.
-
-### Schreibwege (alle getestet)
-
-| Ziel | Weg | Prüfbyte |
-|---|---|---|
-| Therme `08` | 5 Byte an **Master** `03`, MQTT `ebusd/hc/HgRaw/set` = `"crc tnlo tnhi vlo vhi"` | wird geprüft (mit `00` kein Effekt) |
-| Mischermodul `52` | 5 Byte an `52`, `ebusd/mm/MmRaw/set` | CRC, quittiert |
-| BM-2 `35` | 5 Byte an **Slave** `35`, `ebusd/bm2/BmRaw/set` = `"00 tnlo tnhi vlo vhi"` | wird nicht geprüft |
-| Mischerkreis `86` | `ebusd/mk/MkRaw/set`, Präfix `00` | wird nicht geprüft |
-
-- Das ISM7 schreibt 9 Byte an die Master-Adresse `30` mit Anhang; diese Form nimmt das BM-2 von ebusd nicht an. Hinweis
-  auf die 5-Byte-Form von *audaciousengineer* in [ebusd Discussion #779](https://github.com/john30/ebusd/discussions/779).
-- ebusd meldet beim BM-2 immer `ERR: read timeout`, weil keine Antwortdaten kommen
-  ([ebusd Issue #1696](https://github.com/john30/ebusd/issues/1696)). Erfolg nur durch Zurücklesen prüfen.
-- Das offizielle ebusd-Format für die Therme (9 Byte an `03` mit Anhang `9d010000`) nimmt die CGB-2 nicht an.
-
-## Parameterabdeckung (21.10.2026)
-
-Lesen und Schreiben getestet (geändert, zurückgelesen, zurückgestellt):
-- **Therme:** HG01–HG04, HG07–HG09, HG13–HG17, HG19–HG22, HG25, HG33, HG38, HG39, HG41, HG60.
-  HG13 = Zirkomat setzt und sperrt HG14 (A1) – erst HG13, dann HG14 schreiben.
-  HG23 WW-Maximum = TN 385: Zuordnung am Display bestätigt (64 ↔ 65), Schreiben über den Bus noch nicht getestet.
-- **Mischermodul:** MI08 RL-Soll (TN 400), MI09 max. Speicherladezeit (TN 384), TV-min/-max, Heizkurvenabstand,
-  Nachlaufzeit, P-Bereich.
-- **BM-2 / Heizkreise:** Bedienparameter und Heizkurven (Parametertest 20.10.2026), Programmwahl (0 Standby, 1 Auto, 2 Permanent, 3 Sparen),
-  Party, Urlaub, 1× Warmwasser, A04 (TN 388), A07 (TN 257), A08 (TN 618), A09 Frostschutzgrenze (TN 2560), A10 (TN 35),
-  A15 Korrektur Außentemperatur (TN 1443), A23 (TN 10141), A26 (TN 10912), Kreisart (TN 9005), Raumeinfluss (TN 651),
-  Wartungsdatum (TN 5250/5264).
-
-Bewusst gesperrt bzw. ohne Regler: HG10 (eBus-Adresse), HG12 (Gasart), MI10/Busspeisung (`EbusPower`); keine Regler für
-HG34 und HG40. HG43–HG45 nicht angefasst – **HG43 am Display startet eine 100-%-Kalibrierung**.
-
-Offen / nicht verifiziert:
-- A14 (WW-Maximum am BM-2): Telegrammnummer unbekannt, wird nicht verteilt.
-- HG40: Rohwert 1, laut Wolf-DB „02“ (passt zu MI05 = 3), am Display nicht abgelesen.
-- MI17 ↔ TN 45 (liest 15,0, Werk 10 K) und HG61 ↔ TN 10017: Zuordnung nicht verifiziert.
-- Raumregler-Parameter A00, A05, A16–A18 lesbar, wirken ohne Raumfühler am BM-2 nicht.
-
-Nicht über den eBus möglich (getestet, `docs/protokoll.md`):
-- **Störung quittieren:** läuft intern BM-2 ↔ Regelplatine, kein eBus-Telegramm.
-- **BM-2-Uhr stellen:** Schreiben auf TN 10161/10160 und Zeit-Broadcasts von `0f`/`30` wirkungslos; die Uhr liegt im BM-2.
-- **Störungshistorie** (bis 40 Einträge im Fachmann-Menü): keine Telegrammnummer bekannt.
-- HG-Parameter liest das BM-2 intern, nicht über den eBus – Mitschneiden am Display hilft für Therme-Parameter nicht.
-
-## Installation in Home Assistant
-
-1. ebusd-App installieren, Adapter als `network_device` = `ens:<IP>:9999` eintragen.
-2. Dateien aus `ebusd-config/` nach `/app_configs/<slug>_ebusd/ebusd-config/` kopieren (z. B. mit dem File editor
-   oder Samba; in der App heißt der Ordner `/config/ebusd-config`), `mqtt-hassio.cfg` nach `/app_configs/<slug>_ebusd/`.
+1. ebusd-App installieren, als Gerät `ens:<IP-des-Adapters>:9999` eintragen.
+2. Dateien aus `ebusd-config/` nach `/app_configs/<slug>_ebusd/ebusd-config/` kopieren (File editor oder Samba), dazu
+   `mqtt-hassio.cfg` nach `/app_configs/<slug>_ebusd/`.
 3. App-Optionen, `commandline_options`:
    ```
    --configpath=/config/ebusd-config
@@ -124,57 +99,114 @@ Nicht über den eBus möglich (getestet, `docs/protokoll.md`):
    --httpport=8889
    --enabledefine
    ```
-   (kein `--scanconfig`, die Dateien im Ordner werden alle geladen; `seed_mqtt_cfg` bleibt an, die vorhandene cfg wird genutzt)
-4. App neu starten und im Log die Zahl der geladenen Nachrichten prüfen (`found messages: …`).
-5. Home Assistant legt per MQTT-Discovery die Entitäten an: `sensor.heating_ebusd_<circuit>_<name>`, schreibbare
-   BM-2/MK-Werte als `number.…`/`select.…`. HG-Parameter der Therme werden über `script.heizung_therme_schreiben`
-   geschrieben (Felder: name, tn, wert, teiler, minimum, maximum).
-6. Skripte aus `homeassistant/` anlegen (`python3 homeassistant/gen_scripts.py`, JSON per HA-API oder von Hand im Editor).
+   Kein `--scanconfig` – alle Dateien im Ordner werden geladen.
+4. App neu starten, im Log die Zahl der geladenen Nachrichten prüfen (`found messages: …`).
+5. Home Assistant legt die Entitäten per MQTT-Discovery an (`sensor.heating_ebusd_<kreis>_<name>`, schreibbare
+   BM-2/MK-Werte als `number`/`select`).
+6. Skripte aus `homeassistant/` anlegen (`python3 homeassistant/gen_scripts.py` erzeugt die JSON-Dateien), dazu
+   `configuration_shell_command.yaml` für Rohbefehle über den ebusd-Kommandoport (Feld `cmd`).
 
-Die Therme wird vom BM-2 ohnehin alle ~65 s abgefragt; da die IDs in `hc.csv` dem Format des BM-2 entsprechen
-(Präfix `cc`), liest ebusd diese Antworten passiv mit.
+Die Therme wird vom BM-2 ohnehin alle ~65 s abgefragt. Weil die IDs in `hc.csv` dem Format des BM-2 entsprechen,
+liest ebusd diese Antworten passiv mit; dasselbe gilt für die ISM7-Abfragen von BM-2, MK und MM.
 
-## Home-Assistant-Bausteine
+## Protokoll
 
-Vollständige Liste mit Entitätsnamen in `docs/ha-helfer.md`. Überblick:
-- **Bedienung Heizung** (Dashboard „Heizung“, `heizung-wolf`, nur eBus-Entitäten): Schieberegler für die HG-Parameter
-  (`number.therme_*`), Programmwahl der drei Kreise (`select.heizung_programm_*`), Mischermodul-Regler, Partymodus-Skript.
-- **Überwachung:** Störungscode von Therme/BM-2/MM mit Klartext und Push, Anlagendruck, Datenausfall, Außentemperatur fehlt
-  (ohne Außentemperatur gehen beide Kreise in AT-Frostschutz, Vorfall 20.10.2026), Wartung fällig, BM-2-Uhrabweichung.
-- **Schreib-Skripte:** `heizung_therme_schreiben` (Therme und MM, Prüfbyte), `heizung_ebus_schreiben` (BM-2/MK, Rücklesen,
-  bis 3 Versuche), `heizung_parametertest`, `heizung_partymodus`.
-- **Kabine (Gewerbeeinheit, 21.10.2026):** Vorheizen nach Buchungskalender, Geräte vor/nach Buchungen, Anwesenheitsmodus
-  über iPhone-Ortung, Oberlicht-Lüftung gegen Muff (Taupunktvergleich, Regenschutz, Handbetrieb), Dashboard
-  „Kabine“ (`kabine-steuerung`). Die Wolf-Kreise werden dabei nur auf Permanent gestellt, wenn die Kabine kälter als die
-  Komforttemperatur ist; Permanent wirkt auf den ganzen Kreis (auch die Mieterwohnung).
+```
+Lesen      ZZ 50 22 03 <Prüfbyte> <TN lo> <TN hi>                    → 02 <Wert lo> <Wert hi>   (0080 = ungültig)
+Schreiben  ZZ 50 23 05 <Prüfbyte> <TN lo> <TN hi> <Wert lo> <Wert hi>
+```
 
-## Optimierung („Vorschlagen“ / „Automatisch“)
+- **TN** = Telegrammnummer aus der Wolf-Parameterdatenbank (dieselben Nummern wie im ISM7-Protokoll, siehe
+  [zivillian/ism7mqtt](https://github.com/zivillian/ism7mqtt)). Werte 16 Bit little endian, Temperaturen ×10.
+- **Prüfbyte** = CRC8 über die folgenden Bytes, Polynom `0x5C`, Start `0x00`. Selbsttest gegen 30 Mitschnitte:
+  `python3 tools/wolf_crc.py --verify`.
+- Die Geräte antworten auch auf unbekannte TNs (meist mit 0) – eine Antwort beweist nicht, dass es den Parameter gibt.
 
-Grundlage: Wolf CGB-2 Montageanleitung 3063421 (Kap. 22/23 HG-Parameter, Kap. 33 Pumpe, Warnung 43) und die Auswertung
-vom 19.10.2026: tagsüber endete fast jeder Brennerlauf mit „Spreizung KF“ → „Gradientenüberwachung“ (laut Anleitung zu
-wenig Durchfluss), Neustart nach der Taktsperre.
+### Schreibwege
 
-- `automation.heizung_optimierung_auswerten`, täglich 07:30: wertet den Vortag aus (Brennerstarts, Laufzeit,
-  Schutzabschaltungen Spreizung/Gradient), höchstens ein Vorschlag, frühestens 24 h nach der letzten Änderung.
-  Regeln in Reihenfolge: Starts > 40 und Schutzabschaltungen > 30 %: HG16 +10 (max 65) → HG39 = 3 → HG04 −8 (min 70);
-  Starts > 40: HG09 +3 (max 15).
-- Modus `input_select.heizung_optimierung_modus`: Nur überwachen, Vorschlagen (Push mit Übernehmen/Ablehnen), Automatisch.
-- Bisher übernommen: 20.10.2026 HG16 45 → 55.
-- Nie angefasst: Heizkurven, Programmwahl, Warmwasser, Gas-/Abgasparameter (HG02, HG03, HG12, HG43–HG45).
+| Ziel | Weg | Prüfbyte |
+|---|---|---|
+| Therme `08` | 5 Byte an **Master** `03`, MQTT `ebusd/hc/HgRaw/set` = `"crc tnlo tnhi vlo vhi"` | wird geprüft, sonst kein Effekt |
+| Mischermodul `52` | 5 Byte an `52`, `ebusd/mm/MmRaw/set` | CRC, wird quittiert |
+| BM-2 `35` | 5 Byte an **Slave** `35`, `ebusd/bm2/BmRaw/set` = `"00 tnlo tnhi vlo vhi"` | wird nicht geprüft |
+| Mischerkreis `86` | `ebusd/mk/MkRaw/set`, Präfix `00` | wird nicht geprüft |
+
+- ebusd meldet beim BM-2 immer `ERR: read timeout`, weil keine Antwortdaten kommen
+  ([ebusd #1696](https://github.com/john30/ebusd/issues/1696)) – Erfolg nur per Rücklesen prüfen.
+- Das 9-Byte-Format des ISM7 (an Master `30` bzw. `03`, mit Anhang) nehmen BM-2 und Therme von ebusd nicht an.
+- Programmwahl: `0` Standby, `1` Auto, `2` Permanent, `3` Sparen.
+
+## Parameterabdeckung
+
+**Lesen und Schreiben getestet** (geändert, zurückgelesen, zurückgestellt):
+
+- **Therme:** HG01–HG04, HG07–HG09, HG13–HG17, HG19–HG22, HG25, HG33, HG38, HG39, HG41, HG60.
+  HG13 = Zirkomat setzt und sperrt HG14 – erst HG13, dann HG14 schreiben.
+- **Mischermodul:** MI08 RL-Soll (TN 400), MI09 max. Speicherladezeit (TN 384), TV-min/-max, Heizkurvenabstand,
+  Nachlaufzeit, P-Bereich.
+- **BM-2 und Heizkreise:** Bedienparameter und Heizkurven, Programmwahl, Party, Urlaub, 1× Warmwasser,
+  A04 (TN 388), A07 (TN 257), A08 (TN 618), A09 Frostschutzgrenze (TN 2560), A10 (TN 35), A15 Korrektur
+  Außentemperatur (TN 1443), A23 (TN 10141), A26 (TN 10912), Kreisart (TN 9005), Raumeinfluss (TN 651),
+  Wartungsdatum (TN 5250/5264).
+
+**Nur gelesen:** HG23 WW-Maximum = TN 385 (Zuordnung am Display bestätigt), HG40 Anlagenkonfiguration (TN 10076),
+Raumregler-Parameter A00, A05, A16–A18 (wirken nur mit Raumfühler am BM-2).
+
+**Bewusst ausgelassen:** HG10 (eBus-Adresse), HG12 (Gasart), MI10/Busspeisung; HG43–HG45 – **HG43 am Display
+startet eine 100-%-Kalibrierung**.
+
+Fehlercodes mit Klartext und Abgleich gegen die Wolf-Anleitungen: [`docs/fehlercodes-cgb2.md`](docs/fehlercodes-cgb2.md).
+
+## Home Assistant
+
+Vollständige Liste mit Entitätsnamen: [`docs/ha-helfer.md`](docs/ha-helfer.md).
+
+- **Bedienung:** Dashboard „Heizung“ mit Reglern für die HG- und MI-Parameter, Programmwahl der Kreise, Partymodus.
+- **Schreib-Skripte:** `heizung_therme_schreiben` (Therme und MM, Prüfbyte in Jinja), `heizung_ebus_schreiben`
+  (BM-2/MK, Rücklesen, bis 3 Versuche), `heizung_parametertest`, `heizung_partymodus`.
+- **Überwachung:** Störungscodes mit Push, Anlagendruck, Datenausfall, fehlende Außentemperatur (ohne sie gehen beide
+  Kreise in Frostschutz), Wartung, Abweichung der BM-2-Uhr.
+- **Optimierung:** täglich 07:30 Auswertung des Vortags (Brennerstarts, Laufzeit, Schutzabschaltungen) nach den Regeln
+  der Wolf-Montageanleitung; höchstens ein Vorschlag pro Tag, Modi „Nur überwachen“, „Vorschlagen“ (Push mit
+  Übernehmen/Ablehnen), „Automatisch“. Nie angefasst: Heizkurven, Programmwahl, Warmwasser, Gas-/Abgasparameter.
+- **Anwendungsbeispiel Gewerbeeinheit:** Vorheizen nach Buchungskalender, Anwesenheit über Handy-Ortung, Lüftung gegen
+  Muff; die Wolf-Kreise gehen nur auf Permanent, solange der Raum Wärme braucht.
 
 ## Sicherheitsregeln
 
-- Programmwahl beider Heizkreise ist schreibbar; die Mieterwohnung hängt an beiden Kreisen, also mit Bedacht.
-- Gesperrt bleiben HG10, HG12 und die Busspeisung des MM. HG02/HG03 (Brennerleistung) sind schreibbar.
 - Jeder Schreibvorgang wird zurückgelesen und bei Bedarf wiederholt.
-- HG43 am BM-2-Display nicht aufrufen und bestätigen (startet Kalibrierung).
+- Gesperrt: HG10, HG12, Busspeisung des MM. HG02/HG03 (Brennerleistung) sind schreibbar – mit Bedacht.
+- Programmwahl und Heizkurven wirken auf den ganzen Kreis, also auf alle angeschlossenen Wohnungen.
+- HG43 am BM-2-Display nicht aufrufen und bestätigen.
 
-## Quellen
+## Repo-Struktur
 
-- [ebusd](https://github.com/john30/ebusd), [ebusd-configuration](https://github.com/john30/ebusd-configuration) (kromschroeder/08..hc.csv, 50..mc.csv, broadcast.csv)
-- [zivillian/ism7mqtt](https://github.com/zivillian/ism7mqtt) (Wolf-Parameterdatenbank: parameter.xml, converter.xml, device.xml)
-- [dktzde/ebusd-configuration-wolf](https://github.com/dktzde/ebusd-configuration-wolf) (CRC8-Beschreibung)
-- Wolf CGB-2(K) Montageanleitung für den Fachhandwerker, Art.-Nr. 3063421 (Ausgaben 2015 und 2021/2024)
-- Wolf BM-2 Betriebsanleitung für die Fachkraft ab FW 2.80 (3063305_201910), BM-2 Montageanleitung Experte, MM/MM-2 Montageanleitung
-- Wolf Funk-Außenfühler/Funkempfänger, Anleitung 3060938_1007
-- [ebusd Issue #1696](https://github.com/john30/ebusd/issues/1696), [Discussion #779](https://github.com/john30/ebusd/discussions/779)
+| Pfad | Inhalt |
+|---|---|
+| `ebusd-config/*.csv` | Nachrichtendefinitionen: Therme, BM-2, Mischerkreis, Mischermodul, Broadcasts, Störungscodes, passives Mitlesen |
+| `ebusd-config/mqtt-hassio.cfg` | MQTT-Integration für Home Assistant |
+| `tools/wolf_crc.py` | Prüfbyte-Berechnung mit Selbsttest |
+| `tools/gen_ebusd_config.py` | erzeugt die CSV-Dateien aus Tabellen |
+| `homeassistant/` | Skripte, Automationen, Jinja-Makros (`custom_templates/wolf_bm2.jinja`), Generatoren |
+| `docs/protokoll.md` | Protokolldetails, Tests, Mitschnitte, Belege |
+| `docs/fehlercodes-cgb2.md` | Störungs- und Warncodes |
+| `docs/ha-helfer.md` | alle Home-Assistant-Bausteine |
+
+## Offene Punkte
+
+- A14 (WW-Maximum am BM-2): Telegrammnummer unbekannt.
+- HG40: Rohwert 1, laut Wolf-Datenbank „02“ – am Display noch nicht abgelesen.
+- MI17 ↔ TN 45 und HG61 ↔ TN 10017: Zuordnung nicht verifiziert.
+- Störungshistorie: Suche über bekannten Eintrag (Code 15 vom 20.10.2026) geplant.
+- Master `f0`/`f1`: Gerät nicht sicher zugeordnet.
+
+## Quellen und Dank
+
+- [ebusd](https://github.com/john30/ebusd) und [ebusd-configuration](https://github.com/john30/ebusd-configuration)
+- [zivillian/ism7mqtt](https://github.com/zivillian/ism7mqtt) – Wolf-Parameterdatenbank (parameter.xml, converter.xml, device.xml)
+- [dktzde/ebusd-configuration-wolf](https://github.com/dktzde/ebusd-configuration-wolf) – unabhängige Beschreibung der CRC8
+- *audaciousengineer* in [ebusd Discussion #779](https://github.com/john30/ebusd/discussions/779) – 5-Byte-Schreibweg zum BM-2
+- Wolf-Unterlagen: CGB-2 Montage-/Betriebsanleitung 3063421 (2015, 2021, 2024), BM-2 Fachkraft ab FW 2.80 (3063305),
+  BM-2 Montageanleitung Experte, MM/MM-2 Montageanleitung, Funk-Außenfühler 3060938
+
+Eine Lizenz ist für dieses Repo noch nicht festgelegt.
