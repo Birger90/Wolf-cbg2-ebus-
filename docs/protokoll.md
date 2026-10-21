@@ -529,6 +529,11 @@ deshalb hier `raw` (jedes Telegramm im Log).
   und nicht über den eBus. Dann ist Quittieren aus Home Assistant über den eBus nicht möglich.
 - `raw`-Logging wieder ausgeschaltet.
 
+### BM-2-Uhr am Gerät gestellt (21.10.2026, 04:52, Birger)
+
+Direkt danach sendet das BM-2 außer der Reihe den Datetime-Broadcast (04:52:51 → `04:52:10`, sonst immer bei :58);
+TN 10161 um 04:53:06 = 1076 = 04:52. Abweichung damit unter 1 min (Sekunden sendet das BM-2 immer als `10`).
+
 ## Weitere Telegrammnummern
 
 - TN 5250 (BM-2): Wartung Fälligkeitsdatum, Typ BM2Date (ism7mqtt `BM2DateConverterTemplate`):
