@@ -332,7 +332,61 @@ Bit 2 ist also auch bei ausgeschaltetem Brenner gesetzt → die aus anderen Wolf
 | `35`, `86` | 9024 / 9028 / 9007 | aktuelle Kreisart / Kühlkurve global / Raumeinfluss Kühlen | `0080` / `0080` / 0 | keine Kühlfunktion |
 | `52` | 410 | Firmware | 0 | MM liefert keine Version über TN 410 |
 
-## Weitere Telegrammnummern
+## Abdeckungsprüfung gegen die Wolf-Parameterliste (21.10.2026, 04:20–04:35)
+
+Methode: Parameterlisten der Wolf-App (ism7mqtt `device.xml`/`parameter.xml`/`converter.xml`, Vorlagen CGB-2, BM-2,
+DHK_BM-2, MK_BM-2, WW_BM-2, WWSystem_BM-2, ZirkSol_BM-2, MM) mit den TNs in `ebusd-config/*.csv` verglichen
+(Skript im Scratchpad, Regel: Prüfbyte/TN aus der ID-Spalte). Anschließend jede fehlende, für diese Anlage relevante TN
+**einmal gelesen** (`hex`, nur Lesen). Lüftung, Kühlen, SmartHome und AFB (Fernbedienung) ausgelassen – nicht vorhanden.
+
+Achtung: Die Geräte antworten auch auf unbekannte TNs (z. B. MM auf TN 1 mit 0). Eine Antwort 0 beweist deshalb nicht,
+dass es den Parameter gibt; plausible Werte ≠ 0 sprechen dafür.
+
+| Gerät | TN | Wolf-Name | Rohwert | Wert (Typ aus converter.xml) |
+|---|---|---|---|---|
+| Therme `08` | 383 | Nachlaufzeit Speicherladepumpe (1–10 min) | `0300` | 3 min |
+| | 384 | Max. Speicherladezeit (30–180 min) | `7800` | 120 min |
+| | 65019 | eBus Einspeisung (Auto/Aus/Ein) | `0000` | 0 = Auto |
+| | 10041 | Typ Pumpenregelung (Festwert/Linear/dT) | `0100` | 1 = Linear |
+| | 10076 | Anlagenkonfiguration | `0100` | Schlüssel 1 → Anzeige „2“ |
+| | 10014 | Drehzahl ZHP WW (15–100 %) | `5500` | 85 % |
+| | 10030 | Hysterese Sammler (SS10) | `3200` | 5,0 K |
+| | 10028 | Kesselübertemperatur Sammler (SS10) | `3c00` | 6,0 K |
+| | 10017 | WW-Regelung (BUSCONFIG Anschluss Speicher) | `0000` | 0 |
+| | 328 | Typ | `2100` | 33 = CGB-2 |
+| | 370 | Brenner (Bit 3) | `0000` | Aus |
+| | 10009 | Auslauftemperatur WW (SS100) | `0080` | ungültig (kein Fühler) |
+| | 10802 / 10803 | Funktion Eingang E3 / E4 | `0000` | 0 = keine Funktion |
+| Mischermodul `52` | 400 | RL-Solltemperatur (20–80 °C) | `2c01` | 30,0 °C |
+| | 384 | Max. Speicherladezeit (0–5 h) | `0200` | 2 h |
+| | 340 | Hysterese Bypassfühler | `6400` | 10,0 K |
+| | 36 | Ladepumpensperre (0/1) | `0000` | 0 |
+| | 383 | Nachlaufzeit Ladepumpe (0–10 min) | `0300` | 3 min |
+| | 405 / 404 | dT Aus / dT Ein | `3200` / `6400` | 5,0 / 10,0 K |
+| | 839 | Sperrung Brenner bei Rücklaufanhebung (0–300 s) | `0000` | 0 s |
+| | 20035 | Frostschutz LH-Kreis | `1400` | 2,0 °C |
+| | 320 | Speicherhysterese | `3200` | 5,0 K |
+| | 308 | Warmwassermaximaltemperatur (60–80 °C) | `5802` | 60,0 °C |
+| | 101 | Betriebsstatus Mischerkreis (Bit 4–7) | `0000` | 0 |
+| | 3 | Warmwassersolltemperatur | `c201` | 45,0 °C |
+| | 2601 / 2602 | Eingang E1 / Analogeingang E2 | `70fe` | −40,0 (offen/kein Fühler, nicht verifiziert) |
+| BM-2 `35` | 10121 | Funktion des Bedienmoduls | `0000` | 0 = System |
+| | 271 | Raumeinflussfaktor (1–20) | `0400` | 4 |
+| | 265 | Anpassung Raumfühler (SS10) | `0000` | 0,0 K |
+| | 701 | Raumtemperaturabhängige Abschaltung | `0100` | Ein |
+| | 1443 | Korrektur Außentemperatur (SS10, −15…5) | `0000` | 0,0 |
+| | 20018 | Reiner Raumregler | `0000` | Aus |
+| | 41 / 42 | PI-Regler Raum Kp / Tn | `1400` / `0a00` | 20 / 1,0 |
+| | 5264 | Wartungsmeldung Datum (BM2Date) | `2833` | 13096 → 09.10.2025 |
+| | 10922 / 10923 | WS/ECO-ABS bzw. DHK gesteuert von | `0000` | BM-2 |
+| BM-2 `35`, MK `86` | 9005 / 651 | Kreisart / Raumeinfluss | `0000` | Heizkreis / Aus |
+
+Ergebnis Abdeckung (vor dieser Prüfung; „schreibbar“ = Schreibweg vorhanden und getestet):
+- Therme: von 28 einstellbaren App-Parametern 16 schreibbar getestet (HG01–HG04, HG07–HG09, HG15–HG17, HG22, HG25, HG33,
+  HG38, HG39, HG60), HG21 (TK-min) und 10096/10887 nur gelesen, 10 fehlten (Tabelle oben). HG10/HG12 gesperrt.
+- Mischermodul: 19 einstellbar, 5 schreibbar getestet, 3 nur gelesen (Konfiguration gesperrt, 711, 45), 11 fehlten.
+- BM-2/MK: Bedienparameter, Heizkurven, Programme, Party/Urlaub/1×WW schreibbar; fehlten Raumregler-Parameter (ohne
+  Raumfühler wirkungslos) und Korrektur Außentemperatur; Uhr nicht stellbar.
 
 - TN 5250 (BM-2): Wartung Fälligkeitsdatum, Typ BM2Date (ism7mqtt `BM2DateConverterTemplate`):
   Tag = (v & 31) + 1, Monat = ((v >> 5) & 15) + 1, Jahr = 2000 + (v >> 9). Gelesen 13096 → 09.10.2025, identisch mit der Cloud.

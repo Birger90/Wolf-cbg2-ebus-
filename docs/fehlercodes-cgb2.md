@@ -2,7 +2,7 @@
 
 Quelle: `fault_messages.xml` aus der Wolf-Smartset-Parameterdatenbank (zivillian/ism7mqtt, src/ism7config/Resources).
 Zuordnung Code -> Text, wie sie die Smartset-App anzeigt. Auf dem eBus ist der Übertragungsweg des Codes noch nicht beobachtet
-(Kandidat: Broadcast `ControlCmd` PBSB 0802, Felder `device`/`error`; in der Wolf-Parameterdatenbank hat keines der Geräte CGB-2, BM-2, MM eine eigene Fehlerhistorie).
+Auf dem eBus: aktueller Störungscode = TN 1 (Lesen `5022` mit Prüfbyte `5c`, Antwort UIN), vom ISM7 alle 15 s an `08`, `35` und `52` abgefragt; beobachtet am 20.10.2026: BM-2 meldete 15 (Außenfühler) während „T außen“. ebusd: `fault.csv` (`FaultCode` in hc/bm2/mm). Eine Fehlerhistorie gibt es in keinem der Geräte (Wolf-Datenbank `device.xml`: `HasOwnFaultMessageHistory` = false für CGB-2, BM-2, MM); die Historie entsteht nur in der App bzw. in Home Assistant.
 
 
 ## CGB-2 (DTID 180000) - 58 Codes
