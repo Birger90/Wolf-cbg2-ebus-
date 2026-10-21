@@ -1,0 +1,46 @@
+type,circuit,level,name,comment,qq,zz,pbsb,id,*name,part,type,divisor/values,unit,comment
+# Automatisch erzeugt aus der Wolf-Parameterdatenbank (ism7mqtt), nur lesend, ohne Poll-Prioritaet.
+# Einlesen per MQTT ebusd/<circuit>/<name>/get (HA-Skript heizung_parameter_einlesen).
+r,bm2,,x_BUSCONFIG_Erkannte_Geraete_Low_Byte,BUSCONFIG_Erkannte-Geraete-Low-Byte RO,,35,5022,bfb327,value,,UIN,,,TN 10163 PTID 220043
+r,bm2,,x_BUSCONFIG_Erkannte_Geraete_High_Byte,BUSCONFIG_Erkannte-Geraete-High-Byte RO,,35,5022,e3b227,value,,UIN,,,TN 10162 PTID 220044
+r,bm2,,x_BUSCONFIG_Softwareversion,BUSCONFIG_Softwareversion RO,,35,5022,abc927,value,,UIN,,,TN 10185 PTID 220045
+r,bm2,,x_BUSCONFIG_SmartHome_System,BUSCONFIG_SmartHome-System RO,,35,5022,bea82a,value,,UIN,,,TN 10920 PTID 220129
+r,bm2,,x_BUSCONFIG_Vereinfachter_Modus,BUSCONFIG_Vereinfachter-Modus RO,,35,5022,d23c2a,value,,UIN,0=Deaktiviert;1=Aktiviert,,TN 10812 PTID 220107
+r,bm2,,x_Programmwahl_Lueftung,Programmwahl Lüftung,,35,5022,478f27,value,,SIN,1=Auto;2=Reduzierte_Lueftung;3=Nennlueftung;4=Feuchteschutz,,TN 10127 PTID 220036
+r,bm2,,x_Anforderung_Lueftung,Anforderung Lüftung RO,,35,5022,83c427,value,,SIN,0=Initialisierung;1=Stoerung;2=Aus;3=Reduzierte_Lueftung;4=Nennlueftung;5=Zeitweise_Intensivlueftung;6=Zeitweiser_Feuchteschutz;7=Automatik_EIN;8=Automatik_AUS;9=SmartHome;10=Feuchteschutz,,TN 10180 PTID 220040
+r,bm2,,x_Status_Lueftung,Status Lüftung RO,,35,5022,dfc527,value,,SIN,0=Lueftung_Feuchteschutz;1=Reduzierte_Lueftung;2=Nennlueftung;3=Intensivlueftung,,TN 10181 PTID 220041
+r,bm2,,x_Status_Filter,Status Filter RO,,35,5022,f7c827,value,,SIN,0=OK;1=Filter_wechseln,,TN 10184 PTID 220136
+r,bm2,,x_Zeitweise_Intensivlueftung,Zeitweise Intensivlüftung,,35,5022,cfb627,value,,SIN,0=Deaktiviert;1=Aktiviert,,TN 10166 PTID 220037
+r,bm2,,x_Uhrzeit_Ende,Uhrzeit Ende,,35,5022,93b727,minute,,UCH,,,Minute,hour,,UCH,,,TN 10167 PTID 330012
+r,bm2,,x_Datum_Ende,Datum Ende BM2Date,,35,5022,03b827,value,,UIN,,,TN 10168 PTID 330013
+r,bm2,,x_Uhrzeit_Start,Uhrzeit Start,,35,5022,5fb927,minute,,UCH,,,Minute,hour,,UCH,,,TN 10169 PTID 330014
+r,bm2,,x_Datum_Start,Datum Start BM2Date,,35,5022,bbba27,value,,UIN,,,TN 10170 PTID 330015
+r,bm2,,x_Zeitweise_Feuchteschutz,Zeitweise Feuchteschutz,,35,5022,e7bb27,value,,SIN,0=Deaktiviert;1=Aktiviert,,TN 10171 PTID 220038
+r,bm2,,x_Uhrzeit_Ende_10172,Uhrzeit Ende,,35,5022,2fbc27,minute,,UCH,,,Minute,hour,,UCH,,,TN 10172 PTID 330018
+r,bm2,,x_Datum_Ende_10173,Datum Ende BM2Date,,35,5022,73bd27,value,,UIN,,,TN 10173 PTID 330019
+r,bm2,,x_Uhrzeit_Start_10174,Uhrzeit Start,,35,5022,97be27,minute,,UCH,,,Minute,hour,,UCH,,,TN 10174 PTID 330020
+r,bm2,,x_Datum_Start_10175,Datum Start BM2Date,,35,5022,cbbf27,value,,UIN,,,TN 10175 PTID 330021
+r,bm2,,x_Zeitprogramm_Lueftung,Zeitprogramm Lüftung,,35,5022,17c227,value,,SIN,1=1;2=2;3=3,,TN 10178 PTID 220039
+r,bm2,,x_Wolf_Plug_in_Version,Wolf Plug-in Version RO,,35,5022,e2a92a,value,,UIN,10,,TN 10921 PTID 220092
+r,bm2,,x_Winter_Sommer_Umschaltung_ECO_ABS,Winter/Sommer Umschaltung  ECO/ABS RO Bit0 OnValue=1,,35,5022,06aa2a,value,,UIN,,,TN 10922 PTID 220093
+r,bm2,,x_Direkter_Heizkreis_gesteuert_von,Direkter Heizkreis gesteuert von RO Bit0 OnValue=1,,35,5022,5aab2a,value,,UIN,,,TN 10923 PTID 220094
+r,bm2,,x_Programmwahl,Programmwahl,,35,5022,074123,value,,UIN,0=Standby;1=Auto;2=Auto_Heizen;3=Auto_Kuehlen;4=Permanent;5=Permanent_Kuehlen;6=Sparen,,TN 9025 PTID 340047
+r,bm2,,x_Programmwahl_9026,Programmwahl,,35,5022,e34223,value,,UIN,0=Standby;1=Auto;2=Permanent_Kuehlen,,TN 9026 PTID 340048
+r,bm2,,x_Sollwertkorrektur_AFB,Sollwertkorrektur AFB RO,,35,5022,ab9e27,value,,SIN,10,,TN 10142 PTID 340018
+r,bm2,,x_Programmwahl_AFB,Programmwahl AFB RO,,35,5022,091201,value,,UIN,0=Standby;1=Automatikbetrieb;2=Heizbetrieb;3=Sparbetrieb,,TN 274 PTID 340017
+r,bm2,,x_aktuelle_Kreisart_in_Kombination_mit_Hei,aktuelle Kreisart in Kombination mit Heizgerät RO,,35,5022,5b4023,value,,UIN,0=Heizkreis;1=Heizkreis_Kuehlkreis;2=Kuehlkreis,,TN 9024 PTID 340045
+r,bm2,,x_Tagtemperatur_Kuehlen,Tagtemperatur Kühlen,,35,5022,c24f2a,value,,SIN,10,°C,TN 10831 PTID 340049
+r,bm2,,x_Raumeinfluss_Kuehlen,Raumeinfluss Kühlen,,35,5022,8f2f23,value,,UIN,0=Aus;1=Ein,,TN 9007 PTID 340050
+r,bm2,,x_Kuehlkurve_global,Kühlkurve global RO,,35,5022,774423,value,,UIN,0=Nein;1=Ja,,TN 9028 PTID 340055
+r,bm2,,x_Endtemperatur_VL_Kuehlkurve,Endtemperatur VL Kühlkurve,,35,5022,9a472a,value,,SIN,10,°C,TN 10823 PTID 340051
+r,bm2,,x_Starttemperatur_VL_Kuehlkurve,Starttemperatur VL Kühlkurve,,35,5022,0a482a,value,,SIN,10,°C,TN 10824 PTID 340052
+r,bm2,,x_Endpunkt_Kuehlkurve,Endpunkt Kühlkurve,,35,5022,56492a,value,,SIN,10,°C,TN 10825 PTID 340053
+r,bm2,,x_Startpunkt_Kuehlkurve,Startpunkt Kühlkurve,,35,5022,b24a2a,value,,SIN,10,°C,TN 10826 PTID 340054
+r,bm2,,x_Zeitprogramm_Kuehlen,Zeitprogramm Kühlen,,35,5022,c6462a,value,,UIN,1=1;2=2;3=3,,TN 10822 PTID 340059
+r,bm2,,x_Sollwertkorrektur_SmartHome,Sollwertkorrektur SmartHome RO,,35,5022,8a9a2a,value,,SIN,10,,TN 10906 PTID 340021
+r,bm2,,x_Programmwahl_SmartHome,Programmwahl SmartHome RO,,35,5022,d69b2a,value,,UIN,0=Standby;1=Automatikbetrieb;2=Heizbetrieb;3=Sparbetrieb,,TN 10907 PTID 340022
+r,bm2,,x_Vorlaufsolltemperatur_SmartHome,Vorlaufsolltemperatur SmartHome RO,,35,5022,6e992a,value,,SIN,10,°C,TN 10905 PTID 340023
+r,bm2,,x_Analogeingang_E1,Analogeingang E1 RO,,35,5022,32290a,value,,SIN,10,°C,TN 2601 PTID 50067
+r,bm2,,x_Programmwahl_AFB_10133,Programmwahl AFB RO,,35,5022,179527,value,,UIN,0=Standby;1=Automatikbetrieb;2=Dauerbetrieb,,TN 10133 PTID 370005
+r,bm2,,x_Programmwahl_SmartHome_10904,Programmwahl SmartHome RO,,35,5022,32982a,value,,UIN,0=Standby;1=Auto;2=Permanent,,TN 10904 PTID 370050
+r,bm2,,x_Warmwassersolltemperatur_SmartHome,Warmwassersolltemperatur SmartHome RO,,35,5022,a2972a,value,,SIN,10,°C,TN 10903 PTID 370051

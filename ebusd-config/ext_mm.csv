@@ -1,0 +1,4 @@
+type,circuit,level,name,comment,qq,zz,pbsb,id,*name,part,type,divisor/values,unit,comment
+# Automatisch erzeugt aus der Wolf-Parameterdatenbank (ism7mqtt), nur lesend, ohne Poll-Prioritaet.
+# Einlesen per MQTT ebusd/<circuit>/<name>/get (HA-Skript heizung_parameter_einlesen).
+r,mm,,x_PRELOAD_Firmware,PRELOAD_Firmware RO,,52,5022,a19a01,value,,UIN,,,TN 410 PTID 40093

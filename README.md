@@ -174,6 +174,19 @@ Vollständige Liste mit Entitätsnamen: [`docs/ha-helfer.md`](docs/ha-helfer.md)
 - **Anwendungsbeispiel Gewerbeeinheit:** Vorheizen nach Buchungskalender, Anwesenheit über Handy-Ortung, Lüftung gegen
   Muff; die Wolf-Kreise gehen nur auf Permanent, solange der Raum Wärme braucht.
 
+## Vollständigkeit der Parameter (Stand 21.10.2026)
+
+`tools/wolf_db_export.py` zieht **alle** Parameter der Wolf-Gerätevorlagen CGB-2, BM-2, DHK_BM-2, WW_BM-2, MK_BM-2 und MM
+aus der Parameterdatenbank (ism7mqtt) und schreibt, was nicht schon in den handgepflegten Dateien steht, lesend nach
+`ebusd-config/ext_*.csv` (ohne Poll-Priorität; `script.heizung_parameter_einlesen` liest sie täglich 03:30 und nach
+ebusd-Neustart ein). Die komplette Liste mit Status je Parameter steht in `docs/parameter_vollstaendig.md`.
+
+Nicht übernommen, mit Grund:
+- Zeitprogramme (TIMEPROG_03F1, 399 Einträge): kein Einzeltelegramm, in ism7mqtt „not yet implemented“.
+- Einträge ohne Konverter in der Wolf-Datenbank (44), Unicode-Texte (3), Mischerzustand/Bitfelder des MM (3).
+- Vorlage WWSystem_BM-2: nicht belegt, dass sie an dieser Anlage aktiv ist.
+- Schreibsperre (nur lesen): Programmwahl beider Kreise, HG10, HG12, HG43–HG45 (Verbrennung, nicht einmal lesend).
+
 ## Sicherheitsregeln
 
 - Jeder Schreibvorgang wird zurückgelesen und bei Bedarf wiederholt.

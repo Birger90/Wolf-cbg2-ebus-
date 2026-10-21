@@ -1,0 +1,138 @@
+{
+ "alias": "Heizung: alle Parameter einlesen (ext)",
+ "description": "Liest alle nicht gepollten Parameter aus ext_*.csv einmal ueber ebusd ein (MQTT .../get, 2 s Abstand). Laeuft taeglich 03:30 und nach ebusd-Neustart.",
+ "mode": "single",
+ "sequence": [
+  {
+   "action": "logbook.log",
+   "data": {
+    "name": "Heizung eBus",
+    "message": "Einlesen von 97 ext-Parametern gestartet"
+   }
+  },
+  {
+   "repeat": {
+    "for_each": [
+     "ebusd/hc/x_PRELOAD_Herstellwoche/get",
+     "ebusd/hc/x_PRELOAD_Herstelljahr/get",
+     "ebusd/hc/x_PRELOAD_Seriennummer_lo/get",
+     "ebusd/hc/x_PRELOAD_Seriennummer_hi/get",
+     "ebusd/hc/x_BUSCONFIG_Ausgang_A3/get",
+     "ebusd/hc/x_BUSCONFIG_Ausgang_A4/get",
+     "ebusd/hc/x_BUSCONFIG_Warmwasserkonfiguration/get",
+     "ebusd/hc/x_BUSCONFIG_Anlagenkonfiguration/get",
+     "ebusd/hc/x_Typ/get",
+     "ebusd/hc/x_Sammlertemperatur/get",
+     "ebusd/hc/x_0_10_V_GLT/get",
+     "ebusd/hc/x_Brenner/get",
+     "ebusd/hc/x_Heizkreispumpe/get",
+     "ebusd/hc/x_Auslauftemperatur_Warmwasser/get",
+     "ebusd/hc/x_IO_Istwert/get",
+     "ebusd/hc/x_Eingang_E1/get",
+     "ebusd/hc/x_Status_EA_Modul/get",
+     "ebusd/hc/x_Eingang_E3/get",
+     "ebusd/hc/x_Eingang_E4/get",
+     "ebusd/hc/x_Warmwasser_Schnellstart/get",
+     "ebusd/hc/x_erweiterte_Statistik_aktiv/get",
+     "ebusd/hc/x_Energiemenge_HZ_lo/get",
+     "ebusd/hc/x_Energiemenge_HZ_hi/get",
+     "ebusd/hc/x_Energiemenge_WW_lo/get",
+     "ebusd/hc/x_Energiemenge_WW_hi/get",
+     "ebusd/hc/x_Verbrauch_aktuelles_Jahr_lo/get",
+     "ebusd/hc/x_Verbrauch_aktuelles_Jahr_hi/get",
+     "ebusd/hc/x_Erzeugte_Waermemenge_aktuelles_Jahr_lo/get",
+     "ebusd/hc/x_Erzeugte_Waermemenge_aktuelles_Jahr_hi/get",
+     "ebusd/hc/x_Verbrauch_Vorjahr_lo/get",
+     "ebusd/hc/x_Verbrauch_Vorjahr_hi/get",
+     "ebusd/hc/x_Erzeugte_Waermemenge_Vorjahr_lo/get",
+     "ebusd/hc/x_Erzeugte_Waermemenge_Vorjahr_hi/get",
+     "ebusd/hc/x_Verbrauch_Vorvorjahr_lo/get",
+     "ebusd/hc/x_Verbrauch_Vorvorjahr_hi/get",
+     "ebusd/hc/x_Erzeugte_Waermemenge_Vorvorjahr_lo/get",
+     "ebusd/hc/x_Erzeugte_Waermemenge_Vorvorjahr_hi/get",
+     "ebusd/bm2/x_BUSCONFIG_Erkannte_Geraete_Low_Byte/get",
+     "ebusd/bm2/x_BUSCONFIG_Erkannte_Geraete_High_Byte/get",
+     "ebusd/bm2/x_BUSCONFIG_Softwareversion/get",
+     "ebusd/bm2/x_BUSCONFIG_SmartHome_System/get",
+     "ebusd/bm2/x_BUSCONFIG_Vereinfachter_Modus/get",
+     "ebusd/bm2/x_Programmwahl_Lueftung/get",
+     "ebusd/bm2/x_Anforderung_Lueftung/get",
+     "ebusd/bm2/x_Status_Lueftung/get",
+     "ebusd/bm2/x_Status_Filter/get",
+     "ebusd/bm2/x_Zeitweise_Intensivlueftung/get",
+     "ebusd/bm2/x_Uhrzeit_Ende/get",
+     "ebusd/bm2/x_Datum_Ende/get",
+     "ebusd/bm2/x_Uhrzeit_Start/get",
+     "ebusd/bm2/x_Datum_Start/get",
+     "ebusd/bm2/x_Zeitweise_Feuchteschutz/get",
+     "ebusd/bm2/x_Uhrzeit_Ende_10172/get",
+     "ebusd/bm2/x_Datum_Ende_10173/get",
+     "ebusd/bm2/x_Uhrzeit_Start_10174/get",
+     "ebusd/bm2/x_Datum_Start_10175/get",
+     "ebusd/bm2/x_Zeitprogramm_Lueftung/get",
+     "ebusd/bm2/x_Wolf_Plug_in_Version/get",
+     "ebusd/bm2/x_Winter_Sommer_Umschaltung_ECO_ABS/get",
+     "ebusd/bm2/x_Direkter_Heizkreis_gesteuert_von/get",
+     "ebusd/bm2/x_Programmwahl/get",
+     "ebusd/bm2/x_Programmwahl_9026/get",
+     "ebusd/bm2/x_Sollwertkorrektur_AFB/get",
+     "ebusd/bm2/x_Programmwahl_AFB/get",
+     "ebusd/bm2/x_aktuelle_Kreisart_in_Kombination_mit_Hei/get",
+     "ebusd/bm2/x_Tagtemperatur_Kuehlen/get",
+     "ebusd/bm2/x_Raumeinfluss_Kuehlen/get",
+     "ebusd/bm2/x_Kuehlkurve_global/get",
+     "ebusd/bm2/x_Endtemperatur_VL_Kuehlkurve/get",
+     "ebusd/bm2/x_Starttemperatur_VL_Kuehlkurve/get",
+     "ebusd/bm2/x_Endpunkt_Kuehlkurve/get",
+     "ebusd/bm2/x_Startpunkt_Kuehlkurve/get",
+     "ebusd/bm2/x_Zeitprogramm_Kuehlen/get",
+     "ebusd/bm2/x_Sollwertkorrektur_SmartHome/get",
+     "ebusd/bm2/x_Programmwahl_SmartHome/get",
+     "ebusd/bm2/x_Vorlaufsolltemperatur_SmartHome/get",
+     "ebusd/bm2/x_Analogeingang_E1/get",
+     "ebusd/bm2/x_Programmwahl_AFB_10133/get",
+     "ebusd/bm2/x_Programmwahl_SmartHome_10904/get",
+     "ebusd/bm2/x_Warmwassersolltemperatur_SmartHome/get",
+     "ebusd/mk/x_Programmwahl/get",
+     "ebusd/mk/x_Programmwahl_9026/get",
+     "ebusd/mk/x_Sollwertkorrektur_AFB/get",
+     "ebusd/mk/x_Programmwahl_AFB/get",
+     "ebusd/mk/x_aktuelle_Kreisart_in_Kombination_mit_Hei/get",
+     "ebusd/mk/x_Tagtemperatur_Kuehlen/get",
+     "ebusd/mk/x_Raumeinfluss_Kuehlen/get",
+     "ebusd/mk/x_Kuehlkurve_global/get",
+     "ebusd/mk/x_Endtemperatur_VL_Kuehlkurve/get",
+     "ebusd/mk/x_Starttemperatur_VL_Kuehlkurve/get",
+     "ebusd/mk/x_Endpunkt_Kuehlkurve/get",
+     "ebusd/mk/x_Startpunkt_Kuehlkurve/get",
+     "ebusd/mk/x_Zeitprogramm_Kuehlen/get",
+     "ebusd/mk/x_Sollwertkorrektur_SmartHome/get",
+     "ebusd/mk/x_Programmwahl_SmartHome/get",
+     "ebusd/mk/x_Vorlaufsolltemperatur_SmartHome/get",
+     "ebusd/mm/x_PRELOAD_Firmware/get"
+    ],
+    "sequence": [
+     {
+      "action": "mqtt.publish",
+      "data": {
+       "topic": "{{ repeat.item }}",
+       "payload": ""
+      }
+     },
+     {
+      "delay": {
+       "seconds": 2
+      }
+     }
+    ]
+   }
+  },
+  {
+   "action": "logbook.log",
+   "data": {
+    "name": "Heizung eBus",
+    "message": "Einlesen der ext-Parameter beendet"
+   }
+  }
+ ]
+}

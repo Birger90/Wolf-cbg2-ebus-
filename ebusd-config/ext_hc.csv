@@ -1,0 +1,40 @@
+type,circuit,level,name,comment,qq,zz,pbsb,id,*name,part,type,divisor/values,unit,comment
+# Automatisch erzeugt aus der Wolf-Parameterdatenbank (ism7mqtt), nur lesend, ohne Poll-Prioritaet.
+# Einlesen per MQTT ebusd/<circuit>/<name>/get (HA-Skript heizung_parameter_einlesen).
+r,hc,,x_PRELOAD_Herstellwoche,PRELOAD_Herstellwoche RO,,08,5022,cc7d2a,value,,UIN,,,TN 10877 PTID 180176
+r,hc,,x_PRELOAD_Herstelljahr,PRELOAD_Herstelljahr RO,,08,5022,cc7e2a,value,,UIN,,,TN 10878 PTID 180177
+r,hc,,x_PRELOAD_Seriennummer_lo,PRELOAD_Seriennummer RO,,08,5022,cc802a,value,,UIN,,,TN 10880 PTID 180178
+r,hc,,x_PRELOAD_Seriennummer_hi,PRELOAD_Seriennummer RO,,08,5022,cc7f2a,value,,UIN,,,TN 10879 PTID 180178
+r,hc,,x_BUSCONFIG_Ausgang_A3,BUSCONFIG_Ausgang-A3 RO,,08,5022,cc342a,value,,UIN,,,TN 10804 PTID 180156
+r,hc,,x_BUSCONFIG_Ausgang_A4,BUSCONFIG_Ausgang-A4 RO,,08,5022,cc352a,value,,UIN,,,TN 10805 PTID 180157
+r,hc,,x_BUSCONFIG_Warmwasserkonfiguration,BUSCONFIG_Warmwasserkonfiguration RO,,08,5022,cc5b27,value,,UIN,0=NoDHW;1=DHWCombi;2=DHWCoilStor;3=DHWShiftStorage;4=CombiWStor;5=DHWCoilStorNoHead;6=DHWCoilStorWithHead,,TN 10075 PTID 180140
+r,hc,,x_BUSCONFIG_Anlagenkonfiguration,BUSCONFIG_Anlagenkonfiguration RO,,08,5022,cc3127,value,,UIN,0=1;1=2;2=11;3=51;4=52;5=60;6=12,,TN 10033 PTID 180149
+r,hc,,x_Typ,Typ RO,,08,5022,cc4801,value,,UIN,33=CGB_2,,TN 328 PTID 180141
+r,hc,,x_Sammlertemperatur,Sammlertemperatur RO,,08,5022,cc1727,value,,SIN,10,°C,TN 10007 PTID 180048
+r,hc,,x_0_10_V_GLT,0 - 10 V GLT RO,,08,5022,cc1827,value,,SIN,10,V,TN 10008 PTID 180151
+r,hc,,x_Brenner,Brenner RO Bit3 OnValue=1,,08,5022,cc7201,value,,UIN,,,TN 370 PTID 180016
+r,hc,,x_Heizkreispumpe,Heizkreispumpe RO Bit4 OnValue=1,,08,5022,cc7301,value,,UIN,,,TN 371 PTID 180025
+r,hc,,x_Auslauftemperatur_Warmwasser,Auslauftemperatur Warmwasser RO,,08,5022,cc1927,value,,SIN,100,°C,TN 10009 PTID 180050
+r,hc,,x_IO_Istwert,IO-Istwert RO,,08,5022,cc4f27,value,,UIN,,,TN 10063 PTID 180102
+r,hc,,x_Eingang_E1,Eingang E1 RO,,08,5022,cc1627,value,,UIN,65088=Geoeffnet;2000=Geschlossen,,TN 10006 PTID 180146
+r,hc,,x_Status_EA_Modul,Status EA-Modul RO,,08,5022,cc512a,value,,UIN,0=Nicht_vorhanden;1=Vorhanden,,TN 10833 PTID 180161
+r,hc,,x_Eingang_E3,Eingang E3 RO,,08,5022,cc362a,value,,UIN,64936=Geoeffnet;2000=Geschlossen,,TN 10806 PTID 180163
+r,hc,,x_Eingang_E4,Eingang E4 RO,,08,5022,cc372a,value,,UIN,64936=Geoeffnet;2000=Geschlossen,,TN 10807 PTID 180164
+r,hc,,x_Warmwasser_Schnellstart,Warmwasser Schnellstart,,08,5022,cc7027,value,,UIN,0=Eco;1=Comfort,,TN 10096 PTID 180153
+r,hc,,x_erweiterte_Statistik_aktiv,erweiterte Statistik aktiv RO,,08,5022,cc882a,value,,UIN,0=Aus;1=Ein,,TN 10888 PTID 180180
+r,hc,,x_Energiemenge_HZ_lo,Energiemenge HZ RO,,08,5022,cc6f30,value,,UIN,,,TN 12399 PTID 180181
+r,hc,,x_Energiemenge_HZ_hi,Energiemenge HZ RO,,08,5022,cc7030,value,,UIN,,,TN 12400 PTID 180181
+r,hc,,x_Energiemenge_WW_lo,Energiemenge WW RO,,08,5022,cc7a30,value,,UIN,,,TN 12410 PTID 180182
+r,hc,,x_Energiemenge_WW_hi,Energiemenge WW RO,,08,5022,cc7b30,value,,UIN,,,TN 12411 PTID 180182
+r,hc,,x_Verbrauch_aktuelles_Jahr_lo,Verbrauch aktuelles Jahr RO,,08,5022,cc852a,value,,UIN,,,TN 10885 PTID 180187
+r,hc,,x_Verbrauch_aktuelles_Jahr_hi,Verbrauch aktuelles Jahr RO,,08,5022,cc862a,value,,UIN,,,TN 10886 PTID 180187
+r,hc,,x_Erzeugte_Waermemenge_aktuelles_Jahr_lo,Erzeugte Wärmemenge aktuelles Jahr RO,,08,5022,cc8b2a,value,,UIN,,,TN 10891 PTID 180188
+r,hc,,x_Erzeugte_Waermemenge_aktuelles_Jahr_hi,Erzeugte Wärmemenge aktuelles Jahr RO,,08,5022,cc8c2a,value,,UIN,,,TN 10892 PTID 180188
+r,hc,,x_Verbrauch_Vorjahr_lo,Verbrauch Vorjahr RO,,08,5022,cc8d2a,value,,UIN,,,TN 10893 PTID 180189
+r,hc,,x_Verbrauch_Vorjahr_hi,Verbrauch Vorjahr RO,,08,5022,cc8e2a,value,,UIN,,,TN 10894 PTID 180189
+r,hc,,x_Erzeugte_Waermemenge_Vorjahr_lo,Erzeugte Wärmemenge Vorjahr RO,,08,5022,cc8f2a,value,,UIN,,,TN 10895 PTID 180190
+r,hc,,x_Erzeugte_Waermemenge_Vorjahr_hi,Erzeugte Wärmemenge Vorjahr RO,,08,5022,cc902a,value,,UIN,,,TN 10896 PTID 180190
+r,hc,,x_Verbrauch_Vorvorjahr_lo,Verbrauch Vorvorjahr RO,,08,5022,cc912a,value,,UIN,,,TN 10897 PTID 180191
+r,hc,,x_Verbrauch_Vorvorjahr_hi,Verbrauch Vorvorjahr RO,,08,5022,cc922a,value,,UIN,,,TN 10898 PTID 180191
+r,hc,,x_Erzeugte_Waermemenge_Vorvorjahr_lo,Erzeugte Wärmemenge Vorvorjahr RO,,08,5022,cc932a,value,,UIN,,,TN 10899 PTID 180192
+r,hc,,x_Erzeugte_Waermemenge_Vorvorjahr_hi,Erzeugte Wärmemenge Vorvorjahr RO,,08,5022,cc942a,value,,UIN,,,TN 10900 PTID 180192
