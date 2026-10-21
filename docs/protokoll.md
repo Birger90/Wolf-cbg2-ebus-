@@ -294,14 +294,31 @@ Bit 2 ist also auch bei ausgeschaltetem Brenner gesetzt → die aus anderen Wolf
 
 - Master `f0` sendet ebenfalls einen `0301`-Broadcast: `f0 fe 0301 0e 67 00 00 80 00 00 00 01 00 00 00 00 00 00`
   → gleiches Format wie beim BM-2 (`30`): Byte 1–2 = `67 00` = 10,3 °C Außentemperatur, Byte 3–4 `0080` = kein Raumfühler.
-  Hypothese: `f0` ist ein zweites BM-2-artiges Bediengerät (z. B. das BM-2 bzw. Bedienmodul des Mischerkreises).
-  Nicht verifiziert.
+  Erste Hypothese „zweites Bediengerät“ ist **widerlegt**: Laut Birger gibt es kein zweites Bediengerät (21.10.2026, 04:04).
+  Über die Nacht nur 2× gesehen (Außentemperatur `67 00` = 10,3 und `69 00` = 10,5), das BM-2 (`30`) dagegen 526×.
+- **`f0` meldet sich mit derselben Kennung wie das BM-2** (ebusd-Log 21.10.2026):
+
+  | Zeit | Absender | IdAnswer (`fe 0704`) |
+  |---|---|---|
+  | 03:58:49.012 | `f0` | Kromschroeder, SW 0100, HW – |
+  | 03:58:49.252 | `f0` | Kromschroeder, SW 0204, HW 8080 |
+  | 03:58:51.498 | `30` | Kromschroeder, SW 0100, HW – |
+  | 03:58:51.738 | `30` | Kromschroeder, SW 0204, HW 8080 |
+
+  Sonst sendet `30` alle paar Minuten nur die Kennung SW 0204/HW 8080 (03:53:21, 04:01:22). Der identische Zweierblock
+  von `f0` und `30` im Abstand von 2,5 s, das gleiche `0301`-Format mit derselben Außentemperatur und die 5014-Abfrage des
+  Mischermoduls (`f0 → 52` alle 15 s) passen zu der Deutung: **`f0` ist eine zweite Masteradresse des BM-2**, vermutlich für
+  den Mischerkreis (das BM-2 fragt mit `30` die Adresse `50` ab, mit `f0` das Mischermodul `52`). Nicht verifiziert – keine
+  Wolf-Dokumentation dazu gefunden. Nach der eBUS-Prioritätsreihenfolge ist `f0` Master Nr. 5 (Forenliste im ebusd-Repo:
+  `10`/`30`/`70` = Regler 1/2/3, `50`/`51` = Mischer 1/2, [Discussion #779](https://github.com/john30/ebusd/discussions/779)).
+  Die Kennung SW 0100 / HW „–“ entspricht der Softwareversion, die der ebusd-Scan für das Mischermodul `52` meldet
+  (SW 0100); warum das BM-2 sie mitsendet, ist offen.
 - Einmalige ISM7-Abfragen (wohl beim Verbindungsaufbau der Wolf-App), Antworten gegen die Wolf-Datenbank geprüft:
 
 | Adresse | TN | Wolf-DB-Name | Rohwert | Deutung |
 |---|---|---|---|---|
-| `08` | 10878 | Herstelljahr | `0x13` = 19 | vermutlich 2019 (Jahreszahl ohne Jahrhundert, nicht verifiziert) |
-| `08` | 10877 | Herstellwoche | `0x2c` = 44 | KW 44 |
+| `08` | 10878 | Herstelljahr | `0x13` = 19 | 2019 – laut Birger passend zur Therme |
+| `08` | 10877 | Herstellwoche | `0x2c` = 44 | KW 44 – laut Birger passend |
 | `08` | 10879 | – (nicht in der DB) | 2 | unbekannt |
 | `08` | 10880 | – (nicht in der DB) | `0x6a79` = 27257 | unbekannt |
 | `08` | 10075 | Warmwasserkonfiguration | 5 | Listeneintrag 5 = `DHWCoilStorNoHead` (Speicher mit Heizschlange) |
