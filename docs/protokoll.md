@@ -564,6 +564,26 @@ Schreiben roh über `HgRaw` (Therme, Prüfbyte), `MmRaw` (MM, Prüfbyte), `BmRaw
 
 Alle 6 beim ersten Versuch übernommen und zurückgestellt.
 
+### Schreibtest Gruppe 1 (21.10.2026, 05:27–05:33, Freigabe Birger „Teste 1“)
+
+| Parameter | Gerät/TN | Original | Test | Rücklesen | zurück |
+|---|---|---|---|---|---|
+| HG13 Funktion E1 | 08/2651 | 0 keine | 4 Zirkomat | 4 ✓ | 0 ✓ |
+| HG14 Funktion A1 | 08/2751 | 1 Zirk. 100 % | 2 Zirk. 50 % | **6** (während HG13 = 4), allein getestet 2 ✓ | 1 ✓ |
+| HG21 TK-min | 08/31 | 20,0 | 21,0 | 21,0 ✓ | 20,0 ✓ |
+| A04 Außenfühler gemittelt | 35/388 | 3 h | 4 | 4 ✓ | 3 ✓ |
+| A07 Antilegionellen-Tag | 35/257 | 5 Freitag | 6 | 6 ✓ | 5 ✓ |
+| A08 Wartungsmeldung | 35/618 | 2 datumsabh. | 1 | 1 ✓ | 2 ✓ |
+| A10 Parallelbetrieb | 35/35 | 0 Aus | 1 | 1 ✓ | 0 ✓ |
+| A23 Startzeit ALF | 35/10141 | 3102 (12:30) | 3103 | 3103 ✓ | 3102 ✓ |
+| A26 Freigabe Smarthome | 35/10912 | 1 Ein | 0 | 0 ✓ | 1 ✓ |
+| Kreisart HK / MK | 35/9005, 86/9005 | 0 Heizkreis | 1 | 1 ✓ | 0 ✓ |
+| Raumeinfluss HK / MK | 35/651, 86/651 | 0 Aus | 1 | 1 ✓ | 0 ✓ |
+
+Befund: HG13 = 4 (Zirkomat) setzt den Ausgang A1 automatisch auf 6 (Zirkomat) und sperrt ihn – genau wie in der
+CGB-2-Anleitung beschrieben (HG13 Zirkomat → A1 automatisch Zirkulationspumpe, für weitere Einstellungen gesperrt).
+Reihenfolge beim Zurückstellen deshalb: erst HG13, dann HG14. Alle 15 Werte wieder auf Original, zurückgelesen.
+
 ## Weitere Telegrammnummern
 
 - TN 5250 (BM-2): Wartung Fälligkeitsdatum, Typ BM2Date (ism7mqtt `BM2DateConverterTemplate`):
