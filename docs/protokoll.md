@@ -584,6 +584,18 @@ Befund: HG13 = 4 (Zirkomat) setzt den Ausgang A1 automatisch auf 6 (Zirkomat) un
 CGB-2-Anleitung beschrieben (HG13 Zirkomat → A1 automatisch Zirkulationspumpe, für weitere Einstellungen gesperrt).
 Reihenfolge beim Zurückstellen deshalb: erst HG13, dann HG14. Alle 15 Werte wieder auf Original, zurückgelesen.
 
+### Fachmann-Menü mit Rohmitschnitt (21.10.2026, 05:32–05:35)
+
+- Birger ruft am BM-2 Fachmann → Heizgerät die HG-Liste auf (HG21 20,0 / HG22 85,0 / **HG23 WW-Max 65,0** / HG25 15,0).
+  Im Rohmitschnitt **keine** Lesetelegramme des BM-2 an `08` für diese Parameter (nur die zyklischen Statuslesungen) →
+  das BM-2 im Heizgerät liest die HG-Parameter über die interne Verbindung, nicht über den eBus. Die Methode „am Display
+  aufrufen und mitschneiden“ funktioniert für Therme-Parameter deshalb nicht.
+- HG23 gefunden über Probelesen: **TN 308 am BM-2 (`35`) = `8a 02` = 650 → 65,0 °C** (TN 308 heißt in der Wolf-DB beim MM
+  „Warmwassermaximaltemperatur“; an `08` liefert TN 308 `0080` = ungültig). Kandidat für HG23 bzw. A14 – Bestätigung durch
+  Verstellen am Display steht aus.
+- **HG43 ist keine Anzeige, sondern startet die „100% Kalibration“** (Anzeige „Kali abgesch. Aus / Kali. aktiv Aus /
+  HG43: Warte… OK“). Birger gewarnt, nicht bestätigen. HG43–HG45 (Kalibrierung/Gas/Abgas) werden nicht weiter untersucht.
+
 ## Weitere Telegrammnummern
 
 - TN 5250 (BM-2): Wartung Fälligkeitsdatum, Typ BM2Date (ism7mqtt `BM2DateConverterTemplate`):
