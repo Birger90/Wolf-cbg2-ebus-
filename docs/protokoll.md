@@ -455,6 +455,22 @@ Die Anleitung ist von 2007 und für WRS-/5W-Regelungen geschrieben; ob alles fü
 - Forenangabe (ebusd Discussion #779, realResi): das BM nimmt Zeit-Broadcasts von `0f` oder `30` an. Ein Test
   „`0700` mit gültiger Zeit von `-s 0f`“ wäre der nächste Versuch, die BM-2-Uhr zu stellen (noch nicht gemacht).
 
+### Uhr stellen über Absender `0f` und Wartung zurücksetzen (21.10.2026, 04:32–04:40, auf Wunsch von Birger)
+
+- 04:32:52 `hex -s 0f fe0700099e0a55320421100326` (Außentemperatur 10,617 wie vom Empfänger, Zeit 04:32:55, Datum
+  21.10.(Mi)26) → `done broadcast`. Ergebnis: **Uhr nicht übernommen** (TN 10161 um 04:37:52 = 1068 = 04:44, weiter +6 min).
+  Nebenwirkung: Das BM-2 sendet seinen minütlichen Datetime-Broadcast (`30 fe 0700`, sonst jede Minute bei :58) seit
+  04:31:58 **nicht mehr** (Stand 04:39). Hypothese: Das BM-2 hält jetzt eine Funkuhr am Bus für vorhanden und überlässt ihr
+  die Zeit. Nicht verifiziert; ob der Broadcast von selbst wiederkommt, wird beobachtet. Außentemperatur, BmStatus,
+  Störungscodes unverändert normal.
+- Therme `03` sendet `fe fe01` (ebusd `Broadcast Error`) mit `E000 04:37` um 04:36:58 → die Therme führt die **richtige**
+  Uhrzeit (Quelle offen).
+- Wartung: TN 5250 (Fälligkeitsdatum) und TN 5264 (Wartungsmeldung Datum) über `BmRaw` (`00 82 14 34 37` bzw.
+  `00 90 14 34 37`) von 13096 (09.10.2025) auf **14132 = 21.10.2027** gesetzt, beide zurückgelesen ✓, obwohl die Wolf-App
+  beide als nur lesbar führt. HA: `binary_sensor.heizung_wartung_fallig` = aus.
+- Störung quittieren: In der Wolf-Datenbank gibt es „Störung Quittieren“/„Acknowledge alarm“ nur für andere Gerätetypen
+  (Lüftung CWL, WRS), nicht für CGB-2/BM-2/MM. Weg der Quittieren-Taste auf dem Bus unbekannt.
+
 ## Weitere Telegrammnummern
 
 - TN 5250 (BM-2): Wartung Fälligkeitsdatum, Typ BM2Date (ism7mqtt `BM2DateConverterTemplate`):
