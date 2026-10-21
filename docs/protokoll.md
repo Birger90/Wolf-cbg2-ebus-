@@ -494,6 +494,23 @@ Die Anleitung ist von 2007 und für WRS-/5W-Regelungen geschrieben; ob alles fü
   „Mischerkreis und direkter Heizkreis“, d. h. die Pumpe des direkten Heizkreises hängt am Ausgang A1 des MM, die Therme
   arbeitet nur als Zubringer. Die Zuordnung ist damit stimmig, am Display aber weiterhin nicht abgelesen.
 
+### Quittieren-Test (21.10.2026, 04:47, Birger drückt „quittieren“, keine Störung aktiv)
+
+- 04:47:09–13: ISM7 (`ff`) fragt die Kennung von `08`, `35`, `52` ab (`07 04`) – sonst nur selten.
+- ab ca. 04:47:35: Therme **Nachspülen** (Brennerstatus 7, Gebläse/Modulation 60–69 %, Ausgänge TN 371 = 6), bis 04:48:20,
+  dann wieder Aus. Kein Brennerstart (BurnerStartsLow unverändert).
+- Ein eigenes „Quittieren“-Telegramm auf dem Bus wurde **nicht** gefunden: In `grab result` keine neue Variante von
+  `30 03 0507` (Operation, 1237× gleicher Inhalt), keine Schreibtelegramme (`5023`) an `08`/`03` außer den bekannten.
+  Nur einmalig neu: `f0 fe 0503 08 01 00 00 ff 2d ff 32 0a` (f0 sendet einmal das 0503-Format wie `f1`) und einzelne
+  ISM7-Lesungen (MM TN 101, 383; BM-2 TN 20018).
+- Deutung (nicht verifiziert): Das Nachspülen passt zu einem Neustart/Entriegeln des Feuerungsautomaten. Wenn direkt an der
+  Therme (Entstörtaste) gedrückt wurde, läuft das ohne eBus. Falls am BM-2 oder in der App gedrückt wurde, muss der Befehl
+  in einem Telegramm stecken, das ebusd nicht als „unbekannt“ meldet (Kandidat: Inhalt von `0507`, aber unverändert).
+- Uhr: Der Datetime-Broadcast des BM-2 ist wieder da (04:46:58 → `04:53:10`, also weiter +6 min). Die Therme sendet in
+  ihrem Error-Broadcast `fe fe01` um 04:36:58 „04:37“ (= echte Zeit, in der Pause des BM-2-Broadcasts, nach dem
+  `0f`-Zeittelegramm) und um 04:47:00 „04:53“ (= BM-2-Zeit) → Hypothese: Die Therme übernimmt die jeweils zuletzt
+  gesendete Zeit; das `0f`-Zeittelegramm hat also die Therme gestellt, nicht das BM-2. Nicht verifiziert.
+
 ## Weitere Telegrammnummern
 
 - TN 5250 (BM-2): Wartung Fälligkeitsdatum, Typ BM2Date (ism7mqtt `BM2DateConverterTemplate`):
