@@ -126,3 +126,15 @@ Entity-Duplikat behoben: `sensor.heating_ebusd_bm2_maintenancedate` (unique_id `
 
 Hintergrund: Vorfall 20.10.2026 22:22–22:50 (protokoll.md) – ohne Außentemperatur gehen beide Heizkreise in
 AT-Frostschutz und die Anlage heizt nicht. Ersatzwert per eBus funktioniert nicht (BM-2 nimmt nur `0f`).
+
+## Vorheizen der Kabine nach Google-Kalender (21.10.2026)
+
+- `calendar.kabine_buchungen`: Integration Remote Calendar, öffentliche iCal-Adresse des Google-Kalenders „die Kabine“
+  (zeigt nur Belegt-Zeiten, Titel „Busy“). Automation „Kalender Kabine Buchungen aktualisieren“ lädt alle 15 min neu.
+- Helfer: `input_number.kabine_vorheizzeit` (h, Standard 2), `input_number.kabine_komforttemperatur` (21 °C),
+  `input_number.kabine_grundtemperatur` (17 °C), `input_boolean.kabine_vorheizen_nach_kalender` (Ein/Aus).
+- Automation „Kabine vor Buchung vorheizen“: ab Vorheizzeit vor Beginn `input_number.sollwert_kabine` = Komfort und
+  Programmwahl beider Wolf-Kreise (Radiatoren = direkter Kreis, Fußbodenheizung = Mischerkreis) = Permanent, damit das
+  BM-2 auch bei Eco/ECO-ABS Wärme liefert; nach Buchungsende Sollwert = Grund und beide Programme = Auto, außer die nächste
+  Buchung beginnt innerhalb der Vorheizzeit. Die Raumregelung selbst bleibt bei „Heizzone Kabine regeln“.
+- Permanent gilt für den ganzen Heizkreis, also auch für die Mieterwohnung.
