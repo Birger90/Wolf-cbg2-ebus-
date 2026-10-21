@@ -432,6 +432,20 @@ kommen, ist nicht beobachtet. Das BM-2 führt eine Störungshistorie (Fachmanneb
 Anzahl nicht angegeben). Über die Wolf-Datenbank ist sie nicht lesbar (`HasOwnFaultMessageHistory` = false), eine TN dafür
 ist nicht bekannt.
 
+### Funk-Außenfühler und Funkempfänger (Anleitung 3060938_1007, von Birger verlinkt, 21.10.2026)
+
+Die Anleitung ist von 2007 und für WRS-/5W-Regelungen geschrieben; ob alles für das BM-2 gilt, ist nicht verifiziert.
+- Außenfühler sendet alle **30 min** (der Empfänger `0f` wiederholt den Wert auf dem eBus jede Minute, beobachtet).
+- Batterie 3,6 V Lithium (z. B. Saft LS 14250, Xeno XL-050F, Sonnenschein SL-350), Lebensdauer ca. 5 Jahre. Bei
+  schwacher/fehlender Batterie zeigt die Regelung eine Außenfühlerstörung (passt zu Code 15 am 20.10.).
+- Empfänger-LEDs: rot dauernd = keine Verbindung zum Fühler/gestörter Empfang; **gelb an = kein DCF-Empfang bzw. nicht
+  synchronisiert**; grün blinkt im Sekundentakt = DCF-Empfang.
+- Der Empfänger enthält eine **DCF77-Funkuhr**; laut Anleitung stellt sich die Uhr der Regelung danach nach ca. 5 min.
+- Beobachtung dazu: `0f` sendet den `0700`-Broadcast mit Uhrzeit/Datum = `ff` (ungültig) → Hypothese: Der DCF-Teil des
+  Empfängers ist nicht synchronisiert, deshalb läuft die BM-2-Uhr frei (+6 min). Prüfbar an der gelben LED. Nicht verifiziert.
+- Forenangabe (ebusd Discussion #779, realResi): das BM nimmt Zeit-Broadcasts von `0f` oder `30` an. Ein Test
+  „`0700` mit gültiger Zeit von `-s 0f`“ wäre der nächste Versuch, die BM-2-Uhr zu stellen (noch nicht gemacht).
+
 ## Weitere Telegrammnummern
 
 - TN 5250 (BM-2): Wartung Fälligkeitsdatum, Typ BM2Date (ism7mqtt `BM2DateConverterTemplate`):
