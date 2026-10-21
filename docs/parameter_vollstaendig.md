@@ -940,3 +940,20 @@ Stand: core 333, ext 96, nicht übernommen 478.
 | 40026 | Analogeingang E2 | SS10 | 2602 | core (`InputE2`) |
 | 40027 | Analogeingang Vorlauffühler VF | SS10 | 15 | core (`Flowtemp`) |
 
+
+## Ergebnis des Einlesens am 21.10.2026 (nach ebusd-Neustart, 3 Durchgänge)
+
+96 ext-Nachrichten → 100 HA-Entitäten (Uhrzeiten als Stunde/Minute getrennt). 71 liefern Werte.
+29 beantwortet das jeweilige Gerät mit „nicht verfügbar“ (Rohwert 32768 bzw. `-`), d. h. die Funktion ist an dieser
+Anlage nicht vorhanden oder nicht freigeschaltet:
+
+- Therme: Sammlertemperatur (kein Sammlerfühler), Eingang E3/E4 (kein E/A-Modul: `Status_EA_Modul = Nicht_vorhanden`),
+  Auslauftemperatur Warmwasser (kein Kombigerät), erweiterte Statistik aktiv sowie alle Energie-/Wärmemengenzähler
+  (Jahr, Vorjahr, Vorvorjahr, HZ/WW) – die Therme führt diese Statistik nicht (passt zu `EnergyToday` = 32768).
+- BM-2/MK: Programmwahl mit Kühlvarianten (TN 9025/9026), aktuelle Kreisart, Kühlkurve global,
+  Vorlaufsolltemperatur SmartHome – Kühlfunktionen, an dieser Anlage nicht aktiv.
+
+Beispiele gelesener Werte: Typ = CGB_2, Herstelljahr/-woche 19/44, Warmwasserkonfiguration = DHWCoilStorNoHead
+(Speicher mit Wendel, ohne Vorrangschaltung laut Wolf-Bezeichnung), Eingang E1 = Geöffnet, IO-Istwert 5,
+BUSCONFIG_Anlagenkonfiguration Rohwert 1 (Wertetabelle der Wolf-DB: 1 → „2“; Deutung nicht verifiziert, HG40 liefert ebenfalls 1),
+BM-2 Softwareversion 280, Lüftung Nennlüftung/Filter OK (Lüftungsgerät CWL vorhanden?), Kühlkurve 20/30 °C bei 35/45 °C Außentemperatur.
