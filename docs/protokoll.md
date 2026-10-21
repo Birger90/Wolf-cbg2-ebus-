@@ -341,6 +341,47 @@ Rohwerte: wieder nur `M5014_52_20 temp` (22,9 → 21,8, = Mischervorlauf) geänd
 `listen`-Werte konstant. Neu in diesem Zeitraum nur die Kennungsmeldungen von `f0`/`30` um 03:58 (siehe oben).
 Antilegionellenfunktion läuft laut Einstellung erst Freitag – in dieser Nacht nicht beobachtbar.
 
+### Durchgang 3 (21.10.2026, 07:30; Zeitraum 04:30–07:30)
+
+Der Zeitraum ist durch Eingriffe überlagert und taugt nicht als ungestörter Morgen: Quittier-Tests (04:47, 04:51),
+Partymodus ab 04:57, Schreibtests 05:15–05:33, Fachmann-Menü mit HG43-Kalibrierung 05:34–05:40, A09/A14 am Display,
+Neustart von Home Assistant 06:40, ab 06:40 beide Kreise Permanent (Anwesenheitsmodus Kabine), Partymodus 07:14 beendet.
+
+**Übergang Absenkung → Tagbetrieb:** beide Kreise (`bm2 HkStatus`, `mk MkStatus`) „Eco“ → „Heizbetrieb“ um 05:00:39/05:00:49,
+also 3–4 min nach dem Start des Partymodus (04:57) – ausgelöst durch Party, nicht durch das Zeitprogramm. Der planmäßige
+Übergang ist in dieser Nacht deshalb **nicht beobachtbar**. Danach 05:32–05:39 und 05:47–06:10 „Warmwasservorrang“
+(WW-Ladung), Brenner ab 05:03 mit Starts um 05:03, 05:34 (Kalibrierung), 06:11, 07:13, 07:23 und Taktsperren dazwischen.
+
+**`listen`-Sensoren:** bis 04:59 änderte sich wieder nur `M5014_52_20 temp` (Mischervorlauf, 21,8 → 20,1). Seit dem
+HA-Neustart 06:40 stehen alle 14 `M5014_*`-Sensoren auf `unknown`; die übrigen 34 Rohwerte unverändert (z. B. TN 10006 =
+65088, 1113 = 5653, 10711 = 80, MM 45 = 150, 711 = 750).
+
+**Neu im `grab result` (Rohtelegramme, Deutung nicht verifiziert):**
+
+- `30 50 5014` (BM-2 an Adresse `50`), Anfrage 7 Byte, in fünf Varianten:
+  `02 00 05 00 19 40 14` (1×), `02 00 2e 00 19 40 14` (127×), `03 00 2e 00 19 40 78` (326×), `13 00 2e/50 00 19 40 78`,
+  `21 00 2e/50 00 19 48 78` (102×/1×). Hypothese nach der ebusd-Definition `mc Operation` (Status, Vorlauf-Soll D2B,
+  Raum D1C, WW-Soll D1C): Byte 3–4 = Vorlauf-Soll als D2B (`00 05` = 5 °C, `00 2e` = 46 °C, `00 50` = 80 °C),
+  letztes Byte = WW-Soll ×2 (`14` = 10 °C wie das nächtliche WW-Soll der Therme, `78` = 60 °C), Byte 1 = Status.
+  Die Antwort von `50` enthält weiter `9c 03` (= kein Fühler). Zeitliche Zuordnung der Varianten fehlt (grab speichert nur
+  Anzahl und letzten Inhalt).
+- `30 ff 03f2`, 20 Byte, BM-2 an das ISM7, viele Varianten. Die 16-Bit-Werte (little endian) sind durchweg Vielfache von
+  15 und passen als **Minuten seit Mitternacht**: erstes Wort `010e`/`012c`/`014a`/`0168`/`0186` = 270/300/330/360/390
+  = 04:30/05:00/05:30/06:00/06:30 (Halbstundenraster), danach Paare wie `0168 03fc 0438` = 06:00/17:00/18:00,
+  `01a4 0348 04ec` = 07:00/14:00/21:00, `04b0`/`04ec`/`0528`/`0564` = 20:00/21:00/22:00/23:00. Hypothese:
+  **Schaltzeiten der Zeitprogramme**, die das BM-2 dem ISM7 übermittelt. Nicht gegen die eingestellten Programme geprüft.
+- `f0 fe 0301` jetzt 3 Varianten (Außentemperatur 10,3/10,5/10,6), `f0 fe 0503` 1×, `03 fe 5023` 2×: `05 28 2300 0000` und
+  `05 b8 2300 0100` = **TN 35 (A10 Parallelbetrieb) = 0 bzw. 1**, Prüfbyte jeweils korrekt – die Therme (`03`) verteilt den
+  Wert weiter, passend zum A10-Schreibtest 05:27–05:33 (1 und zurück auf 0).
+
+**Kennung laut ebusd `info` (07:27):** `f0` Master #5 mit Slave `f5` = „Kromschroeder SW 0100 HW –“ (wie das MM `52`);
+`04` = „Kromschroeder SW 0204 HW 8080“ (ISM7-Slave). Adapter: Firmware `1.1[6911]`, enhanced, 0 Reconnects.
+
+**Fazit der Nacht:** Neu bestätigt: Mischervorlauf in `5014` (Durchgang 1–3), `f0` = zweite Masteradresse mit
+Kromschröder-Kennung, Herstelljahr/-woche der Therme. Neu als Hypothese: `5014`-Anfrage = Sollwerte an Mischer 1,
+`03f2` = Zeitprogramm-Schaltzeiten. Die `listen`-Sensoren haben über drei Durchgänge außer dem Mischervorlauf nichts
+Neues geliefert und können entfernt werden; `grab` reicht für weitere Suche.
+
 ## Abdeckungsprüfung gegen die Wolf-Parameterliste (21.10.2026, 04:20–04:35)
 
 Methode: Parameterlisten der Wolf-App (ism7mqtt `device.xml`/`parameter.xml`/`converter.xml`, Vorlagen CGB-2, BM-2,
