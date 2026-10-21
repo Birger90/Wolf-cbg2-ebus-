@@ -371,8 +371,11 @@ HA-Neustart 06:40 stehen alle 14 `M5014_*`-Sensoren auf `unknown`; die übrigen 
   `01a4 0348 04ec` = 07:00/14:00/21:00, `04b0`/`04ec`/`0528`/`0564` = 20:00/21:00/22:00/23:00. Hypothese:
   **Schaltzeiten der Zeitprogramme**, die das BM-2 dem ISM7 übermittelt. Nicht gegen die eingestellten Programme geprüft.
 - `f0 fe 0301` jetzt 3 Varianten (Außentemperatur 10,3/10,5/10,6), `f0 fe 0503` 1×, `03 fe 5023` 2×: `05 28 2300 0000` und
-  `05 b8 2300 0100` = **TN 35 (A10 Parallelbetrieb) = 0 bzw. 1**, Prüfbyte jeweils korrekt – die Therme (`03`) verteilt den
-  Wert weiter, passend zum A10-Schreibtest 05:27–05:33 (1 und zurück auf 0).
+  `05 b8 2300 0100`. Gelesen als `<Prüfbyte> <TN lo> <TN hi> <Wert>` wäre das TN 35 (A10 Parallelbetrieb) = 0 bzw. 1,
+  passend zum A10-Schreibtest 05:27–05:33. **Aber:** `tools/wolf_crc.py` ergibt über `23 00 00 00` bzw. `23 00 01 00` die
+  Prüfbytes `44` bzw. `18`, nicht `28`/`b8` (Gegenprobe A09-Broadcast `00 0a 46 00` → `58` ✓). Byte 2 ist also hier kein
+  CRC über diese Daten oder das Format ist ein anderes – Zuordnung **nicht verifiziert**. Die Angabe im Abschnitt „A09“
+  („Prüfbyte im Broadcast korrekt … `28`“) für den TN-35-Broadcast des BM-2 ist damit ebenfalls zu prüfen.
 
 **Kennung laut ebusd `info` (07:27):** `f0` Master #5 mit Slave `f5` = „Kromschroeder SW 0100 HW –“ (wie das MM `52`);
 `04` = „Kromschroeder SW 0204 HW 8080“ (ISM7-Slave). Adapter: Firmware `1.1[6911]`, enhanced, 0 Reconnects.
