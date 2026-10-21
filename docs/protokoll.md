@@ -591,8 +591,13 @@ Reihenfolge beim Zurückstellen deshalb: erst HG13, dann HG14. Alle 15 Werte wie
   das BM-2 im Heizgerät liest die HG-Parameter über die interne Verbindung, nicht über den eBus. Die Methode „am Display
   aufrufen und mitschneiden“ funktioniert für Therme-Parameter deshalb nicht.
 - HG23 gefunden über Probelesen: **TN 308 am BM-2 (`35`) = `8a 02` = 650 → 65,0 °C** (TN 308 heißt in der Wolf-DB beim MM
-  „Warmwassermaximaltemperatur“; an `08` liefert TN 308 `0080` = ungültig). Kandidat für HG23 bzw. A14 – Bestätigung durch
+  „Warmwassermaximaltemperatur“; an `08` liefert TN 308 `0080` = ungültig). Kandidat für A14 (nicht HG23, siehe unten) – Bestätigung durch
   Verstellen am Display steht aus.
+- **HG23 Warmwassermaximaltemperatur = TN 385 an der Therme (`08`), SS10** (Name aus der Wolf-DB der COB-Vorlage).
+  Bestätigt: Birger stellt HG23 am Display auf 64 → TN 385 = `80 02` = 64,0 (TN 308 am BM-2 blieb 65,0); zurück auf 65 →
+  `8a 02` = 65,0.
+- 05:34–05:40: Durch das Aufrufen von HG43 lief eine 100%-Kalibrierung: Betriebsart „Kalibration“, Brenner kurz aus und
+  um 05:34:33 neu gestartet, danach gleichmäßig 81–82 % Modulation, kein Störungscode.
 - **HG43 ist keine Anzeige, sondern startet die „100% Kalibration“** (Anzeige „Kali abgesch. Aus / Kali. aktiv Aus /
   HG43: Warte… OK“). Birger gewarnt, nicht bestätigen. HG43–HG45 (Kalibrierung/Gas/Abgas) werden nicht weiter untersucht.
 
