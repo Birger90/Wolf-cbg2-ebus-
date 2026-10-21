@@ -661,6 +661,12 @@ Birger: A14 stand auf 70 °C, dann 65, 67, wieder 65. TN 308 und TN 385 am BM-2 
 `30 03 5023 4f f4 02 00 03` (TN 756). → A14 bleibt im BM-2 und wird nicht verteilt; Nummer unbekannt (systematische Suche
 im BM-2 nötig). Nebenbefund: TN 10830 war im Broadcast 05:32:59 = 1 (Warmwasserladung lief), sonst 0.
 
+### Mithör-Sensoren entfernt (21.10.2026, 08:10, Freigabe Birger)
+
+`listen.csv` aus ebusd gelöscht (`find -c listen` → nicht gefunden), Discovery der 48 `sensor.heating_ebusd_listen_*`
+mit leerer, gehaltener Nachricht geleert, die Entitäten sind aus HA verschwunden. Der Generator erzeugt die Datei nicht
+mehr. Grund: außer dem Mischervorlauf brachten sie keine Erkenntnis (Durchgang 3).
+
 ### Prüfbyte A09-Broadcast nachgerechnet (21.10.2026)
 
 `tools/wolf_crc.py`: Daten `00 0a 46 00` → `58`, `00 0a 14 00` → `28`. Beide stimmen mit dem Mitschnitt überein, die

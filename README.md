@@ -209,4 +209,8 @@ Vollständige Liste mit Entitätsnamen: [`docs/ha-helfer.md`](docs/ha-helfer.md)
 - Wolf-Unterlagen: CGB-2 Montage-/Betriebsanleitung 3063421 (2015, 2021, 2024), BM-2 Fachkraft ab FW 2.80 (3063305),
   BM-2 Montageanleitung Experte, MM/MM-2 Montageanleitung, Funk-Außenfühler 3060938
 
-Eine Lizenz ist für dieses Repo noch nicht festgelegt.
+## Lizenz
+
+GNU General Public License v3.0, siehe [LICENSE](LICENSE). Grund: Die verwendeten Vorlagen
+(ebusd-configuration, ism7mqtt) stehen ebenfalls unter GPL v3. Nutzung, Änderung und Weitergabe sind frei, abgeleitete
+Werke müssen wieder unter GPL v3 stehen. Eine kommerzielle Nutzung schließt die GPL nicht aus.

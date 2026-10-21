@@ -368,30 +368,10 @@ def main():
              ]
 
 
-    # Nachtmitschnitt 20./21.10.2026: unbekannte Telegramme anderer Master passiv als Rohwert mitlesen,
-    # damit HA eine Zeitreihe aufzeichnet (Typ r ohne Prioritaet = ebusd fragt selbst NICHT ab).
-    lt = [HEADER, "# Passiver Mitschnitt unbekannter Telegramme (BM-2 30 und ISM7 ff lesen diese TNs zyklisch). Kein eigenes Polling.",
-          "# Rohwerte UIN (32768 = 0x8000 = ungueltig). Namen soweit in der Wolf-Datenbank vorhanden."]
-    therme = [(10063,"IO-Istwert"),(10006,"Eingang E1"),(1113,"unbekannt (COB: Brennerstunden 2. Stufe)"),(10007,"Sammlertemperatur"),
-              (10876,"Heizkreisdurchfluss"),(10870,"unbekannt (COB-2: Brennerstufe)"),(10090,"unbekannt"),(10083,"unbekannt (CGG-3: Fan speed)"),
-              (10039,"unbekannt"),(10833,"Status EA-Modul"),(10805,"Funktion Ausgang A4"),(10804,"Funktion Ausgang A3"),(10711,"unbekannt"),
-              (10096,"Warmwasser Schnellstart"),(10084,"unbekannt"),(10074,"unbekannt"),(10073,"unbekannt"),(10034,"unbekannt"),
-              (10033,"Anlagenkonfiguration"),(10003,"unbekannt"),(10002,"unbekannt"),(5000,"unbekannt"),(2751,"Funktion Ausgang A1"),
-              (12057,"unbekannt (Freigabe Kuehlbetrieb bei Waermepumpen)"),(10807,"Eingang E4"),(10806,"Eingang E3")]
-    for tn,name in therme:
-        lt.append(f"r,listen,,T08_{tn},{name} - Therme TN {tn},,08,5022,cc{tn_hex(tn)},value,,UIN,,,TN {tn}")
-    for tn,name in [(756,"unbekannt"),(2593,"Konfiguration MM"),(711,"Konstanttemperatur"),(45,"Kesseluebertemperatur Speicherladung"),(14,"Warmwassertemperatur")]:
-        lt.append(f"r,listen,,T52_{tn},{name} - Mischermodul TN {tn} (vom BM-2 gelesen),,52,5022,cc{tn_hex(tn)},value,,UIN,,,TN {tn}")
-    lt.append(f"r,listen,,T08_10888,erweiterte Statistik aktiv - Therme TN 10888 (vom ISM7 gelesen),,08,5022,82{tn_hex(10888)},value,,UIN,,,TN 10888")
-    lt.append(f"r,listen,,T52_87,unbekannt - Mischermodul TN 87 (vom ISM7 gelesen),,52,5022,00{tn_hex(87)},value,,UIN,,,TN 87")
-    lt.append(f"r,listen,,T52_86,unbekannt - Mischermodul TN 86 (vom ISM7 gelesen),,52,5022,5c{tn_hex(86)},value,,UIN,,,TN 86")
-    for zz,label in [("52","Mischermodul"),("50","Adresse 50")]:
-        for b in ["20","22"]:
-            lt.append(f"r,listen,,M5014_{zz}_{b},Kromschroeder 5014 an {label} (Anfrage {b}...),,{zz},5014,{b}000500194014,b1,,UCH,,,Byte1,b2,,UCH,,,Byte2,temp,,D2B,,°C,Byte3-4 (beim MM Mischervorlauf),b5,,UCH,,,Byte5,b6,,UCH,,,Byte6,b7,,UCH,,,Byte7,temp2,,D2B,,°C,Byte8-9")
-    lt.append("u,listen,,BmWrite,BM-2 Broadcast-Schreibtelegramm (Pruefbyte TN Wert),30,fe,5023,,data,,HEX:5,,,roh")
-    lt.append("u,listen,,FaToF1,Feuerungsautomat an Master f1 (0800),03,f1,0800,,data,,HEX:8,,,roh")
+    # Passiver Mitschnitt (listen.csv, 48 Sensoren) am 21.10.2026 entfernt: brachte ueber den Mischervorlauf hinaus
+    # keine Erkenntnis (docs/protokoll.md, Durchgang 3). Stand davor siehe Git-Historie.
 
-    for fname, lines in [("listen.csv", lt), ("hc.csv", hc), ("bm2.csv", bm2), ("mk.csv", mk), ("mm.csv", mm), ("mc.csv", mc), ("broadcast.csv", broadcast), ("fault.csv", fault)]:
+    for fname, lines in [("hc.csv", hc), ("bm2.csv", bm2), ("mk.csv", mk), ("mm.csv", mm), ("mc.csv", mc), ("broadcast.csv", broadcast), ("fault.csv", fault)]:
         with open(os.path.join(OUT, fname), "w", encoding="utf-8") as f:
             f.write("\n".join(lines) + "\n")
         print(f"{fname}: {len(lines)} Zeilen")
