@@ -332,6 +332,15 @@ Bit 2 ist also auch bei ausgeschaltetem Brenner gesetzt → die aus anderen Wolf
 | `35`, `86` | 9024 / 9028 / 9007 | aktuelle Kreisart / Kühlkurve global / Raumeinfluss Kühlen | `0080` / `0080` / 0 | keine Kühlfunktion |
 | `52` | 410 | Firmware | 0 | MM liefert keine Version über TN 410 |
 
+### Durchgang 2 (21.10.2026, 04:30; Zeitraum 01:30–04:30)
+
+Weiter ruhige Nacht: Therme durchgehend Standby, Brenner aus, **keine Brennerstarts** (BurnerStartsLow 52854 unverändert),
+**keine Warmwasserladung** (Speicher 54,4 → 50,4 °C ohne Nachladung; WW-Soll der Therme nachts 10,0 → Zeitprogramm aus),
+Heizkreis „Eco“, Pumpe aus, Ausgänge TN 371 weiter 4 (Bit 2). Außentemperatur 10,3 → 10,6.
+Rohwerte: wieder nur `M5014_52_20 temp` (22,9 → 21,8, = Mischervorlauf) geändert; `temp2` 40,43 und alle übrigen
+`listen`-Werte konstant. Neu in diesem Zeitraum nur die Kennungsmeldungen von `f0`/`30` um 03:58 (siehe oben).
+Antilegionellenfunktion läuft laut Einstellung erst Freitag – in dieser Nacht nicht beobachtbar.
+
 ## Abdeckungsprüfung gegen die Wolf-Parameterliste (21.10.2026, 04:20–04:35)
 
 Methode: Parameterlisten der Wolf-App (ism7mqtt `device.xml`/`parameter.xml`/`converter.xml`, Vorlagen CGB-2, BM-2,
