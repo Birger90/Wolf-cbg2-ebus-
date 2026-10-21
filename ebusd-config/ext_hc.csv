@@ -13,7 +13,6 @@ r,hc,,x_Typ,Typ RO,,08,5022,cc4801,value,,UIN,33=CGB_2,,TN 328 PTID 180141
 r,hc,,x_Sammlertemperatur,Sammlertemperatur RO,,08,5022,cc1727,value,,SIN,10,°C,TN 10007 PTID 180048
 r,hc,,x_0_10_V_GLT,0 - 10 V GLT RO,,08,5022,cc1827,value,,SIN,10,V,TN 10008 PTID 180151
 r,hc,,x_Brenner,Brenner RO Bit3 OnValue=1,,08,5022,cc7201,value,,UIN,,,TN 370 PTID 180016
-r,hc,,x_Heizkreispumpe,Heizkreispumpe RO Bit4 OnValue=1,,08,5022,cc7301,value,,UIN,,,TN 371 PTID 180025
 r,hc,,x_Auslauftemperatur_Warmwasser,Auslauftemperatur Warmwasser RO,,08,5022,cc1927,value,,SIN,100,°C,TN 10009 PTID 180050
 r,hc,,x_IO_Istwert,IO-Istwert RO,,08,5022,cc4f27,value,,UIN,,,TN 10063 PTID 180102
 r,hc,,x_Eingang_E1,Eingang E1 RO,,08,5022,cc1627,value,,UIN,65088=Geoeffnet;2000=Geschlossen,,TN 10006 PTID 180146

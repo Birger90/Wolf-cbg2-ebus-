@@ -7,7 +7,7 @@
    "action": "logbook.log",
    "data": {
     "name": "Heizung eBus",
-    "message": "Einlesen von 97 ext-Parametern gestartet"
+    "message": "Einlesen von 96 ext-Parametern gestartet"
    }
   },
   {
@@ -25,7 +25,6 @@
      "ebusd/hc/x_Sammlertemperatur/get",
      "ebusd/hc/x_0_10_V_GLT/get",
      "ebusd/hc/x_Brenner/get",
-     "ebusd/hc/x_Heizkreispumpe/get",
      "ebusd/hc/x_Auslauftemperatur_Warmwasser/get",
      "ebusd/hc/x_IO_Istwert/get",
      "ebusd/hc/x_Eingang_E1/get",

@@ -88,9 +88,9 @@ def load(res):
 def core_tns():
     """(circuit, TN) der handgepflegten Dateien, damit nichts doppelt definiert wird."""
     have = {}
-    for fn in ("hc", "bm2", "mk", "mm"):
-        p = os.path.join(OUT, f"{fn}.csv")
-        if not os.path.exists(p):
+    import glob
+    for p in sorted(glob.glob(os.path.join(OUT, "*.csv"))):
+        if os.path.basename(p).startswith("ext_"):
             continue
         for line in open(p, encoding="utf-8"):
             if line.startswith("#") or line.startswith("type,"):

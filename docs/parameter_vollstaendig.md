@@ -1,7 +1,7 @@
 # Vollständige Parameterliste (Wolf-Datenbank, ism7mqtt)
 
 Erzeugt von `tools/wolf_db_export.py`. Spalte Status: core = in den handgepflegten CSV, ext = in ext_*.csv, sonst Grund für Nichtübernahme.
-Stand: core 327, ext 97, nicht übernommen 483.
+Stand: core 333, ext 96, nicht übernommen 478.
 
 ## CGB-2 → hc (Adresse 08)
 
@@ -27,10 +27,10 @@ Stand: core 327, ext 97, nicht übernommen 483.
 | 180151 | 0 - 10 V GLT | SS10 | 10008 | ext (`x_0_10_V_GLT`) |
 | 180016 | Brenner | US | 370 | ext (`x_Brenner`) |
 | 180012 | Modulationsgrad | US | 367 | core (`Modulation`) |
-| 180025 | Heizkreispumpe | US | 371 | ext (`x_Heizkreispumpe`) |
+| 180025 | Heizkreispumpe | US | 371 | core (`Outputs`) |
 | 180110 | Drehzahl Heizkreispumpe | US | 10071 | core (`Pumpspeed`) |
-| 180028 | Speicherladepumpe | US | 371 | doppelt (gleiche TN wie `x_Heizkreispumpe`) |
-| 180026 | 3-Wege-Ventil | US | 371 | doppelt (gleiche TN wie `x_Heizkreispumpe`) |
+| 180028 | Speicherladepumpe | US | 371 | core (`Outputs`) |
+| 180026 | 3-Wege-Ventil | US | 371 | core (`Outputs`) |
 | 180051 | Anlagendruck | SS100 | 10010 | core (`Pressure`) |
 | 180155 | Warmwassersolltemperatur | SS10 | 3 | core (`Hwctempdesired`) |
 | 180006 | Warmwassertemperatur | SS10 | 14 | core (`Hwctemp`) |
@@ -46,7 +46,7 @@ Stand: core 327, ext 97, nicht übernommen 483.
 | 180034 | Netzbetriebsstunden | UINT32 | 552 | core (`NetHoursLow`) |
 | 180034 | Netzbetriebsstunden | UINT32 | 553 | core (`NetHoursHigh`) |
 | 180148 | Anzahl Netz-Starts | US | 10078 | core (`NetStarts`) |
-| 180027 | Ausgang A1 | US | 371 | doppelt (gleiche TN wie `x_Heizkreispumpe`) |
+| 180027 | Ausgang A1 | US | 371 | core (`Outputs`) |
 | 180146 | Eingang E1 | US | 10006 | ext (`x_Eingang_E1`) |
 | 180152 | Sicherheitstemperaturbegrenzer | US | 633 | core (`Stb`) |
 | 180032 | Firmware | SS100 | 410 | core (`Firmware`) |
@@ -55,8 +55,8 @@ Stand: core 327, ext 97, nicht übernommen 483.
 | 180160 | Seriennummer | UINT32 | 10880 | doppelt (gleiche TN wie `x_PRELOAD_Seriennummer_lo`) |
 | 180160 | Seriennummer | UINT32 | 10879 | doppelt (gleiche TN wie `x_PRELOAD_Seriennummer_hi`) |
 | 180161 | Status EA-Modul | US | 10833 | ext (`x_Status_EA_Modul`) |
-| 180171 | Ausgang A3 | US | 371 | doppelt (gleiche TN wie `x_Heizkreispumpe`) |
-| 180172 | Ausgang A4 | US | 371 | doppelt (gleiche TN wie `x_Heizkreispumpe`) |
+| 180171 | Ausgang A3 | US | 371 | core (`Outputs`) |
+| 180172 | Ausgang A4 | US | 371 | core (`Outputs`) |
 | 180163 | Eingang E3 | US | 10806 | ext (`x_Eingang_E3`) |
 | 180164 | Eingang E4 | US | 10807 | ext (`x_Eingang_E4`) |
 | 180153 | Warmwasser Schnellstart | US | 10096 | ext (`x_Warmwasser_Schnellstart`) |
