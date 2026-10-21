@@ -150,7 +150,9 @@ Buchungsvorbereitung; dort entfernt). Alle Einstellwerte liegen auf dem Dashboar
   `input_boolean.birger_in_der_kabine` ist an. Schalter `input_boolean.kabine_vorheizen_nach_kalender`.
 - Ob geheizt wird, entscheiden allein „Heizzone Kabine regeln“ / „Heizzone Keller regeln“ nach Raumtemperatur und
   Sollwert (keine Jahreszeit- oder Außentemperaturlogik; eine „Heizperiode“ wurde am 21.10. gebaut und wieder entfernt).
-- Permanent gilt für den ganzen Heizkreis, also auch für die Mieterwohnung.
+- Permanent gilt für den ganzen Heizkreis, also auch für die Mieterwohnung. Deshalb „Wolf-Kreise nach Kabinenbedarf“:
+  solange `sollwert_kabine` über der Grundtemperatur liegt, beide Kreise Permanent bei Kabine < Sollwert − 0,3 K und
+  zurück auf Auto bei ≥ Sollwert + 0,5 K (Prüfung bei jeder Temperaturänderung und alle 10 min).
 
 ### Geräte vor und nach Buchungen (Schalter `input_boolean.kabine_gerate_nach_kalender`)
 
