@@ -468,6 +468,8 @@ Die Anleitung ist von 2007 und für WRS-/5W-Regelungen geschrieben; ob alles fü
 - Wartung: TN 5250 (Fälligkeitsdatum) und TN 5264 (Wartungsmeldung Datum) über `BmRaw` (`00 82 14 34 37` bzw.
   `00 90 14 34 37`) von 13096 (09.10.2025) auf **14132 = 21.10.2027** gesetzt, beide zurückgelesen ✓, obwohl die Wolf-App
   beide als nur lesbar führt. HA: `binary_sensor.heizung_wartung_fallig` = aus.
+  04:41 auf Wunsch von Birger zurückgestellt: beide wieder 13096 (09.10.2025), zurückgelesen ✓ → Schreiben und Rückstellen
+  von TN 5250/5264 per `BmRaw` damit zweimal bestätigt.
 - Störung quittieren: In der Wolf-Datenbank gibt es „Störung Quittieren“/„Acknowledge alarm“ nur für andere Gerätetypen
   (Lüftung CWL, WRS), nicht für CGB-2/BM-2/MM. Weg der Quittieren-Taste auf dem Bus unbekannt.
 
