@@ -471,6 +471,19 @@ Die Anleitung ist von 2007 und für WRS-/5W-Regelungen geschrieben; ob alles fü
 - Störung quittieren: In der Wolf-Datenbank gibt es „Störung Quittieren“/„Acknowledge alarm“ nur für andere Gerätetypen
   (Lüftung CWL, WRS), nicht für CGB-2/BM-2/MM. Weg der Quittieren-Taste auf dem Bus unbekannt.
 
+### BM-2 Betriebsanleitung für die Fachkraft ab FW 2.80 (3063305_201910, von Birger hochgeladen)
+
+- Störung quittieren (Kap. 15.3/15.4): Statusseite „Meldung“, **Taste 4**, nur wenn eine Störung ansteht und das BM-2 im
+  Heizgerät sitzt; verriegelnde Störungen zusätzlich mit Fachmanncode („RESET durchführen“). Warnungen müssen nicht
+  quittiert werden; Fühlerstörungen quittiert die Regelung selbst. Welches Telegramm das BM-2 dabei sendet, ist unbekannt –
+  nur bei einer echten Störung mitschneidbar.
+- Meldungshistorie (Kap. 30): bis zu 40 Störungen mit Beginn und Ende (Datum/Uhrzeit), nur im Fachmann-Menü.
+- A08 Wartungsmeldung (Aus/Betriebsabhängig/Datumsabhängig), A25 Wartungsmeldung Datum: Werk = heute + 1 Jahr,
+  Bereich heute … heute + 2 Jahre → der gesetzte Wert 21.10.2027 liegt genau an der Obergrenze. Zurücksetzen am Gerät:
+  Fachmann → „Wartungsmeldung Reset“.
+- Uhrzeit/Datum: Hauptmenü → Grundeinstellungen → Uhrzeit bzw. Datum (ohne Fachmanncode); Sommer-/Winterzeit automatisch
+  über den ewigen Kalender. Funkuhrmodul mit Außenfühler: „Das DCF-Zeitsignal sendet die genaue Uhrzeit und das aktuelle Datum.“
+
 ## Weitere Telegrammnummern
 
 - TN 5250 (BM-2): Wartung Fälligkeitsdatum, Typ BM2Date (ism7mqtt `BM2DateConverterTemplate`):
