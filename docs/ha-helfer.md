@@ -127,14 +127,65 @@ Entity-Duplikat behoben: `sensor.heating_ebusd_bm2_maintenancedate` (unique_id `
 Hintergrund: Vorfall 20.10.2026 22:22–22:50 (protokoll.md) – ohne Außentemperatur gehen beide Heizkreise in
 AT-Frostschutz und die Anlage heizt nicht. Ersatzwert per eBus funktioniert nicht (BM-2 nimmt nur `0f`).
 
-## Vorheizen der Kabine nach Google-Kalender (21.10.2026)
+## Kabine: Buchungen, Anwesenheit, Oberlicht (21.10.2026)
 
-- `calendar.kabine_buchungen`: Integration Remote Calendar, öffentliche iCal-Adresse des Google-Kalenders „die Kabine“
-  (zeigt nur Belegt-Zeiten, Titel „Busy“). Automation „Kalender Kabine Buchungen aktualisieren“ lädt alle 15 min neu.
-- Helfer: `input_number.kabine_vorheizzeit` (h, eingestellt 8, max. 24), `input_number.kabine_komforttemperatur` (21 °C),
-  `input_number.kabine_grundtemperatur` (8 °C; Minimum von `sollwert_kabine` dafür auf 5 °C gesenkt), `input_boolean.kabine_vorheizen_nach_kalender` (Ein/Aus).
-- Automation „Kabine vor Buchung vorheizen“: ab Vorheizzeit vor Beginn `input_number.sollwert_kabine` = Komfort und
-  Programmwahl beider Wolf-Kreise (Radiatoren = direkter Kreis, Fußbodenheizung = Mischerkreis) = Permanent, damit das
-  BM-2 auch bei Eco/ECO-ABS Wärme liefert; nach Buchungsende Sollwert = Grund und beide Programme = Auto, außer die nächste
-  Buchung beginnt innerhalb der Vorheizzeit. Die Raumregelung selbst bleibt bei „Heizzone Kabine regeln“.
+Ersetzt die Automationen, die bis 21.10.2026 in der Lovable-App „Die Kabine“ liefen (Cron `skylight-airing-tick`,
+Buchungsvorbereitung; dort entfernt). Alle Einstellwerte liegen auf dem Dashboard `kabine-steuerung` („Kabine“).
+
+### Kalender
+
+| Entität | Quelle | Zweck |
+|---|---|---|
+| `calendar.kabine_belegung_app` | Remote Calendar, ICS-Feed der Kabinen-App (`/api/public/ha-calendar/<geheimes Token>.ics`, Token in `app_settings.ha_calendar_token`) | **Buchungen**: Status confirmed, confirmed_paid, confirmed_invoice, pending; ein Termin je Buchungstag, Titel nur „Buchung“, keine Kundendaten. Angebote (quote_pending) fehlen bewusst. |
+| `calendar.kabine_buchungen` | Remote Calendar, öffentliche iCal-Adresse des Google-Kalenders „die Kabine“ (nur Belegt-Zeiten, Titel „Busy“) | nur noch **ganztägige** Einträge = Birgers Aufenthalte. Einträge, die in Google als „Verfügbar“ markiert sind, fehlen im öffentlichen Feed. |
+
+„Kalender Kabine Buchungen aktualisieren“ lädt beide alle 15 min neu (Remote Calendar ab Werk nur alle 24 h).
+
+### Heizen vor und nach Buchungen
+
+- „Kabine vor Buchung vorheizen“: ab `input_number.kabine_vorheizzeit` (8 h) vor Beginn `sollwert_kabine` =
+  `kabine_komforttemperatur` (21 °C), `sollwert_keller` = `keller_buchungstemperatur` (18 °C); beide Wolf-Kreise auf
+  Permanent, **nur wenn die Kabine dann kälter als die Komforttemperatur ist**. 2 h nach Buchungsende Kabine und Keller auf
+  `kabine_grundtemperatur` (8 °C), Kreise auf Auto – außer die nächste Buchung beginnt innerhalb der Vorheizzeit oder
+  `input_boolean.birger_in_der_kabine` ist an. Schalter `input_boolean.kabine_vorheizen_nach_kalender`.
+- Ob geheizt wird, entscheiden allein „Heizzone Kabine regeln“ / „Heizzone Keller regeln“ nach Raumtemperatur und
+  Sollwert (keine Jahreszeit- oder Außentemperaturlogik; eine „Heizperiode“ wurde am 21.10. gebaut und wieder entfernt).
 - Permanent gilt für den ganzen Heizkreis, also auch für die Mieterwohnung.
+
+### Geräte vor und nach Buchungen (Schalter `input_boolean.kabine_gerate_nach_kalender`)
+
+- „Kabine vor Buchung vorbereiten“ (30 min vor Beginn, nicht bei ganztägigen Einträgen): Getränke-Kühlschrank
+  (`switch.shellyplugsg3_8cbfeaa3ca7c`) aus. Kaffeemaschine: Steckdose bleibt immer an; liegt die Leistung
+  (`sensor.shellyplugsg3_e4b32339c1f8_leistung`) unter `input_number.kaffeemaschine_an_schwelle` (3 W), drückt der
+  SwitchBot (`switch.bot_4a71`, Tastmodus) einmal; nach 2 min erneut prüfen, sonst Hinweis. Messbasis 20./21.10.: aus
+  ca. 1,4 W, an im Leerlauf ca. 5 W, Heizen bis ca. 2,5 kW. Meldet die Steckdose 0 W statt „nicht erreichbar“, würde der
+  SwitchBot fälschlich drücken (nicht abgefangen).
+- „Kabine nach Buchung herunterfahren“ (2 h nach Ende, nur wenn keine Buchung läuft): Oberlicht zu, Licht Kabine aus,
+  Beamer aus, Getränke-Kühlschrank an (Keller-Kühlschrank unberührt), Klo-Licht Keller aus, Rollo hoch. Ist Birger in
+  der Kabine, nur Oberlicht zu.
+
+### Anwesenheit „Birger in der Kabine“ (`input_boolean.birger_in_der_kabine`, Automation „Kabine Anwesenheit Birger“)
+
+- Ein: Kabine Komfort, Keller Buchungstemperatur, Wolf-Kreise Permanent (nur wenn kälter als Komfort), Kühlschrank aus.
+- Aus: nur wenn keine Buchung läuft oder innerhalb der Vorheizzeit beginnt → Grundtemperatur, Kreise Auto, Kühlschrank an.
+- Automatisch über das iPhone (`person.birger`): Ankunft → ein; 10 min weg ohne anstehende Buchung → Kabine auf
+  `kabine_temperatur_kurz_weg` (18 °C); Verlassen der Zone `zone.meko_sarstedt` (Arbeit) → sofort Komfort;
+  Annäherung außerhalb von Zonen (jede Position ≥ 200 m näher) innerhalb `kabine_aufheizen_ab_km_kurz_weg` (25 km) →
+  Komfort; ist der Modus aus, schaltet Annäherung innerhalb `kabine_aufheizen_ab_km_anreise` (100 km) ihn ein;
+  `kabine_abgereist_nach_stunden` (12 h) durchgehend weg → aus. Zusätzlich ganztägige Kalendereinträge (Start/Ende).
+- Nicht verifiziert: wie oft das iPhone unterwegs Positionen meldet (beobachtet am 20.10. etwa alle 5 min), ob
+  `trigger.calendar_event.all_day` bei ganztägigen Einträgen wie erwartet gesetzt ist.
+
+### Oberlicht gegen Muff (Automation „Oberlicht steuern (Lüftung gegen Muff)“)
+
+- `binary_sensor.oberlicht_soll_offen` (Template-Helfer) ist an, wenn: Automatik an und kein Handbetrieb, kein Regen/Schnee/
+  Gewitter laut `weather.forecast_home` (met.no), keine Buchung läuft oder heute bzw. innerhalb der Vorheizzeit beginnt,
+  und entweder Außentemperatur > `oberlicht_dauerluften_ab_aussentemperatur` (16 °C) zwischen `oberlicht_luften_von`
+  und `…_bis` (08–20 Uhr) **oder** ein Lüftungsfenster läuft (`oberlicht_luftungen_pro_tag` × `oberlicht_luftungsdauer`,
+  6 × 15 min gleichmäßig verteilt, doppelt so oft bei Luftfeuchte > `oberlicht_feuchte_schwelle` 60 %) und der
+  Außen-Taupunkt (met.no) mindestens 1 K unter `sensor.kabine_taupunkt_innen` liegt (sonst würde Lüften befeuchten).
+- Taupunkt innen: Magnus-Formel mit 17,62 / 243,12 °C aus Luft-Kabine-Temperatur und -Feuchte (Koeffizienten hier nicht
+  gegen eine Quelle geprüft).
+- Regen schließt immer, auch im Handbetrieb. Jede Bewegung des Oberlichts ohne Automatik-Befehl in den letzten 3 min
+  (Taster über „Taster Oberlicht Auf/Zu“, App, UI) setzt `input_boolean.oberlicht_handbetrieb_bis_mitternacht`.
+- Heizungspause bei offenem Oberlicht bleibt bei „Heizung Kabine bei offenem Oberlicht pausieren“.
