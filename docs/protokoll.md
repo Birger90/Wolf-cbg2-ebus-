@@ -590,7 +590,7 @@ Reihenfolge beim Zurückstellen deshalb: erst HG13, dann HG14. Alle 15 Werte wie
   Im Rohmitschnitt **keine** Lesetelegramme des BM-2 an `08` für diese Parameter (nur die zyklischen Statuslesungen) →
   das BM-2 im Heizgerät liest die HG-Parameter über die interne Verbindung, nicht über den eBus. Die Methode „am Display
   aufrufen und mitschneiden“ funktioniert für Therme-Parameter deshalb nicht.
-- HG23 gefunden über Probelesen: **TN 308 am BM-2 (`35`) = `8a 02` = 650 → 65,0 °C** (TN 308 heißt in der Wolf-DB beim MM
+- Probelesen: **TN 308 am BM-2 (`35`) = `8a 02` = 650 → 65,0 °C** (TN 308 heißt in der Wolf-DB beim MM
   „Warmwassermaximaltemperatur“; an `08` liefert TN 308 `0080` = ungültig). Kandidat für A14 (nicht HG23, siehe unten) – Bestätigung durch
   Verstellen am Display steht aus.
 - **HG23 Warmwassermaximaltemperatur = TN 385 an der Therme (`08`), SS10** (Name aus der Wolf-DB der COB-Vorlage).
