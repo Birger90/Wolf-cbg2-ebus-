@@ -601,6 +601,14 @@ Reihenfolge beim Zurückstellen deshalb: erst HG13, dann HG14. Alle 15 Werte wie
 - **HG43 ist keine Anzeige, sondern startet die „100% Kalibration“** (Anzeige „Kali abgesch. Aus / Kali. aktiv Aus /
   HG43: Warte… OK“). Birger gewarnt, nicht bestätigen. HG43–HG45 (Kalibrierung/Gas/Abgas) werden nicht weiter untersucht.
 
+### A09 Frostschutzgrenze = TN 2560 (21.10.2026, 05:41)
+
+Birger stellt A09 am BM-2 von 2 auf 7 °C. Sofort danach (05:41:26) sendet das BM-2 den Schreib-Broadcast
+`30 fe 5023 05 58 00 0a 46 00` = TN 2560 (`0a00`) = 70 → **7,0 °C (SS10)**; vorher minütlich `28 00 0a 14 00` = 2,0 °C.
+Lesen an `35` (`hex 355022030a000a`) liefert ebenfalls `46 00` = 7,0. Damit ist der seit dem 20.10. beobachtete minütliche
+`BmWrite`-Broadcast erklärt: Das BM-2 verteilt Frostschutzgrenze (TN 2560), Parallelbetrieb (TN 35) und TN 10830 an alle
+Geräte. Prüfbyte im Broadcast korrekt (`58` bzw. `28`).
+
 ## Weitere Telegrammnummern
 
 - TN 5250 (BM-2): Wartung Fälligkeitsdatum, Typ BM2Date (ism7mqtt `BM2DateConverterTemplate`):
