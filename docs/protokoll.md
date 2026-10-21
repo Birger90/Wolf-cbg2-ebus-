@@ -511,6 +511,24 @@ Die Anleitung ist von 2007 und für WRS-/5W-Regelungen geschrieben; ob alles fü
   `0f`-Zeittelegramm) und um 04:47:00 „04:53“ (= BM-2-Zeit) → Hypothese: Die Therme übernimmt die jeweils zuletzt
   gesendete Zeit; das `0f`-Zeittelegramm hat also die Therme gestellt, nicht das BM-2. Nicht verifiziert.
 
+### Quittieren am BM-2, zweiter Versuch mit Rohmitschnitt (21.10.2026, 04:50:46–04:52, ebusd `raw` an)
+
+Hinweis: `grab` speichert je Nachrichtenschlüssel nur den letzten Inhalt – einmalige Telegramme können darin untergehen;
+deshalb hier `raw` (jedes Telegramm im Log).
+- Birger drückt am BM-2 „Quittieren“ (keine Störung aktiv). ISM7-Blocklesung 04:51:36,6/37,6: Modulation 0x41 = 65 %,
+  Ausgänge 6, Brennerstatus 7 = **Nachspülen**; ebusd-Poll 04:51:28,5 noch „Aus“ → Neustart des Feuerungsautomaten
+  zwischen 04:51:28,5 und 04:51:36,6 (wie beim ersten Druck 04:47).
+- Im Rohmitschnitt in diesem Fenster **kein neues Telegramm an `03`/`08`**: nur die zyklischen Lesungen, `0507` mit
+  unverändertem Inhalt `09 00 03 50 00 00 80 ff 14 00`, `ff`-Lesungen TN 1. Einzige Auffälligkeit ab 04:51:32,8: das BM-2
+  sendet `30 9x 5012` ohne Daten nacheinander an `90`, `91` … `97` (je 3–4 Wiederholungen, keine Antwort), dazu einzelne
+  abgebrochene Bytes (`<30`, `<00`).
+- Gegenprobe 04:52: `hex -s 30 90501200` von ebusd gesendet → keine Antwort, **kein** Nachspülen (Brennerstatus 2× „Aus“).
+  Das `5012`-Telegramm ist also nicht der Quittierbefehl (es sieht nach einer Suche nach Teilnehmern aus).
+- Deutung (nicht verifiziert): Das BM-2 sitzt in der Therme; laut BM-2-Anleitung (Kap. 15.3) geht das Quittieren nur
+  „wenn das BM-2 im Heizgerät montiert ist“. Wahrscheinlich läuft der Befehl über die interne Verbindung BM-2 ↔ Regelplatine
+  und nicht über den eBus. Dann ist Quittieren aus Home Assistant über den eBus nicht möglich.
+- `raw`-Logging wieder ausgeschaltet.
+
 ## Weitere Telegrammnummern
 
 - TN 5250 (BM-2): Wartung Fälligkeitsdatum, Typ BM2Date (ism7mqtt `BM2DateConverterTemplate`):
