@@ -609,6 +609,14 @@ Lesen an `35` (`hex 355022030a000a`) liefert ebenfalls `46 00` = 7,0. Damit ist 
 `BmWrite`-Broadcast erklärt: Das BM-2 verteilt Frostschutzgrenze (TN 2560), Parallelbetrieb (TN 35) und TN 10830 an alle
 Geräte. Prüfbyte im Broadcast korrekt (`58` bzw. `28`).
 
+### A14 (21.10.2026, 05:41–05:45)
+
+Birger: A14 stand auf 70 °C, dann 65, 67, wieder 65. TN 308 und TN 385 am BM-2 blieben bei jedem Wert 65,0 → nicht A14
+(wahrscheinlich Warmwasser-Maximum der Therme gespiegelt, nicht verifiziert). Im Rohmitschnitt beim Zurückstellen
+(05:43:50–05:44:35) kein Telegramm mit dem Wert: nur die minütlichen Broadcasts (TN 2560, 35, 10830) und der zyklische
+`30 03 5023 4f f4 02 00 03` (TN 756). → A14 bleibt im BM-2 und wird nicht verteilt; Nummer unbekannt (systematische Suche
+im BM-2 nötig). Nebenbefund: TN 10830 war im Broadcast 05:32:59 = 1 (Warmwasserladung lief), sonst 0.
+
 ## Weitere Telegrammnummern
 
 - TN 5250 (BM-2): Wartung Fälligkeitsdatum, Typ BM2Date (ism7mqtt `BM2DateConverterTemplate`):
