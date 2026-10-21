@@ -549,6 +549,21 @@ TN 10161 um 04:53:06 = 1076 = 04:52. Abweichung damit unter 1 min (Sekunden send
   - Brenner ist nicht gestartet (zu kurz). Vermutlich hat das Verstellen der Uhr das Zeitprogramm kurz neu bewertet.
 - `raw` wieder aus.
 
+### Schreibtest neue Parameter (21.10.2026, 05:15–05:18, Freigabe Birger)
+
+Schreiben roh über `HgRaw` (Therme, Prüfbyte), `MmRaw` (MM, Prüfbyte), `BmRaw` (BM-2, Präfix `00`), Rücklesen mit `hex`.
+
+| Parameter | TN | Original | Test | Rücklesen | zurück | Rücklesen |
+|---|---|---|---|---|---|---|
+| HG19 Nachlaufzeit SLP | 383 | 3 min | 4 (`8c 7f 01 04 00`) | 4 ✓ | 3 (`44 7f 01 03 00`) | 3 ✓ |
+| HG20 max. Speicherladezeit | 384 | 120 min | 130 (`d8 80 01 82 00`) | 130 ✓ | 120 (`3c 80 01 78 00`) | 120 ✓ |
+| HG41 Drehzahl ZHP WW | 10014 | 85 % | 86 (`84 1e 27 56 00`) | 86 ✓ | 85 (`60 1e 27 55 00`) | 85 ✓ |
+| MI08 RL-Solltemperatur | 400 | 30,0 °C | 31,0 (`09 90 01 36 01`) | 31,0 ✓ | 30,0 (`59 90 01 2c 01`) | 30,0 ✓ |
+| MI09 max. Speicherladezeit | 384 | 2 h | 3 (`74 80 01 03 00`) | 3 ✓ | 2 (`28 80 01 02 00`) | 2 ✓ |
+| A15 Korrektur Außentemp. | 1443 | 0,0 K | 1,0 (`00 a3 05 0a 00`) | 1,0 ✓ | 0,0 (`00 a3 05 00 00`) | 0,0 ✓ |
+
+Alle 6 beim ersten Versuch übernommen und zurückgestellt.
+
 ## Weitere Telegrammnummern
 
 - TN 5250 (BM-2): Wartung Fälligkeitsdatum, Typ BM2Date (ism7mqtt `BM2DateConverterTemplate`):
