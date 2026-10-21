@@ -388,6 +388,52 @@ Ergebnis Abdeckung (vor dieser Prüfung; „schreibbar“ = Schreibweg vorhanden
 - BM-2/MK: Bedienparameter, Heizkurven, Programme, Party/Urlaub/1×WW schreibbar; fehlten Raumregler-Parameter (ohne
   Raumfühler wirkungslos) und Korrektur Außentemperatur; Uhr nicht stellbar.
 
+### Abgleich mit den Anleitungen (21.10.2026, 04:30)
+
+Quellen: Wolf CGB-2-14/20/24 Betriebsanleitung Fachkraft 3063421_202405 (Parametertabelle Kap. 23, Spalte 24 kW),
+Wolf MM/MM-2 Montageanleitung und BM-2 Montageanleitung Experte (beide farko.com, von Birger verlinkt), Screenshots von
+Birger aus 8616991_202111 – **das ist die Anleitung der CGB-2-68/75/100**, nicht unserer CGB-2-24; Werkseinstellungen
+und Bereiche können abweichen.
+
+Therme (gelesene Werte gegen Werkseinstellung 24 kW):
+
+| HG | TN | gelesen | Werk 24 kW | Bemerkung |
+|---|---|---|---|---|
+| HG13 Funktion E1 | 2651 | 0 = keine | 0 | – |
+| HG14 Funktion A1 | 2751 | 1 = Zirkulationspumpe 100 % | 0 | eingestellt (Liste aus Wolf-DB) |
+| HG19 Nachlaufzeit SLP | 383 | 3 min | 3 | = Werk |
+| HG20 max. Speicherladezeit | 384 | 120 min | 120 (30/Aus–300) | Wolf-DB nennt 30–180 |
+| HG34 eBus-Einspeisung | 65019 | Auto | Auto | = Werk |
+| HG37 Typ Pumpenregelung | 10041 | Linear | Linear | = Werk |
+| HG40 Anlagenkonfiguration | 10076 (auch 10033) | Rohwert 1 → laut Wolf-DB-Liste „02“ | 01 | **Zuordnung Rohwert→Anzeige nicht verifiziert**, am BM-2 ablesen |
+| HG41 Drehzahl ZHP WW | 10014 | 85 % | 85 % | = Werk |
+| HG42 Hysterese Sammler | 10030 | 5,0 | 5 | = Werk |
+| HG46 Kesselübertemp. Sammler | 10028 | 6,0 | 6 | = Werk |
+| HG56/57 Funktion E3/E4 | 10802/10803 | 0 | – | E/A-Modul nicht vorhanden (TN 10833 = 0) |
+| HG58/59 Funktion A3/A4 | 10804/10805 | 0 | – | dito |
+| HG61 WW-Regelung | 10017 (Wolf-DB „BUSCONFIG Anschluss Speicher“) | 0 | Kesselfühler | Zuordnung TN↔HG61 nicht verifiziert |
+
+Mischermodul (MI-Parameter laut MM-Anleitung): MI05 Konfiguration = TN 2593 = **3 = „Mischerkreis und direkter
+Heizkreis“** (Pumpe des direkten Kreises an Ausgang A1 des MM). Gleich Werk: MI08 RL-Soll 30 (TN 400), MI09 2 h (TN 384),
+MI11 10 K (TN 340), MI12 0 (TN 36), MI13 3 min (TN 383), MI14 75 °C (TN 711), MI15 5 K (TN 405), MI16 10 K (TN 404),
+MI18 0 s (TN 839). Abweichend: MI17 Kesselübertemperatur Speicherladung Werk 10 K, TN 45 = 15,0 (eingestellt oder andere
+Bedeutung, nicht verifiziert). MI10 Busspeisung = `EbusPower` (gesperrt). Die MM-Fehlercodes der Anleitung (FC52, 70, 71,
+79, 81, 91, 97) sind identisch mit unserer Tabelle aus der Wolf-Datenbank.
+
+BM-2 (A-Parameter laut BM-2-Anleitung Experte): Funktion BM-2 = TN 10121 = 0 = System ✓; A00 Raumeinflussfaktor 4
+(TN 271 ✓ Werk); A04 Außenfühler gemittelt 3 h (TN 388); A05 Anpassung RF 0 (TN 265 ✓); A10 Parallelbetrieb (TN 35);
+A11 Raumtemperatur-Abschaltung Ein (TN 701 ✓); A15 Korrektur Außentemperatur 0 K, Bereich laut Anleitung −5…+5 K
+(TN 1443 = 0; Wolf-DB nennt −15…5); A16 Reiner Raumregler Aus (TN 20018 ✓); A17 P-Anteil 20 (TN 41 ✓); A18 I-Anteil 1,0
+(TN 42 ✓). A00/A05/A16–A18 wirken laut Anleitung nur mit Raumfühler bzw. BM-2 als Fernbedienung im Wandsockel.
+
+Fehlercodes/Historie: Die 68–100-kW-Anleitung nennt zusätzlich 28 „Gasdruckwächter“ und 225 „Fehlercode unbekannt“
+(nicht in der Wolf-DB-Liste für CGB-2). Warnmeldungen (1, 2, 3, 4, 5, 24, 43) sind eine eigene Liste; ob sie über TN 1
+kommen, ist nicht beobachtet. Das BM-2 führt eine Störungshistorie (Fachmannebene, Einträge mit Code, Datum, Uhrzeit;
+Anzahl nicht angegeben). Über die Wolf-Datenbank ist sie nicht lesbar (`HasOwnFaultMessageHistory` = false), eine TN dafür
+ist nicht bekannt.
+
+## Weitere Telegrammnummern
+
 - TN 5250 (BM-2): Wartung Fälligkeitsdatum, Typ BM2Date (ism7mqtt `BM2DateConverterTemplate`):
   Tag = (v & 31) + 1, Monat = ((v >> 5) & 15) + 1, Jahr = 2000 + (v >> 9). Gelesen 13096 → 09.10.2025, identisch mit der Cloud.
 - BM2Time (ism7mqtt `BM2TimeConverterTemplate`): Stunde = v // 256, Minute = v % 256 (entspricht ebusd-Typ `VTM`).
