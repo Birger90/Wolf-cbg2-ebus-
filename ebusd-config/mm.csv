@@ -12,5 +12,21 @@ r9,mm,,TvMax,Maximalbegrenzung Mischerkreis TV-max (20-80 C),,52,5022,642800,val
 r9,mm,,CurveDistance,Heizkurvenabstand (0-30 K),,52,5022,ed1101,value,,SIN,10,K,TN 273
 r9,mm,,PumpOverrun,Nachlaufzeit Heizkreis (0-30 min),,52,5022,c14201,value,,UIN,,min,TN 322
 r9,mm,,MixerPband,P-Bereich Mischer (5-40 K),,52,5022,618f01,value,,SIN,10,K,TN 399
+r9,mm,,Mi08ReturnSoll,MI08 Ruecklaufsolltemperatur (20-80 C),,52,5022,419001,value,,SIN,10,°C,TN 400
+r9,mm,,Mi09MaxLoadTime,MI09 Max. Speicherladezeit (0-5 h),,52,5022,f18001,value,,UIN,,h,TN 384
+r9,mm,,Mi11BypassHyst,MI11 Hysterese Bypassfuehler,,52,5022,e55401,value,,SIN,10,K,TN 340
+r9,mm,,Mi12LoadPumpLock,MI12 Ladepumpensperre,,52,5022,102400,value,,UIN,0=Aus;1=Ein,,TN 36
+r9,mm,,Mi13PumpOverrun,MI13 Nachlaufzeit Ladepumpe (0-10 min),,52,5022,657f01,value,,UIN,,min,TN 383
+r9,mm,,Mi14ConstTemp,MI14 Konstanttemperatur,,52,5022,42c702,value,,SIN,10,°C,TN 711
+r9,mm,,Mi15DtOff,MI15 dT Aus,,52,5022,319501,value,,SIN,10,K,TN 405
+r9,mm,,Mi16DtOn,MI16 dT Ein,,52,5022,6d9401,value,,SIN,10,K,TN 404
+r9,mm,,Tn45,TN 45 (Kandidat MI17 Kesseluebertemperatur Speicherladung - nicht verifiziert),,52,5022,142d00,value,,SIN,10,K,TN 45
+r9,mm,,Mi18BurnerLock,MI18 Sperrung Brenner bei Ruecklaufanhebung (0-300 s),,52,5022,b34703,value,,UIN,,s,TN 839
+r9,mm,,FrostLh,Frostschutz LH-Kreis,,52,5022,d2434e,value,,SIN,10,°C,TN 20035
+r9,mm,,StorageHyst,Speicherhysterese,,52,5022,794001,value,,SIN,10,K,TN 320
+r9,mm,,WwMaxTemp,Warmwassermaximaltemperatur,,52,5022,a13401,value,,SIN,10,°C,TN 308
+r9,mm,,WwSoll,Warmwassersolltemperatur,,52,5022,e40300,value,,SIN,10,°C,TN 3
+r9,mm,,InputE1,Eingang E1 (-40 = kein Fuehler),,52,5022,32290a,value,,SIN,10,°C,TN 2601
+r9,mm,,InputE2,Analogeingang E2 (-40 = kein Fuehler),,52,5022,d62a0a,value,,SIN,10,°C,TN 2602
 r,mm,,Config,Konfiguration MM (1-11),,52,5022,6a210a,value,,UIN,,,TN 2593
 r,mm,,EbusPower,eBus Einspeisung,,52,5022,45fbfd,value,,UIN,0=Aus;1=Ein;2=Auto,,TN 65019

@@ -661,6 +661,27 @@ Birger: A14 stand auf 70 °C, dann 65, 67, wieder 65. TN 308 und TN 385 am BM-2 
 `30 03 5023 4f f4 02 00 03` (TN 756). → A14 bleibt im BM-2 und wird nicht verteilt; Nummer unbekannt (systematische Suche
 im BM-2 nötig). Nebenbefund: TN 10830 war im Broadcast 05:32:59 = 1 (Warmwasserladung lief), sonst 0.
 
+### Prüfbyte A09-Broadcast nachgerechnet (21.10.2026)
+
+`tools/wolf_crc.py`: Daten `00 0a 46 00` → `58`, `00 0a 14 00` → `28`. Beide stimmen mit dem Mitschnitt überein, die
+Aussage „Prüfbyte korrekt“ oben ist damit bestätigt.
+
+### Neue Parameter in ebusd eingebaut (21.10.2026, vormittags)
+
+Generator erweitert, CSVs neu erzeugt, nach `/app_configs/b4d7ad18_ebusd/ebusd-config/` hochgeladen, ebusd `reload`
+(261 Nachrichten). Stichprobe mit `read -f`: `bm2 FrostLimit` = 7,0 °C, `hc Hg13` = 0, `mm Mi08ReturnSoll` = 30,0 °C.
+HA legt die Entitäten automatisch an (z. B. `number.heating_ebusd_bm2_frostlimit`). Im Template `wolf_bm2.jinja` ist
+Störungscode 255 „Fehlercode unbekannt“ ergänzt.
+
+### HG13 „RT“ (Raumthermostat) laut CGB-2-Montageanleitung
+
+Quelle: Montageanleitung CGB-2/CGB-2K, Wolf 3063421_201512, Kap. 23 (Parameter HG13), über
+[heizungsdiscount24.de](https://www.heizungsdiscount24.de/pdf/Wolf-CGB-2-14-8615008_10_Montageanleitung-Gasbrennwerttherme-Wolf-CGB-2-2K.pdf):
+Einstellwerte keine, RT, WW, RT/WW, Zirkomat, BOB, Abgasklappe, BOH, Ext. Störung. RT: Kontakt E1 offen = Heizbetrieb
+gesperrt, geschlossen = freigegeben. Der Kontakt muss potentialfrei sein, keine Fremdspannung an E1.
+Rohwert für RT ist nicht verifiziert. Die Reihenfolge passt zu den gemessenen Werten 0 = keine und 4 = Zirkomat, daraus
+würde RT = 1 folgen. Das ist nicht geprüft.
+
 ## Weitere Telegrammnummern
 
 - TN 5250 (BM-2): Wartung Fälligkeitsdatum, Typ BM2Date (ism7mqtt `BM2DateConverterTemplate`):

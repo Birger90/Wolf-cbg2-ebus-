@@ -50,6 +50,20 @@ r9,hc,,Hg38,HG38 Soll-Spreizung dT Pumpenregelung (0-40 K),,08,5022,ccce05,value
 r9,hc,,Hg39,HG39 Zeit Softstart (0-10 min),,08,5022,cc5301,value,,UIN,,min,TN 339
 r9,hc,,Hg60,HG60 Minimale Schalthysterese Brenner (2-30 K),,08,5022,cc382a,value,,SIN,10,K,TN 10808
 r9,hc,,Hg62,HG62 Anlagenkorrekturfaktor (0.1-2),,08,5022,cc872a,value,,SIN,100,,TN 10887
+r9,hc,,Hg13,HG13 Funktion Eingang E1 (Wert 4 = Zirkomat sperrt HG14),,08,5022,cc5b0a,value,,UIN,,,TN 2651
+r9,hc,,Hg14,HG14 Funktion Ausgang A1 (erst HG13 dann HG14 schreiben),,08,5022,ccbf0a,value,,UIN,,,TN 2751
+r9,hc,,Hg19,HG19 Nachlaufzeit Speicherladepumpe (1-10 min),,08,5022,cc7f01,value,,UIN,,min,TN 383
+r9,hc,,Hg20,HG20 Max. Speicherladezeit (30-180 min),,08,5022,cc8001,value,,UIN,,min,TN 384
+r9,hc,,Hg23,HG23 Warmwassermaximaltemperatur (Schreiben ungetestet),,08,5022,cc8101,value,,SIN,10,°C,TN 385
+r9,hc,,Hg37,HG37 Typ Pumpenregelung (0 Festwert 1 Linear 2 dT),,08,5022,cc3927,value,,UIN,,,TN 10041
+r9,hc,,Hg40,HG40 Anlagenkonfiguration roh - nur lesen,,08,5022,cc5c27,value,,UIN,,,TN 10076
+r9,hc,,Hg41,HG41 Drehzahl ZHP Warmwasser (15-100 %),,08,5022,cc1e27,value,,UIN,,%,TN 10014
+r9,hc,,Hg42,HG42 Hysterese Sammler,,08,5022,cc2e27,value,,SIN,10,K,TN 10030
+r9,hc,,Hg46,HG46 Kesseluebertemperatur Sammler,,08,5022,cc2c27,value,,SIN,10,K,TN 10028
+r9,hc,,Hg61raw,BUSCONFIG Anschluss Speicher (HG61?) roh,,08,5022,cc2127,value,,UIN,,,TN 10017
+r9,hc,,Hg34raw,HG34 eBus-Einspeisung roh - nur lesen (0 gelesen = laut Abgleich Auto),,08,5022,ccfbfd,value,,UIN,,,TN 65019
+r9,hc,,FuncE3,Funktion Eingang E3 (E/A-Modul),,08,5022,cc322a,value,,UIN,,,TN 10802
+r9,hc,,FuncE4,Funktion Eingang E4 (E/A-Modul),,08,5022,cc332a,value,,UIN,,,TN 10803
 r,hc,,Hg12,HG12 Gasart - nur lesen,,08,5022,cc6b01,value,,UIN,0=Nat_gas;1=LPG,,TN 363
 r,hc,,Hg10,HG10 eBus-Adresse,,08,5022,cc7801,value,,UIN,,,TN 376
 r,hc,,Firmware,Firmware Feuerungsautomat,,08,5022,cc9a01,value,,SIN,100,,TN 410

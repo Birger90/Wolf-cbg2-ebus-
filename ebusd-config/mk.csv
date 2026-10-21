@@ -28,4 +28,6 @@ r9,mk,,MkEcoabs,ECO/ABS MK (-10-40 C),,86,5022,791701,value,,SIN,10,°C,TN 279
 w,mk,,MkEcoabs,ECO/ABS MK (-10-40 C),,86,5023,001701,value,,SIN,10,°C,TN 279
 r9,mk,,MkTimeprogram,Zeitprogramm Mischerkreis aktiv (1-3),,86,5022,7baf27,value,,UIN,,,TN 10159
 w,mk,,MkTimeprogram,Zeitprogramm Mischerkreis aktiv (1-3),,86,5023,00af27,value,,UIN,,,TN 10159
+r9,mk,,MkCircuitType,Kreisart Mischerkreis,,86,5022,372d23,value,,UIN,,,TN 9005
+r9,mk,,MkRoomInfluence,Raumeinfluss Mischerkreis,,86,5022,4e8b02,value,,UIN,0=Aus;1=Ein,,TN 651
 r,mk,,MkControllertype,Reglertyp MK,,86,5022,ec9214,value,,UIN,0=Notbetrieb;1=Witterungsgefuehrt;2=Reiner_Raumregler;3=Witterungsgefuehrt_mit_Raumeinfluss;4=Erweiterter_Raumeinfuss,,TN 5266

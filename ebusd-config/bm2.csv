@@ -70,14 +70,34 @@ r9,bm2,,HolidayEnd,Urlaubsmodus Ende Uhrzeit roh (BM2Time),,35,5022,53a227,value
 w,bm2,,HolidayEnd,Urlaubsmodus Ende Uhrzeit roh (BM2Time),,35,5023,00a227,value,,UIN,,,TN 10146
 r9,bm2,,HolidayEndDate,Urlaubsmodus Ende Datum roh (BM2Date),,35,5022,0fa327,value,,UIN,,,TN 10147
 w,bm2,,HolidayEndDate,Urlaubsmodus Ende Datum roh (BM2Date),,35,5023,00a327,value,,UIN,,,TN 10147
-r9,bm2,,Antilegionella,Antilegionellenfunktion,,35,5022,5d0101,value,,UIN,0=Aus;1=Montag;2=Dienstag;3=Mittwoch;4=Donnerstag;5=Freitag;6=Samstag;7=Sonntag;8=Taeglich,,TN 257
-r9,bm2,,AntilegionellaStart,Startzeit Antilegionellenfunktion roh (BM2Time),,35,5022,4f9d27,value,,UIN,,,TN 10141
+r9,bm2,,Antilegionella,A07 Antilegionellenfunktion Wochentag,,35,5022,5d0101,value,,UIN,0=Aus;1=Montag;2=Dienstag;3=Mittwoch;4=Donnerstag;5=Freitag;6=Samstag;7=Sonntag;8=Taeglich,,TN 257
+w,bm2,,Antilegionella,A07 Antilegionellenfunktion Wochentag,,35,5023,000101,value,,UIN,0=Aus;1=Montag;2=Dienstag;3=Mittwoch;4=Donnerstag;5=Freitag;6=Samstag;7=Sonntag;8=Taeglich,,TN 257
+r9,bm2,,AntilegionellaStart,A23 Startzeit Antilegionellenfunktion roh (BM2Time),,35,5022,4f9d27,value,,UIN,,,TN 10141
+w,bm2,,AntilegionellaStart,A23 Startzeit Antilegionellenfunktion roh (BM2Time),,35,5023,009d27,value,,UIN,,,TN 10141
 r,bm2,,HkControllertype,Reglertyp,,35,5022,ec9214,value,,UIN,0=Notbetrieb;1=Witterungsgefuehrt;2=Reiner_Raumregler;3=Witterungsgefuehrt_mit_Raumeinfluss;4=Erweiterter_Raumeinfuss,,TN 5266
 r9,bm2,,Maintenance,Wartung betriebsabhaengig,,35,5022,b88114,value,,UIN,,%,TN 5249
-r,bm2,,MaintenanceMode,Wartungsmeldung,,35,5022,a66a02,value,,UIN,0=Aus;1=Betriebsabhaengig;2=Datumsabhaengig,,TN 618
+r9,bm2,,MaintenanceMode,A08 Wartungsmeldung,,35,5022,a66a02,value,,UIN,0=Aus;1=Betriebsabhaengig;2=Datumsabhaengig,,TN 618
+w,bm2,,MaintenanceMode,A08 Wartungsmeldung,,35,5023,006a02,value,,UIN,0=Aus;1=Betriebsabhaengig;2=Datumsabhaengig,,TN 618
 r9,bm2,,MaintenanceDate,Wartung Faelligkeitsdatum roh (BM2Date: Tag=(v&31)+1 Monat=((v>>5)&15)+1 Jahr=2000+(v>>9)),,35,5022,5c8214,value,,UIN,,,TN 5250
-r9,bm2,,ParallelMode,Freigabe Parallelbetrieb,,35,5022,d82300,value,,UIN,0=Aus;1=Ein,,TN 35
+r9,bm2,,ParallelMode,A10 Freigabe Parallelbetrieb,,35,5022,d82300,value,,UIN,0=Aus;1=Ein,,TN 35
+w,bm2,,ParallelMode,A10 Freigabe Parallelbetrieb,,35,5023,002300,value,,UIN,0=Aus;1=Ein,,TN 35
 r9,bm2,,OneTimeHotwater,1x Warmwasser,,35,5022,a78527,value,,UIN,0=Aus;1=Ein,,TN 10117
 w,bm2,,OneTimeHotwater,1x Warmwasser,,35,5023,008527,value,,UIN,0=Aus;1=Ein,,TN 10117
-r,bm2,,SmarthomeEnable,Freigabe SmartHome,,35,5022,e6a02a,value,,UIN,0=Aus;1=Ein,,TN 10912
-r,bm2,,AvgPeriod,Aussenfuehler gemittelt Berechnungszeitraum (0-24 h),,35,5022,dd8401,value,,UIN,,,TN 388
+r9,bm2,,SmarthomeEnable,A26 Freigabe SmartHome,,35,5022,e6a02a,value,,UIN,0=Aus;1=Ein,,TN 10912
+w,bm2,,SmarthomeEnable,A26 Freigabe SmartHome,,35,5023,00a02a,value,,UIN,0=Aus;1=Ein,,TN 10912
+r9,bm2,,AvgPeriod,A04 Aussenfuehler gemittelt Berechnungszeitraum (0-24 h),,35,5022,dd8401,value,,UIN,,h,TN 388
+w,bm2,,AvgPeriod,A04 Aussenfuehler gemittelt Berechnungszeitraum (0-24 h),,35,5023,008401,value,,UIN,,h,TN 388
+r9,bm2,,FrostLimit,A09 Frostschutzgrenze,,35,5022,0a000a,value,,SIN,10,°C,TN 2560
+w,bm2,,FrostLimit,A09 Frostschutzgrenze,,35,5023,00000a,value,,SIN,10,°C,TN 2560
+r9,bm2,,OutsideCorr,A15 Korrektur Aussentemperatur (-5-5 K),,35,5022,2da305,value,,SIN,10,K,TN 1443
+w,bm2,,OutsideCorr,A15 Korrektur Aussentemperatur (-5-5 K),,35,5023,00a305,value,,SIN,10,K,TN 1443
+r9,bm2,,RoomFactor,A00 Raumeinflussfaktor (wirkt nur mit Raumfuehler),,35,5022,910f01,value,,UIN,,,TN 271
+r9,bm2,,RoomSensorAdj,A05 Anpassung Raumfuehler,,35,5022,050901,value,,SIN,10,K,TN 265
+r9,bm2,,RoomShutdown,A11 Raumtemperaturabhaengige Abschaltung,,35,5022,56bd02,value,,UIN,0=Aus;1=Ein,,TN 701
+r9,bm2,,PureRoomControl,A16 Reiner Raumregler,,35,5022,7a324e,value,,UIN,0=Aus;1=Ein,,TN 20018
+r9,bm2,,RoomPiKp,A17 PI-Regler Raum P-Anteil,,35,5022,382900,value,,UIN,,,TN 41
+r9,bm2,,RoomPiTn,A18 PI-Regler Raum I-Anteil,,35,5022,dc2a00,value,,SIN,10,,TN 42
+r9,bm2,,BmFunction,Funktion des Bedienmoduls (0 = System),,35,5022,d38927,value,,UIN,,,TN 10121
+r9,bm2,,MaintenanceMsgDate,A25 Wartungsmeldung Datum roh (BM2Date),,35,5022,549014,value,,UIN,,,TN 5264
+r9,bm2,,HkCircuitType,Kreisart direkter Heizkreis,,35,5022,372d23,value,,UIN,,,TN 9005
+r9,bm2,,HkRoomInfluence,Raumeinfluss direkter Heizkreis,,35,5022,4e8b02,value,,UIN,0=Aus;1=Ein,,TN 651
