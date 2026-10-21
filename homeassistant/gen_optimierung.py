@@ -6,6 +6,7 @@ Kap. 40 Warnung 43 "Viele Brennerstarts") und die Mitschnitte vom 19.10.2026 (Ta
 durch Schutzabschaltungen "Spreizung KF" -> "Gradientenueberwachung", d.h. zu wenig Durchfluss).
 
 Regeln (ein Vorschlag pro Tag, erst 24 h nach der letzten Aenderung, Reihenfolge = Prioritaet):
+  R0  Starts > 40 und Schutzabschaltungen > 30 % der Starts und HG37 != 2  -> HG37 = 2 dT/Spreizung (Anleitung Kap. 23/33)
   R1  Starts > 40 und Schutzabschaltungen > 30 % der Starts und HG16 < 65  -> HG16 +10 (Pumpe min, Anleitung S. 61)
   R2  dito und HG39 < 3                                                     -> HG39 = 3 (Softstart, Werkseinstellung)
   R3  dito und HG04 > 70                                                    -> HG04 -8 (max. Heizleistung, Tabelle S. 55)
@@ -82,7 +83,11 @@ def auswertung_automation():
         "{% set hg39 = states('sensor.heating_ebusd_hc_hg39') | float(-1) %}"
         "{% set hg04 = states('sensor.heating_ebusd_hc_hg04') | float(-1) %}"
         "{% set hg09 = states('sensor.heating_ebusd_hc_hg09') | float(-1) %}"
-        "{% if starts > 40 and anteil > 0.3 and 0 <= hg16 < 65 %}"
+        "{% set hg37 = states('sensor.heating_ebusd_hc_hg37') | float(-1) %}"
+        "{% if starts > 40 and anteil > 0.3 and 0 <= hg37 < 2 %}"
+        "hc|Hg37|10041|1|{{ hg37 | int }}|2|0|2|"
+        "Schutzabschaltungen {{ schutz | int }} von {{ starts | int }} Starts: Pumpenregelung auf Spreizung (dT) statt Linear (Anleitung Kap. 23/33)"
+        "{% elif starts > 40 and anteil > 0.3 and 0 <= hg16 < 65 %}"
         "hc|Hg16|341|1|{{ hg16 | int }}|{{ [hg16 | int + 10, 65] | min }}|15|100|"
         "Schutzabschaltungen {{ schutz | int }} von {{ starts | int }} Starts: Pumpendrehzahl minimal erhoehen (Anleitung Kap. 33)"
         "{% elif starts > 40 and anteil > 0.3 and 0 <= hg39 < 3 %}"

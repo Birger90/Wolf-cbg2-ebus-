@@ -126,6 +126,7 @@ HC = [  # Therme, ZZ 08 (Lesen mit Präfix cc). "schreibbar" = Freigabe fuer HgR
     (39,    "Hg22",  "HG22 Kesselmaximaltemperatur TK-max (50-90 C)",         "SIN", "10", "°C",  9, True),
     (45,    "Hg25",  "HG25 Kesseluebertemperatur bei Speicherladung (1-30 K)", "SIN", "10", "K",  9, True),
     (33,    "Hg33",  "HG33 Laufzeit Brennerhysterese (1-30 min)",             "UIN", "",   "min", 9, True),
+    (10041, "Hg37",  "HG37 Typ Pumpenregelung 0=Festwert 1=Linear 2=dT (Spreizung)", "UIN", "",  "",    9, True),
     (1486,  "Hg38",  "HG38 Soll-Spreizung dT Pumpenregelung (0-40 K)",        "SIN", "10", "K",   9, True),
     (339,   "Hg39",  "HG39 Zeit Softstart (0-10 min)",                        "UIN", "",   "min", 9, True),
     (10808, "Hg60",  "HG60 Minimale Schalthysterese Brenner (2-30 K)",        "SIN", "10", "K",   9, True),

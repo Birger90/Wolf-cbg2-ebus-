@@ -168,7 +168,9 @@ Vollständige Liste mit Entitätsnamen: [`docs/ha-helfer.md`](docs/ha-helfer.md)
   Kreise in Frostschutz), Wartung, Abweichung der BM-2-Uhr.
 - **Optimierung:** täglich 07:30 Auswertung des Vortags (Brennerstarts, Laufzeit, Schutzabschaltungen) nach den Regeln
   der Wolf-Montageanleitung; höchstens ein Vorschlag pro Tag, Modi „Nur überwachen“, „Vorschlagen“ (Push mit
-  Übernehmen/Ablehnen), „Automatisch“. Nie angefasst: Heizkurven, Programmwahl, Warmwasser, Gas-/Abgasparameter.
+  Übernehmen/Ablehnen), „Automatisch“. Reihenfolge bei > 40 Starts und > 30 % Schutzabschaltungen: HG37 → dT (Spreizung),
+  HG16 +10 % (max 65), HG39 → 3 min, HG04 −8 % (min 70); bei > 40 Starts: HG09 +3 min (max 15).
+  Nie angefasst: Heizkurven, Programmwahl, Warmwasser, Gas-/Abgasparameter.
 - **Anwendungsbeispiel Gewerbeeinheit:** Vorheizen nach Buchungskalender, Anwesenheit über Handy-Ortung, Lüftung gegen
   Muff; die Wolf-Kreise gehen nur auf Permanent, solange der Raum Wärme braucht.
 
