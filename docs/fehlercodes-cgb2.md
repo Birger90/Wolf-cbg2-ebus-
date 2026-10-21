@@ -87,3 +87,16 @@ Auf dem eBus: aktueller Störungscode = TN 1 (Lesen `5022` mit Prüfbyte `5c`, A
 | 81 | EEPROM Fehler |
 | 91 | Bus-Adresse |
 | 97 | Defekte Bypasspumpe |
+
+## Abgleich mit der Anleitung CGB-2-14/20/24 (3063421_202106, Kap. 41/42; von Birger hochgeladen 21.10.2026)
+
+- Störcodes: Die Anleitung bestätigt die Codes der Wolf-Datenbank (u. a. 01–05, 12–16, 20, 24, 26, **27 Warmwasserauslauffühler**,
+  52–55, 90, 95, 96, 98, 99, 107, 116) und nennt zusätzlich **255 „Fehlercode unbekannt“** (in der Wolf-DB-Liste nicht enthalten).
+  Die Codes 28 „Gasdruckwächter“ und 225 aus der Anleitung der CGB-2-68/75/100 (8616991_202111) stehen in der Anleitung
+  der 24-kW-Therme nicht – sie gelten für unsere Therme nicht nachweislich.
+- **Warnmeldungen** (Kap. 42, eigene Liste, müssen nicht quittiert werden): 1 Feuerungsautomat gewechselt, 2 Druck Heizkreis,
+  3 Parameter ausgelesen (Werkseinstellung), 4 Keine Flammenbildung (beim letzten Startversuch), 5 Flammenausfall,
+  24 Drehzahl Gebläse unter/über Grenze, 43 Viele Brennerstarts, 53 IO-Regelabweichung, 54 GLV Aktoren,
+  55 GLV Systemfehler, 58 Kalibration Timeout, 68 GPV Offset, 69 Adaption nicht möglich.
+  Die Nummern überschneiden sich mit Störcodes (4, 5, 24, 53–55, 58) → ein Code allein unterscheidet nicht zwischen Warnung
+  und Störung. Ob und wie Warnungen über TN 1 übertragen werden, ist nicht beobachtet.

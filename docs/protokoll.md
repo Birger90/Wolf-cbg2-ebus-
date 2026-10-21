@@ -486,6 +486,14 @@ Die Anleitung ist von 2007 und für WRS-/5W-Regelungen geschrieben; ob alles fü
 - Uhrzeit/Datum: Hauptmenü → Grundeinstellungen → Uhrzeit bzw. Datum (ohne Fachmanncode); Sommer-/Winterzeit automatisch
   über den ewigen Kalender. Funkuhrmodul mit Außenfühler: „Das DCF-Zeitsignal sendet die genaue Uhrzeit und das aktuelle Datum.“
 
+### HG40 laut Anleitung CGB-2-14/20/24 (3063421_202106, Kap. 24)
+
+- **02 = „Ein oder mehrere Mischerkreise über Mischermodule (kein direkter Heizkreis am Brennwertgerät)“**, interne
+  Gerätepumpe als Zubringerpumpe. 01 (Werk) = direkter Heizkreis am Gerät, Gerätepumpe als Heizkreispumpe.
+- Unser Rohwert TN 10076 = 1 → laut Wolf-DB-Liste „02“. Das passt zur Anlage: Das Mischermodul steht auf MI05 = 3
+  „Mischerkreis und direkter Heizkreis“, d. h. die Pumpe des direkten Heizkreises hängt am Ausgang A1 des MM, die Therme
+  arbeitet nur als Zubringer. Die Zuordnung ist damit stimmig, am Display aber weiterhin nicht abgelesen.
+
 ## Weitere Telegrammnummern
 
 - TN 5250 (BM-2): Wartung Fälligkeitsdatum, Typ BM2Date (ism7mqtt `BM2DateConverterTemplate`):
