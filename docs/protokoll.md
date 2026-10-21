@@ -534,6 +534,21 @@ deshalb hier `raw` (jedes Telegramm im Log).
 Direkt danach sendet das BM-2 außer der Reihe den Datetime-Broadcast (04:52:51 → `04:52:10`, sonst immer bei :58);
 TN 10161 um 04:53:06 = 1076 = 04:52. Abweichung damit unter 1 min (Sekunden sendet das BM-2 immer als `10`).
 
+### Uhr am BM-2 verstellen mit Rohmitschnitt (21.10.2026, 04:55, Birger: 1 min verstellt und zurück)
+
+- Kein Telegramm, das die Zeit an ein anderes Gerät schreibt. Das BM-2 sendet nur außer der Reihe seinen Datetime-
+  Broadcast (04:55:46 → `04:54:10`). → Die Uhr liegt im BM-2 selbst; Stellen am Gerät braucht den Bus nicht.
+  Danach geht die BM-2-Uhr gut 1–2 min nach (04:56:15 echt, BM-2 04:54).
+- Nebenbefund, genau ein 15-s-Zyklus nach dem Verstellen:
+  - `30 03 0507` (Regler → Feuerungsautomat) 04:55:40 mit Inhalt `AA 03 9b 02 00 80 ff 14 00` (Rohbytes `a9 01` =
+    eBUS-Escape für `AA`) statt sonst `00 03 50 00 00 80 ff 14 00`: Byte 1 `AA` statt `00`, Byte 3–4 `029b` = 667/16 =
+    **41,7 °C** statt `0050` = 5,0 °C → kurzzeitige Wärmeanforderung (Deutung Byte 1 = Betriebszustand nach eBUS-Norm
+    0507, `AA` = Heizbetrieb: nicht verifiziert). 15 s später wieder `00 … 50 00`.
+  - Gleichzeitig `30 71 5023 05 a8 62 00 01 00` (Schreiben TN 98 = 1 an Adresse `71`, Prüfbyte korrekt, keine Antwort,
+    4 Wiederholungen), 15 s später `f4 62 00 00 00` (TN 98 = 0). TN 98 und Adresse `71` nicht zugeordnet.
+  - Brenner ist nicht gestartet (zu kurz). Vermutlich hat das Verstellen der Uhr das Zeitprogramm kurz neu bewertet.
+- `raw` wieder aus.
+
 ## Weitere Telegrammnummern
 
 - TN 5250 (BM-2): Wartung Fälligkeitsdatum, Typ BM2Date (ism7mqtt `BM2DateConverterTemplate`):
