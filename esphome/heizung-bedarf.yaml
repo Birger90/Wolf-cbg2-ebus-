@@ -1,0 +1,662 @@
+# Heizung Bedarfssteuerung – Waveshare ESP32-S3-Relay-6CH
+#
+# Aufgabe: Wolf CGB-2 per Eingang E1 (HG13 = 1 "Raumthermostat") sperren, wenn kein Heizkörperventil
+# Wärme anfordert, und regelmäßig per Prüflauf der Heizkreispumpe nachsehen, ob wieder Bedarf da ist.
+# Die Regelung läuft komplett auf dem ESP, verdrahtet. WLAN/Home Assistant nur für Anzeige und Einstellwerte.
+#
+# Hardware (verifiziert am Waveshare-Schaltplan ESP32-S3-Relay-6CH):
+#   CH1 Relais GPIO1  -> E1-Sperre    COM + NC an Therme E1 (Relais aus = E1 zu = Heizung frei)
+#   CH2 Relais GPIO2  -> HKP-Prüflauf COM = Pumpe L, NC = MM-Ausgang A1, NO = Dauer-L
+#   RS485 GPIO17/18   -> TUF-2000 (Adresse 1) und PTA8C04 (Adresse 2), 9600 8N1
+#                        Richtungsumschaltung automatisch auf der Platine (74HC04 + SP485), kein flow_control_pin
+#   GPIO4 (H1 Pin 15) -> 230-V-Optokoppler-Modul am MM-Ausgang A1 ("Wolf will Heizkreispumpe")
+#   CH5/CH6 (GPIO45/46) bewusst nicht benutzt: Strapping-Pins.
+#
+# Vor Inbetriebnahme (siehe docs/bedarfssteuerung.md):
+#   1. Modus "Beobachten" lassen (Werkseinstellung dieser Firmware) – dann schaltet der ESP nichts.
+#   2. TUF-Registervariante gegen das TUF-Display prüfen und die passende auswählen.
+#   3. Schwellen aus echten Messwerten setzen. Alle Startwerte unten sind
+#      BEISPIEL – NICHT VERIFIZIERTER REALWERT.
+#   4. Erst dann HG13 = 1 an der Therme und Modus "Automatisch".
+
+substitutions:
+  name: heizung-bedarf
+  friendly: Heizung Bedarf
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly}
+  includes:
+    - heizung_bedarf.h   # fp32_from(): zwei 16-Bit-Register -> IEEE-754-Float
+
+esp32:
+  board: esp32-s3-devkitc-1
+  flash_size: 4MB   # Modulvariante nicht dokumentiert; 4 MB ist die kleinste ESP32-S3-WROOM-1U-Variante
+  framework:
+    type: esp-idf
+
+logger:
+  baud_rate: 0      # UART0 frei lassen
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  ap:
+    ssid: "${name} Fallback"
+    password: !secret fallback_password
+
+captive_portal:
+
+api:
+  encryption:
+    key: !secret api_key
+
+ota:
+  - platform: esphome
+    encryption:          # nutzt den API-Schlüssel
+
+# ---------------------------------------------------------------- RS485 / Modbus
+uart:
+  id: uart_rs485
+  tx_pin: GPIO17
+  rx_pin: GPIO18
+  baud_rate: 9600
+  data_bits: 8
+  parity: NONE
+  stop_bits: 1
+
+modbus:
+  id: mb
+  uart_id: uart_rs485
+  send_wait_time: 500ms
+
+modbus_controller:
+  - id: mbc_tuf
+    modbus_id: mb
+    address: 1            # TUF-2000: Menü M46 = 1, M62 = 9600/none/8/1, M63 = MODBUS-RTU
+    update_interval: 2s
+    max_cmd_retries: 2
+  - id: mbc_pt100
+    modbus_id: mb
+    address: 2            # PTA8C04 ab Werk 1 -> einmalig per Taster unten auf 2 setzen
+    update_interval: 10s
+    max_cmd_retries: 2
+
+# ---------------------------------------------------------------- Einstellwerte (aus HA änderbar, im ESP gespeichert)
+select:
+  - platform: template
+    id: sel_modus
+    name: "Modus"
+    icon: mdi:cog
+    optimistic: true
+    restore_value: true
+    options:
+      - "Aus"
+      - "Beobachten"
+      - "Automatisch"
+    initial_option: "Beobachten"
+
+  - platform: template
+    id: sel_tuf_variante
+    name: "TUF Registervariante"
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    # Handbuch (TDS-100M-Familie): Register 0001-0002 Durchfluss IEEE-754, 0092 Low-Byte Signalqualität.
+    # Ob "0001" Modbus-Adresse 0 oder 1 ist und welche Wortreihenfolge das Gerät nutzt, ist nicht
+    # verifiziert. Darum alle vier Varianten – die richtige ist die, deren Wert zum TUF-Display passt.
+    options:
+      - "A: Adresse 0, High-Wort zuerst"
+      - "B: Adresse 0, Low-Wort zuerst"
+      - "C: Adresse 1, High-Wort zuerst"
+      - "D: Adresse 1, Low-Wort zuerst"
+    initial_option: "B: Adresse 0, Low-Wort zuerst"
+
+number:
+  - platform: template
+    id: n_schwelle
+    name: "Schwelle Durchfluss"
+    entity_category: config
+    unit_of_measurement: "m³/h"
+    min_value: 0.0
+    max_value: 2.0
+    step: 0.005
+    mode: box
+    optimistic: true
+    restore_value: true
+    initial_value: 0.05     # BEISPIEL – NICHT VERIFIZIERTER REALWERT
+  - platform: template
+    id: n_sperre_nach
+    name: "Sperren nach (kein Durchfluss)"
+    entity_category: config
+    unit_of_measurement: "min"
+    min_value: 1
+    max_value: 120
+    step: 1
+    mode: box
+    optimistic: true
+    restore_value: true
+    initial_value: 10       # BEISPIEL – NICHT VERIFIZIERTER REALWERT
+  - platform: template
+    id: n_intervall
+    name: "Prüfintervall"
+    entity_category: config
+    unit_of_measurement: "min"
+    min_value: 2
+    max_value: 120
+    step: 1
+    mode: box
+    optimistic: true
+    restore_value: true
+    initial_value: 10
+  - platform: template
+    id: n_dauer
+    name: "Prüflauf Dauer"
+    entity_category: config
+    unit_of_measurement: "s"
+    min_value: 20
+    max_value: 600
+    step: 5
+    mode: box
+    optimistic: true
+    restore_value: true
+    initial_value: 90       # BEISPIEL – NICHT VERIFIZIERTER REALWERT
+  - platform: template
+    id: n_max_sperre
+    name: "Höchstdauer Sperre"
+    entity_category: config
+    unit_of_measurement: "h"
+    min_value: 0.5
+    max_value: 24
+    step: 0.5
+    mode: box
+    optimistic: true
+    restore_value: true
+    initial_value: 6
+  - platform: template
+    id: n_min_frei
+    name: "Mindestdauer frei"
+    entity_category: config
+    unit_of_measurement: "min"
+    min_value: 0
+    max_value: 240
+    step: 1
+    mode: box
+    optimistic: true
+    restore_value: true
+    initial_value: 30       # BEISPIEL – NICHT VERIFIZIERTER REALWERT
+  - platform: template
+    id: n_aussen_min
+    name: "Nicht sperren unter Außentemperatur"
+    entity_category: config
+    unit_of_measurement: "°C"
+    min_value: -20
+    max_value: 20
+    step: 0.5
+    mode: box
+    optimistic: true
+    restore_value: true
+    initial_value: 5        # BEISPIEL – NICHT VERIFIZIERTER REALWERT
+  - platform: template
+    id: n_signal_min
+    name: "TUF Signalqualität mindestens"
+    entity_category: config
+    unit_of_measurement: "%"
+    min_value: 0
+    max_value: 99
+    step: 1
+    mode: box
+    optimistic: true
+    restore_value: true
+    initial_value: 60       # BEISPIEL – NICHT VERIFIZIERTER REALWERT
+
+# ---------------------------------------------------------------- Zustand
+globals:
+  - id: g_state            # 0 frei, 1 gesperrt, 2 Prüflauf
+    type: int
+    initial_value: '0'
+  - id: g_low_active
+    type: bool
+    initial_value: 'false'
+  - id: g_low_since
+    type: uint32_t
+    initial_value: '0'
+  - id: g_lock_start
+    type: uint32_t
+    initial_value: '0'
+  - id: g_last_test
+    type: uint32_t
+    initial_value: '0'
+  - id: g_test_start
+    type: uint32_t
+    initial_value: '0'
+  - id: g_test_max
+    type: float
+    initial_value: '0'
+  - id: g_free_since
+    type: uint32_t
+    initial_value: '0'
+  - id: g_outdoor_ms
+    type: uint32_t
+    initial_value: '0'
+  - id: g_outdoor_valid
+    type: bool
+    initial_value: 'false'
+  - id: g_force_free
+    type: bool
+    initial_value: 'false'
+  - id: g_lock_seconds     # gezählte Sperrzeit (in "Beobachten" simuliert), übersteht Neustart
+    type: float
+    restore_value: true
+    initial_value: '0'
+  - id: g_tests            # Anzahl Prüfläufe
+    type: int
+    restore_value: true
+    initial_value: '0'
+
+# ---------------------------------------------------------------- Ausgänge
+switch:
+  - platform: gpio
+    id: rel_e1
+    name: "Relais E1 Sperre"
+    pin: GPIO1
+    restore_mode: ALWAYS_OFF
+    internal: true          # nur die Logik schaltet; Anzeige über binary_sensor unten
+  - platform: gpio
+    id: rel_hkp
+    name: "Relais HKP Prüflauf"
+    pin: GPIO2
+    restore_mode: ALWAYS_OFF
+    internal: true
+
+output:
+  # Einmalig: PTA8C04 von Werksadresse 1 auf 2 umstellen (Register 253, laut Eletechsup/lamaPLC).
+  # NUR ausführen, wenn der PTA8C04 ALLEIN am RS485 hängt (TUF abklemmen), sonst wird beim TUF Register 253 beschrieben.
+  - platform: modbus_controller
+    id: out_pta_adresse
+    modbus_controller_id: mbc_tuf
+    address: 253
+    register_type: holding
+    value_type: U_WORD
+    write_lambda: "return 2;"
+
+button:
+  - platform: template
+    name: "Heizung sofort freigeben"
+    icon: mdi:fire
+    on_press:
+      - lambda: id(g_force_free) = true;
+  - platform: template
+    name: "PTA8C04 Adresse 1 auf 2 setzen (nur PTA8C04 allein am Bus)"
+    entity_category: config
+    on_press:
+      - output.set_level:
+          id: out_pta_adresse
+          level: 100%
+  - platform: restart
+    name: "Neustart"
+
+# ---------------------------------------------------------------- Eingänge
+binary_sensor:
+  - platform: gpio
+    id: bs_wolf_pumpe
+    name: "Wolf will Heizkreispumpe"
+    pin:
+      number: GPIO4
+      mode:
+        input: true
+        pullup: true
+      inverted: true       # typische 230-V-Optokoppler-Module ziehen bei Spannung auf GND – am Modul prüfen
+    filters:
+      - delayed_off: 200ms # gleichgerichtete 230 V pulsieren mit 100 Hz
+      - delayed_on: 500ms
+  - platform: template
+    name: "Heizung gesperrt"
+    lambda: return id(g_state) != 0;
+  - platform: template
+    name: "Prüflauf aktiv"
+    lambda: return id(g_state) == 2;
+  - platform: template
+    name: "Relais E1 angezogen"
+    entity_category: diagnostic
+    lambda: return id(rel_e1).state;
+  - platform: template
+    name: "Relais HKP angezogen"
+    entity_category: diagnostic
+    lambda: return id(rel_hkp).state;
+
+sensor:
+  # --- TUF-2000 Rohregister (0..3 und 91..92), Auswertung unten
+  - platform: modbus_controller
+    modbus_controller_id: mbc_tuf
+    id: tuf_r0
+    internal: true
+    register_type: holding
+    address: 0
+    value_type: U_WORD
+  - platform: modbus_controller
+    modbus_controller_id: mbc_tuf
+    id: tuf_r1
+    internal: true
+    register_type: holding
+    address: 1
+    value_type: U_WORD
+  - platform: modbus_controller
+    modbus_controller_id: mbc_tuf
+    id: tuf_r2
+    internal: true
+    register_type: holding
+    address: 2
+    value_type: U_WORD
+  - platform: modbus_controller
+    modbus_controller_id: mbc_tuf
+    id: tuf_r3
+    internal: true
+    register_type: holding
+    address: 3
+    value_type: U_WORD
+  - platform: modbus_controller
+    modbus_controller_id: mbc_tuf
+    id: tuf_r91
+    internal: true
+    register_type: holding
+    address: 91
+    value_type: U_WORD
+  - platform: modbus_controller
+    modbus_controller_id: mbc_tuf
+    id: tuf_r92
+    internal: true
+    register_type: holding
+    address: 92
+    value_type: U_WORD
+
+  # --- Kandidaten zum Abgleich mit dem TUF-Display
+  - platform: template
+    id: tuf_var_a
+    name: "TUF Kandidat A"
+    entity_category: diagnostic
+    unit_of_measurement: "m³/h"
+    accuracy_decimals: 3
+    update_interval: 5s
+    lambda: return fp32_from(id(tuf_r0).state, id(tuf_r1).state);
+  - platform: template
+    id: tuf_var_b
+    name: "TUF Kandidat B"
+    entity_category: diagnostic
+    unit_of_measurement: "m³/h"
+    accuracy_decimals: 3
+    update_interval: 5s
+    lambda: return fp32_from(id(tuf_r1).state, id(tuf_r0).state);
+  - platform: template
+    id: tuf_var_c
+    name: "TUF Kandidat C"
+    entity_category: diagnostic
+    unit_of_measurement: "m³/h"
+    accuracy_decimals: 3
+    update_interval: 5s
+    lambda: return fp32_from(id(tuf_r1).state, id(tuf_r2).state);
+  - platform: template
+    id: tuf_var_d
+    name: "TUF Kandidat D"
+    entity_category: diagnostic
+    unit_of_measurement: "m³/h"
+    accuracy_decimals: 3
+    update_interval: 5s
+    lambda: return fp32_from(id(tuf_r2).state, id(tuf_r1).state);
+
+  - platform: template
+    id: s_flow
+    name: "Durchfluss Heizkörperkreis"
+    icon: mdi:water-pump
+    unit_of_measurement: "m³/h"
+    state_class: measurement
+    accuracy_decimals: 3
+    update_interval: 2s
+    lambda: |-
+      auto idx = id(sel_tuf_variante).active_index();
+      switch (idx.has_value() ? *idx : 1) {
+        case 0:  return fp32_from(id(tuf_r0).state, id(tuf_r1).state);
+        case 2:  return fp32_from(id(tuf_r1).state, id(tuf_r2).state);
+        case 3:  return fp32_from(id(tuf_r2).state, id(tuf_r1).state);
+        default: return fp32_from(id(tuf_r1).state, id(tuf_r0).state);
+      }
+  - platform: template
+    id: s_quality
+    name: "TUF Signalqualität"
+    entity_category: diagnostic
+    unit_of_measurement: "%"
+    accuracy_decimals: 0
+    update_interval: 5s
+    lambda: |-
+      auto idx = id(sel_tuf_variante).active_index();
+      float raw = (idx.has_value() && *idx >= 2) ? id(tuf_r92).state : id(tuf_r91).state;
+      if (std::isnan(raw)) return NAN;
+      return (float) (((uint16_t) raw) & 0x00FF);   // Low-Byte = Signalqualität 00-99 laut Handbuch
+
+  # --- PT100 (PTA8C04, Register 0..3 in 0,1 °C) – Belegung beim Einbau festlegen
+  - platform: modbus_controller
+    modbus_controller_id: mbc_pt100
+    id: t_hk_vl
+    name: "Heizkörper Vorlauf"
+    unit_of_measurement: "°C"
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+    register_type: holding
+    address: 0
+    value_type: S_WORD
+    filters:
+      - multiply: 0.1
+  - platform: modbus_controller
+    modbus_controller_id: mbc_pt100
+    id: t_hk_rl
+    name: "Heizkörper Rücklauf"
+    unit_of_measurement: "°C"
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+    register_type: holding
+    address: 1
+    value_type: S_WORD
+    filters:
+      - multiply: 0.1
+  - platform: modbus_controller
+    modbus_controller_id: mbc_pt100
+    id: t_fbh_vl
+    name: "Fußbodenheizung Vorlauf"
+    unit_of_measurement: "°C"
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+    register_type: holding
+    address: 2
+    value_type: S_WORD
+    filters:
+      - multiply: 0.1
+  - platform: modbus_controller
+    modbus_controller_id: mbc_pt100
+    id: t_fbh_rl
+    name: "Fußbodenheizung Rücklauf"
+    unit_of_measurement: "°C"
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+    register_type: holding
+    address: 3
+    value_type: S_WORD
+    filters:
+      - multiply: 0.1
+  - platform: template
+    name: "Spreizung Heizkörper"
+    unit_of_measurement: "K"
+    state_class: measurement
+    accuracy_decimals: 1
+    update_interval: 10s
+    lambda: return id(t_hk_vl).state - id(t_hk_rl).state;
+  - platform: template
+    name: "Spreizung Fußbodenheizung"
+    unit_of_measurement: "K"
+    state_class: measurement
+    accuracy_decimals: 1
+    update_interval: 10s
+    lambda: return id(t_fbh_vl).state - id(t_fbh_rl).state;
+
+  # --- Außentemperatur vom BM-2 (über ebusd/HA). Fehlt sie länger als 3 h, wird nicht gesperrt.
+  - platform: homeassistant
+    id: s_aussen
+    entity_id: sensor.heating_ebusd_bm2_outsidetemp
+    internal: true
+    on_value:
+      - lambda: |-
+          id(g_outdoor_valid) = !std::isnan(x);
+          id(g_outdoor_ms) = millis();
+
+  - platform: template
+    name: "Sperrzeit gesamt"
+    icon: mdi:timer-lock
+    unit_of_measurement: "h"
+    state_class: total_increasing
+    accuracy_decimals: 2
+    update_interval: 60s
+    lambda: return id(g_lock_seconds) / 3600.0f;
+  - platform: template
+    name: "Prüfläufe gesamt"
+    state_class: total_increasing
+    accuracy_decimals: 0
+    update_interval: 60s
+    lambda: return (float) id(g_tests);
+
+  - platform: wifi_signal
+    name: "WLAN Signal"
+    update_interval: 60s
+  - platform: uptime
+    name: "Laufzeit"
+
+text_sensor:
+  - platform: template
+    id: ts_status
+    name: "Status"
+    icon: mdi:information-outline
+
+# ---------------------------------------------------------------- Regelung (läuft jede Sekunde, unabhängig von WLAN/HA)
+interval:
+  - interval: 1s
+    then:
+      - lambda: |-
+          const uint32_t now = millis();
+          // Modus: 0 Aus, 1 Beobachten, 2 Automatisch
+          auto midx = id(sel_modus).active_index();
+          const int modus = midx.has_value() ? (int) *midx : 1;
+          const bool automatik = (modus == 2);
+
+          const float flow = id(s_flow).state;
+          const float qual = id(s_quality).state;
+          const float thr = id(n_schwelle).state;
+          const bool tuf_ok = !std::isnan(flow) && !std::isnan(qual) && qual >= id(n_signal_min).state;
+          const bool wolf_pumpe = id(bs_wolf_pumpe).state;
+
+          const bool aussen_aktuell = id(g_outdoor_valid) && (now - id(g_outdoor_ms)) < 3UL * 3600UL * 1000UL;
+          const bool aussen_ok = aussen_aktuell && !std::isnan(id(s_aussen).state) &&
+                                 id(s_aussen).state >= id(n_aussen_min).state;
+
+          static std::string last_status;
+          auto status = [&](const std::string &s) {
+            if (s != last_status) {
+              last_status = s;
+              id(ts_status).publish_state(s);
+              ESP_LOGI("bedarf", "%s", s.c_str());
+            }
+          };
+          auto frei = [&](const char *grund) {
+            id(g_state) = 0;
+            id(g_free_since) = now;
+            id(g_low_active) = false;
+            if (id(rel_hkp).state) id(rel_hkp).turn_off();
+            if (id(rel_e1).state) id(rel_e1).turn_off();
+            ESP_LOGI("bedarf", "Freigabe: %s", grund);
+          };
+
+          // Ohne Automatik schaltet der ESP nie etwas: Relais immer abgefallen (= Heizung frei, MM steuert Pumpe).
+          if (!automatik) {
+            if (id(rel_hkp).state) id(rel_hkp).turn_off();
+            if (id(rel_e1).state) id(rel_e1).turn_off();
+          }
+
+          if (modus == 0) {
+            if (id(g_state) != 0) frei("Modus Aus");
+            status("Aus");
+            return;
+          }
+          if (id(g_force_free)) {
+            id(g_force_free) = false;
+            frei("Taster");
+          }
+
+          const char *praefix = automatik ? "" : "(simuliert) ";
+
+          switch (id(g_state)) {
+            case 0: {  // ---- frei: Wolf regelt normal
+              const bool darf = tuf_ok && wolf_pumpe && flow < thr && aussen_ok &&
+                                (now - id(g_free_since)) >= (uint32_t) (id(n_min_frei).state * 60000.0f);
+              if (!darf) {
+                id(g_low_active) = false;
+              } else if (!id(g_low_active)) {
+                id(g_low_active) = true;
+                id(g_low_since) = now;
+              } else if ((now - id(g_low_since)) >= (uint32_t) (id(n_sperre_nach).state * 60000.0f)) {
+                id(g_state) = 1;
+                id(g_lock_start) = now;
+                id(g_last_test) = now;
+                id(g_low_active) = false;
+                if (automatik) id(rel_e1).turn_on();
+                ESP_LOGI("bedarf", "%sSperre: kein Durchfluss (%.3f m³/h)", praefix, flow);
+              }
+              if (!tuf_ok) status("Frei – Durchflussmesser ohne gültigen Wert");
+              else if (!aussen_aktuell) status("Frei – keine aktuelle Außentemperatur");
+              else if (!aussen_ok) status("Frei – zu kalt zum Sperren");
+              else if (!wolf_pumpe) status("Frei – Wolf-Pumpe aus");
+              else if (id(g_low_active)) status("Frei – kein Durchfluss, Sperre folgt");
+              else status("Frei – Bedarf");
+              break;
+            }
+            case 1: {  // ---- gesperrt
+              id(g_lock_seconds) += 1.0f;
+              if (!aussen_ok) { frei("Außentemperatur"); break; }
+              if ((now - id(g_lock_start)) >= (uint32_t) (id(n_max_sperre).state * 3600000.0f)) { frei("Höchstdauer"); break; }
+              if (!automatik) {
+                // Beobachten: Pumpen laufen weiter, Bedarf direkt am Durchfluss erkennbar
+                if (tuf_ok && wolf_pumpe && flow >= thr) { frei("(simuliert) Durchfluss"); break; }
+                status("(simuliert) Gesperrt");
+                break;
+              }
+              if (std::isnan(flow)) { frei("Durchflussmesser ausgefallen"); break; }
+              if ((now - id(g_last_test)) >= (uint32_t) (id(n_intervall).state * 60000.0f)) {
+                id(g_state) = 2;
+                id(g_test_start) = now;
+                id(g_test_max) = 0.0f;
+                id(g_tests) += 1;
+                id(rel_hkp).turn_on();
+                ESP_LOGI("bedarf", "Prüflauf gestartet");
+              }
+              status("Gesperrt");
+              break;
+            }
+            case 2: {  // ---- Prüflauf (nur Automatik): HKP läuft am Dauer-L
+              id(g_lock_seconds) += 1.0f;
+              if (!automatik) { id(g_state) = 1; id(g_last_test) = now; break; }
+              if (tuf_ok && flow > id(g_test_max)) id(g_test_max) = flow;
+              if (!aussen_ok) { frei("Außentemperatur"); break; }
+              if ((now - id(g_test_start)) >= (uint32_t) (id(n_dauer).state * 1000.0f)) {
+                id(rel_hkp).turn_off();
+                id(g_last_test) = now;
+                if (id(g_test_max) >= thr) {
+                  frei("Prüflauf: Durchfluss");
+                } else {
+                  id(g_state) = 1;
+                  ESP_LOGI("bedarf", "Prüflauf: kein Durchfluss (max %.3f m³/h)", id(g_test_max));
+                }
+              }
+              status("Prüflauf");
+              break;
+            }
+          }
