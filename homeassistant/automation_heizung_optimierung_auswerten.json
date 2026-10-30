@@ -13,7 +13,7 @@
    "variables": {
     "bericht": "Gestern: {{ state_attr('sensor.wolflink_c083_brennerstarts_pro_tag', 'last_period') | int(0) }} Brennerstarts, {{ state_attr('sensor.wolflink_c083_brennerstunden_pro_tag', 'last_period') | float(0) | round(1) }} h Laufzeit, Schutzabschaltungen Spreizung {{ states('sensor.heating_ebusd_hc_heizung_schutzabschaltungen_spreizung_gestern') | int(0) }} / Gradient {{ states('sensor.heating_ebusd_hc_heizung_schutzabschaltungen_gradient_gestern') | int(0) }}. Letzte Aenderung: {{ states('input_text.heizung_letzte_optimierung') or 'keine' }}.",
     "vorschlag": "{% set starts = state_attr('sensor.wolflink_c083_brennerstarts_pro_tag', 'last_period') | float(0) %}{% set schutz = states('sensor.heating_ebusd_hc_heizung_schutzabschaltungen_spreizung_gestern') | float(0) + states('sensor.heating_ebusd_hc_heizung_schutzabschaltungen_gradient_gestern') | float(0) %}{% set anteil = (schutz / starts) if starts > 0 else 0 %}{% set hg16 = states('sensor.heating_ebusd_hc_hg16') | float(-1) %}{% set hg39 = states('sensor.heating_ebusd_hc_hg39') | float(-1) %}{% set hg04 = states('sensor.heating_ebusd_hc_hg04') | float(-1) %}{% set hg09 = states('sensor.heating_ebusd_hc_hg09') | float(-1) %}{% set hg37 = states('sensor.heating_ebusd_hc_hg37') | float(-1) %}{% if starts > 40 and anteil > 0.3 and 0 <= hg37 < 2 %}hc|Hg37|10041|1|{{ hg37 | int }}|2|0|2|Schutzabschaltungen {{ schutz | int }} von {{ starts | int }} Starts: Pumpenregelung auf Spreizung (dT) statt Linear (Anleitung Kap. 23/33){% elif starts > 40 and anteil > 0.3 and 0 <= hg16 < 65 %}hc|Hg16|341|1|{{ hg16 | int }}|{{ [hg16 | int + 10, 65] | min }}|15|100|Schutzabschaltungen {{ schutz | int }} von {{ starts | int }} Starts: Pumpendrehzahl minimal erhoehen (Anleitung Kap. 33){% elif starts > 40 and anteil > 0.3 and 0 <= hg39 < 3 %}hc|Hg39|339|1|{{ hg39 | int }}|3|0|10|Schutzabschaltungen {{ schutz | int }} von {{ starts | int }} Starts: Softstart auf Werkseinstellung 3 min{% elif starts > 40 and anteil > 0.3 and hg04 > 70 %}hc|Hg04|319|1|{{ hg04 | int }}|{{ [hg04 | int - 8, 70] | max }}|60|100|Schutzabschaltungen {{ schutz | int }} von {{ starts | int }} Starts: max. Heizleistung senken (Tabelle S. 55){% elif starts > 40 and 0 <= hg09 < 15 %}hc|Hg09|323|1|{{ hg09 | int }}|{{ [hg09 | int + 3, 15] | min }}|1|30|{{ starts | int }} Starts gestern: Brennertaktsperre erhoehen (Anleitung Warnung 43){% endif %}",
-    "sperre": "{{ states('input_datetime.heizung_letzte_parameteranderung') not in ['unknown', 'unavailable', ''] and (now() - as_datetime(states('input_datetime.heizung_letzte_parameteranderung')) | as_local).total_seconds() < 86400 }}"
+    "sperre": "{{ states('input_datetime.heizung_letzte_parameteranderung') not in ['unknown', 'unavailable', ''] and (as_datetime(states('input_datetime.heizung_letzte_parameteranderung')) | as_local).date() == now().date() }}"
    }
   },
   {
@@ -75,7 +75,7 @@
        "data": {
         "notification_id": "heizung_bericht",
         "title": "Heizung: Tagesbericht",
-        "message": "{{ bericht }} Vorschlag zurueckgestellt: letzte Aenderung ist juenger als 24 h."
+        "message": "{{ bericht }} Vorschlag zurueckgestellt: heute wurde bereits ein Parameter geaendert (hoechstens eine Aenderung pro Kalendertag)."
        }
       }
      ]

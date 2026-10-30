@@ -5,7 +5,7 @@ Grundlage: Wolf CGB-2 Montageanleitung 3063421_201512 (Kap. 22/23 Regelungsparam
 Kap. 40 Warnung 43 "Viele Brennerstarts") und die Mitschnitte vom 19.10.2026 (Takten tagsueber fast nur
 durch Schutzabschaltungen "Spreizung KF" -> "Gradientenueberwachung", d.h. zu wenig Durchfluss).
 
-Regeln (ein Vorschlag pro Tag, erst 24 h nach der letzten Aenderung, Reihenfolge = Prioritaet):
+Regeln (ein Vorschlag pro Tag, hoechstens eine Aenderung pro Kalendertag, Reihenfolge = Prioritaet):
   R0  Starts > 40 und Schutzabschaltungen > 30 % der Starts und HG37 != 2  -> HG37 = 2 dT/Spreizung (Anleitung Kap. 23/33)
   R1  Starts > 40 und Schutzabschaltungen > 30 % der Starts und HG16 < 65  -> HG16 +10 (Pumpe min, Anleitung S. 61)
   R2  dito und HG39 < 3                                                     -> HG39 = 3 (Softstart, Werkseinstellung)
@@ -117,7 +117,7 @@ def auswertung_automation():
         "actions": [
             {"variables": {"bericht": bericht, "vorschlag": rule_tpl,
                            "sperre": "{{ states('" + LETZTE_ZEIT + "') not in ['unknown', 'unavailable', ''] and "
-                                     "(now() - as_datetime(states('" + LETZTE_ZEIT + "')) | as_local).total_seconds() < 86400 }}"}},
+                                     "(as_datetime(states('" + LETZTE_ZEIT + "')) | as_local).date() == now().date() }}"}},
             {"action": "logbook.log", "data": {"name": "Heizung Optimierung", "message": "{{ bericht }} Vorschlag: {{ vorschlag or 'keiner' }}"}},
             {"choose": [
                 {"conditions": [{"condition": "state", "entity_id": MODE, "state": "Nur überwachen"}],
@@ -130,7 +130,7 @@ def auswertung_automation():
                 {"conditions": [{"condition": "template", "value_template": "{{ sperre }}"}],
                  "sequence": [{"action": "persistent_notification.create",
                                "data": {"notification_id": "heizung_bericht", "title": "Heizung: Tagesbericht",
-                                        "message": "{{ bericht }} Vorschlag zurueckgestellt: letzte Aenderung ist juenger als 24 h."}}]},
+                                        "message": "{{ bericht }} Vorschlag zurueckgestellt: heute wurde bereits ein Parameter geaendert (hoechstens eine Aenderung pro Kalendertag)."}}]},
                 {"conditions": [{"condition": "template", "value_template": "{{ states('" + OFFEN + "') | length > 8 }}"}],
                  "sequence": [{"action": "persistent_notification.create",
                                "data": {"notification_id": "heizung_bericht", "title": "Heizung: Tagesbericht",
